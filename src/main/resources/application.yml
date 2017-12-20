@@ -1,0 +1,15 @@
+spring:
+  data:
+    rest:
+      base-path: /api
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+
+debug: false
+
+application:
+  endpoint-lais:
+    url: ${ENDPOINT_LAIS_URL:https://localhost:8080/api/notification}
+    authorization: ${ENDPOINT_LAIS_AUTHORIZATION:58228383-66eb-4281-ab5c-5335367299e1}
