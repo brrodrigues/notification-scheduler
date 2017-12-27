@@ -1,9 +1,14 @@
 package br.com.lasa.notificacao;
 
+import br.com.lasa.notificacao.domain.Canal;
 import br.com.lasa.notificacao.domain.Notificacao;
-import br.com.lasa.notificacao.domain.UnidadeTempo;
+import br.com.lasa.notificacao.domain.TimeUnit;
+import br.com.lasa.notificacao.domain.lais.BotUser;
+import br.com.lasa.notificacao.domain.lais.Conversation;
+import br.com.lasa.notificacao.domain.lais.Recipient;
+import br.com.lasa.notificacao.repository.ChannelRepository;
 import br.com.lasa.notificacao.repository.NotificacaoRepository;
-import br.com.lasa.notificacao.util.TempoRestanteUtils;
+import br.com.lasa.notificacao.service.NotificacaoService;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -14,24 +19,24 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Primary;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
+import org.springframework.web.client.RestTemplate;
 
-import java.time.ZoneId;
-import java.time.temporal.TemporalAccessor;
+import java.net.InetAddress;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
-import java.util.TimeZone;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 
 @SpringBootApplication
 @Slf4j
+@EnableScheduling
 public class SistemaDeNotificaoPushApplication {
 
 	public static void main(String[] args) {
@@ -41,23 +46,21 @@ public class SistemaDeNotificaoPushApplication {
 	@Bean
 	@Order(1)
 	@Autowired
-	CommandLineRunner initializeDatabase(final NotificacaoRepository notificacaoRepository){
+	CommandLineRunner initializeDatabase(final NotificacaoRepository notificacaoRepository, final ChannelRepository channelRepository){
 		return (strings -> {
-			log.info("Criando notificacao de exempo");
-			notificacaoRepository.save(new Notificacao("bruno", "lais.bot", new Date(), "initial.sale", 1, UnidadeTempo.SEGUNDO));
-			notificacaoRepository.save(new Notificacao("bruno", "lais.bot", new Date(), "final.sale", 15, UnidadeTempo.MINUTO));
-			notificacaoRepository.save(new Notificacao("bruno", "lais.bot", new Date(), "close.store",1, UnidadeTempo.DIARIO));
-			log.info("Feito!!!!");
+			log.info("Criando evento para teste");
+			ObjectMapper objectMapper = new ObjectMapper();
+			channelRepository.save(Canal.builder().channelId("without.sale.1min").users(Arrays.asList(objectMapper.writeValueAsString(usuarioJonatasLais()))).build());
+			channelRepository.save(Canal.builder().channelId("without.sale.1min").users(Arrays.asList(objectMapper.writeValueAsString(usuarioJonatasLais()))).build());
+			//String channelId, Date scheduleTime, String eventName, long delay, TimeUnit timeUnit
+			notificacaoRepository.save(new Notificacao("without.sale.1min", new Date(), "Check de loja sem venda entre 1 min", 1, TimeUnit.MINUTO, false ));
+			notificacaoRepository.save(new Notificacao("without.sale.5min", new Date(), "Check de loja sem venda entre 5 min", 5, TimeUnit.MINUTO, false ));
+			notificacaoRepository.save(new Notificacao("without.sale.5min", new Date(), "Check de loja sem venda entre 5 min", 5, TimeUnit.MINUTO, false ));
+
+
+
+			log.info("Notificacao criado !!!!");
 		});
-	}
-
-	@Bean
-	@Autowired
-	@Order(2)
-	CommandLineRunner carregarNotificao(final NotificacaoRepository notificacaoRepository, ScheduledExecutorService scheduledExecutorService) {
-		return strings ->
-		notificacaoRepository.findAll().parallelStream().forEach((Notificacao notificacao) -> scheduledExecutorService.scheduleAtFixedRate(() -> log.info(""), , notificacao.getDelay(), notificacao.getTimeUnit().getTimeUnit()));
-
 	}
 
 	@Bean(destroyMethod="shutdown")
@@ -79,15 +82,7 @@ public class SistemaDeNotificaoPushApplication {
 		return scheduledExecutorService;
 	}
 
-	/**
 	@Bean
-	@Primary
-	CommandLineRunner setTimeZone() {
-		return strings -> TimeZone.setDefault(TimeZone.getTimeZone("America/Sao_Paulo"));
-
-	}**/
-
-	@Bean(name = "jacksonObjectMapper")
 	public ObjectMapper jacksonObjectMapper() {
 		ObjectMapper mapper = new ObjectMapper();
 		// mapper.configure(JsonGenerator.Feature.ESCAPE_NON_ASCII, true);
@@ -114,7 +109,7 @@ public class SistemaDeNotificaoPushApplication {
 		return mapper;
 	}
 
-	@Bean(name = "appJackson2HttpMessageConverter")
+	@Bean
 	public MappingJackson2HttpMessageConverter appJackson2HttpMessageConverter() {
 		MappingJackson2HttpMessageConverter jsonConverter = new MappingJackson2HttpMessageConverter();
 		jsonConverter.setObjectMapper(jacksonObjectMapper());
@@ -128,5 +123,31 @@ public class SistemaDeNotificaoPushApplication {
 		return jsonConverter;
 
 	}
+
+	@Bean
+	@Autowired
+	CommandLineRunner clearScheduledByLocalhost(NotificacaoService notificacaoService) {
+		return strings -> {
+			InetAddress inetAddress = InetAddress.getLocalHost();
+			notificacaoService.liberarTodosAgendamentoPorHostname(inetAddress.getHostAddress());
+		};
+	}
+
+	@Bean
+	Recipient usuarioJonatasLais() {
+		return new Recipient("mid.$cAAA7URkk_Xxmi7uHeVgWnY_Fi0fm", "facebook", BotUser.builder().id("1696672097072999").name("Jônatas Ricardo").build(), BotUser.builder().id("107349120032554").name("LAIS-SAC-HML").build(), Conversation.builder().isGroup(false).id("1696672097072999-107349120032554").build(),"https://facebook.botframework.com/");
+	}
+
+	@Bean
+	Recipient usuarioGustavoLais() {
+		return new Recipient("mid.$cAAA7UQtt0cFmq7rohFgenWfiZhZL", "facebook", BotUser.builder().id("1652887001413594").name("Gustavo Gomes").build(), BotUser.builder().id("107349120032554").name("LAIS-SAC-HML").build(), Conversation.builder().isGroup(false).id("1652887001413594-107349120032554").build(),"https://facebook.botframework.com/");
+	}
+
+
+	@Bean
+	RestTemplate restTemplate() {
+		return new RestTemplate();
+	}
+
 
 }

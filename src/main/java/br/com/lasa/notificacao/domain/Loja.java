@@ -1,21 +1,23 @@
 package br.com.lasa.notificacao.domain;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
-import java.util.Date;
 
 @Data
 @Entity
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class Loja {
 
     @Id
-    @GeneratedValue
+    @Column(length = 15)
     private String id;
     private String nome;
-    @Temporal(TemporalType.TIME)
-    private Date horaAbertura;
-    @Temporal(TemporalType.TIME)
-    private Date horaFechamento;
+    private String horaAbertura;
 
 }

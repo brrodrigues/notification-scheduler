@@ -1,23 +1,24 @@
 package br.com.lasa.notificacao.controller;
 
+import br.com.lasa.notificacao.task.EventoTask;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ScheduledFuture;
 
 @RestController
 public class ScheduleController {
 
     @Autowired
-    private ThreadPoolTaskExecutor threadPoolTaskExecutor;
+    private EventoTask eventoTask;
 
-    public Map getSchedules(){
-        BlockingQueue<Runnable> queue = threadPoolTaskExecutor.getThreadPoolExecutor().getQueue();
-        Object[] objects = queue.toArray();
-        return new HashMap();
+    @GetMapping(path = "/schedules")
+    public ConcurrentMap<String, ScheduledFuture> getSchedules(){
+        ConcurrentMap<String, ScheduledFuture> queues = eventoTask.getScheduledTasks();
+
+        return queues;
     }
+
 }

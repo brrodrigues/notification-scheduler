@@ -2,18 +2,19 @@ package br.com.lasa.notificacao.domain;
 
 import lombok.Data;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 
 @Data
 @Entity
-public class Usuario {
+public class User {
 
     @Id
-    @GeneratedValue
+    @Column(length = 15)
     private String login;
-    private String lojaId;
-    private String hierarquia;
+    private String storeId;
+    private String hierarchy;
+    private String profile;
 
 }

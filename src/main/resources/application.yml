@@ -2,14 +2,27 @@ spring:
   data:
     rest:
       base-path: /api
-  h2:
-    console:
-      enabled: true
-      path: /h2-console
-
+  datasource:
+    hikari:
+      username: root
+      password: admin
+      jdbc-url: jdbc:mysql://localhost:3306/notificacao?useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC&useSSL=false&autoReconnect=true&useServerPrepStmts=false&rewriteBatchedStatements=true&cachePrepStmts=true&prepStmtCacheSize=250&prepStmtCacheSqlLimit=2048&defaultFetchSize=5000
+      driver-class-name: com.mysql.jdbc.Driver
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
 debug: false
 
 application:
   endpoint-lais:
-    url: ${ENDPOINT_LAIS_URL:https://localhost:8080/api/notification}
-    authorization: ${ENDPOINT_LAIS_AUTHORIZATION:58228383-66eb-4281-ab5c-5335367299e1}
+    url: ${ENDPOINT_LAIS_URL:https://lasa-lais-hml-sac.us-west-2.elasticbeanstalk.com/api/notification}
+    authorization-password: ${ENDPOINT_LAIS_AUTHORIZATION_VALUE:#Lasa2017}
+
+management:
+  context-path: /jmx
+  port: 8081
+  security:
+    enabled: false
+info:
+  name: @project.artifactId@
+  version: @project.version@
