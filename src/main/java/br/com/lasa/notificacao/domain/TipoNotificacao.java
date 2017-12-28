@@ -14,7 +14,7 @@ import java.io.Serializable;
 @NoArgsConstructor
 @Data
 @ToString
-@Document
+@Document(collection = "Cadastro_Tipo_Notificacoes")
 public class TipoNotificacao implements Serializable {
 
     @Id

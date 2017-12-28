@@ -1,7 +1,7 @@
 package br.com.lasa.notificacao.task;
 
 import br.com.lasa.notificacao.domain.Notificacao;
-import br.com.lasa.notificacao.domain.lais.Recipient;
+import br.com.lasa.notificacao.domain.lais.UserIdentification;
 import br.com.lasa.notificacao.repository.NotificacaoRepository;
 import br.com.lasa.notificacao.service.NotificacaoService;
 import lombok.extern.slf4j.Slf4j;
@@ -25,10 +25,10 @@ public class EventoTask extends ThreadPoolTaskScheduler {
     private final ConcurrentMap<String, ScheduledFuture> scheduledTasks = new ConcurrentHashMap<>();
 
     @Qualifier("usuarioJonatasLais")
-    @Autowired private Recipient jonatasUser;
+    @Autowired private UserIdentification jonatasUser;
 
     @Qualifier("usuarioGustavoLais")
-    @Autowired private Recipient gustavoUser;
+    @Autowired private UserIdentification gustavoUser;
 
     @Autowired
     private NotificacaoRepository notificacaoRepository;
@@ -56,7 +56,7 @@ public class EventoTask extends ThreadPoolTaskScheduler {
         log.info("scheduled cron!!!");
     }
 
-    @Scheduled(cron = "0/5 * * * * *")
+    @Scheduled(cron = "0/60 * * * * *")
     public void bloquearIntervalo() {
         log.info("Finding notification schedule pending...");
         notificacaoService.buscarNotificacaoNaoProgramada().stream().forEach(this::agendar);

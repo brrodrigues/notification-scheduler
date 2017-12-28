@@ -11,7 +11,7 @@ import java.io.Serializable;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class Recipient implements Serializable{
+public class UserIdentification implements Serializable{
 
     private String id;
     private String channelId;

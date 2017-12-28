@@ -12,7 +12,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import java.util.Date;
 
 @Data
-@Document
+@Document(collection = "Cadastro_Notificacoes")
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder

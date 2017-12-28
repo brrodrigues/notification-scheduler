@@ -4,14 +4,16 @@ import lombok.Data;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.util.Collection;
+
 @Data
-@Document
-public class User {
+@Document(collection = "Cadastro_Usuario_Notificacao")
+public class UsuarioNotificacao {
 
     @Id
     private String login;
     private String storeId;
     private String hierarchy;
-    private String profile;
+    private Collection<Object> perfis;
 
 }

@@ -5,7 +5,7 @@ import br.com.lasa.notificacao.domain.Notificacao;
 import br.com.lasa.notificacao.domain.TimeUnit;
 import br.com.lasa.notificacao.domain.lais.BotUser;
 import br.com.lasa.notificacao.domain.lais.Conversation;
-import br.com.lasa.notificacao.domain.lais.Recipient;
+import br.com.lasa.notificacao.domain.lais.UserIdentification;
 import br.com.lasa.notificacao.repository.ChannelRepository;
 import br.com.lasa.notificacao.repository.NotificacaoRepository;
 import br.com.lasa.notificacao.service.NotificacaoService;
@@ -59,12 +59,7 @@ public class SistemaDeNotificaoPushApplication {
 			ObjectMapper objectMapper = new ObjectMapper();
 			channelRepository.save(Canal.builder().channelId("without.sale.1min").users(Arrays.asList(objectMapper.writeValueAsString(usuarioJonatasLais()))).build());
 			channelRepository.save(Canal.builder().channelId("without.sale.1min").users(Arrays.asList(objectMapper.writeValueAsString(usuarioJonatasLais()))).build());
-			//String channelId, Date scheduleTime, String eventName, long delay, TimeUnit timeUnit
 			notificacaoRepository.save(new Notificacao("without.sale.1min", new Date(), "Check de loja sem venda entre 1 min", 1, TimeUnit.MINUTO, false ));
-			notificacaoRepository.save(new Notificacao("without.sale.5min", new Date(), "Check de loja sem venda entre 5 min", 5, TimeUnit.MINUTO, false ));
-			notificacaoRepository.save(new Notificacao("without.sale.5min", new Date(), "Check de loja sem venda entre 5 min", 5, TimeUnit.MINUTO, false ));
-
-
 
 			log.info("Notificacao criado !!!!");
 		});
@@ -141,13 +136,13 @@ public class SistemaDeNotificaoPushApplication {
 	}
 
 	@Bean
-	Recipient usuarioJonatasLais() {
-		return new Recipient("mid.$cAAA7URkk_Xxmi7uHeVgWnY_Fi0fm", "facebook", BotUser.builder().id("1696672097072999").name("Jônatas Ricardo").build(), BotUser.builder().id("107349120032554").name("LAIS-SAC-HML").build(), Conversation.builder().isGroup(false).id("1696672097072999-107349120032554").build(),"https://facebook.botframework.com/");
+    UserIdentification usuarioJonatasLais() {
+		return new UserIdentification("mid.$cAAA7URkk_Xxmi7uHeVgWnY_Fi0fm", "facebook", BotUser.builder().id("1696672097072999").name("Jônatas Ricardo").build(), BotUser.builder().id("107349120032554").name("LAIS-SAC-HML").build(), Conversation.builder().isGroup(false).id("1696672097072999-107349120032554").build(),"https://facebook.botframework.com/");
 	}
 
 	@Bean
-	Recipient usuarioGustavoLais() {
-		return new Recipient("mid.$cAAA7UQtt0cFmq7rohFgenWfiZhZL", "facebook", BotUser.builder().id("1652887001413594").name("Gustavo Gomes").build(), BotUser.builder().id("107349120032554").name("LAIS-SAC-HML").build(), Conversation.builder().isGroup(false).id("1652887001413594-107349120032554").build(),"https://facebook.botframework.com/");
+    UserIdentification usuarioGustavoLais() {
+		return new UserIdentification("mid.$cAAA7UQtt0cFmq7rohFgenWfiZhZL", "facebook", BotUser.builder().id("1652887001413594").name("Gustavo Gomes").build(), BotUser.builder().id("107349120032554").name("LAIS-SAC-HML").build(), Conversation.builder().isGroup(false).id("1652887001413594-107349120032554").build(),"https://facebook.botframework.com/");
 	}
 
 

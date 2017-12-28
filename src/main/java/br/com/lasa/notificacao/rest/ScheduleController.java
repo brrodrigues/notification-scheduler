@@ -1,4 +1,4 @@
-package br.com.lasa.notificacao.controller;
+package br.com.lasa.notificacao.rest;
 
 import br.com.lasa.notificacao.task.EventoTask;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -9,7 +9,7 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 @Data
-@Document
+@Document(collection = "Cadastro_Lojas")
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
