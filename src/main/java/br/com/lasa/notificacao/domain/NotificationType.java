@@ -2,17 +2,17 @@ package br.com.lasa.notificacao.domain;
 
 import lombok.Data;
 import lombok.ToString;
-
-import javax.persistence.Entity;
-import javax.persistence.Id;
+import org.bson.types.ObjectId;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
 
 @Data
 @ToString
-@Entity
+@Document
 public class NotificationType {
 
     @Id
-    private String id;
+    private ObjectId id;
     private String nome;
 
 }

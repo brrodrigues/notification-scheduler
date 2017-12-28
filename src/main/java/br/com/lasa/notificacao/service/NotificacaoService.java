@@ -19,8 +19,8 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.URI;
 import java.net.UnknownHostException;
+import java.util.List;
 import java.util.UUID;
-import java.util.stream.Stream;
 
 @Service
 @Slf4j
@@ -74,7 +74,7 @@ public class NotificacaoService {
     }
 
     @Transactional
-    public Stream<Notificacao> buscarNotificacaoNaoProgramada() {
+    public List<Notificacao> buscarNotificacaoNaoProgramada() {
         log.info("Buscando eventos nao programados");
         String uuid = UUID.randomUUID().toString();
         String hostAddress = null;
@@ -84,9 +84,9 @@ public class NotificacaoService {
             e.printStackTrace();
         }
 
-        notificacaoRepository.setScheduleAndHostnameFor(true, uuid , hostAddress, 1);
+        //notificacaoRepository.setScheduleAndHostnameFor(true, uuid , hostAddress, 1);
 
-        return notificacaoRepository.readAllByUuid(uuid);
+        return notificacaoRepository.findAllByUuid(uuid);
     }
 
     private HttpEntity<Recipient> setAuthorization(Recipient recipient){
@@ -98,7 +98,7 @@ public class NotificacaoService {
         return requestEntity ;
     }
 
-    public void liberarTodosAgendamentoPorHostname(String hostname) {
-        notificacaoRepository.releaseByHostname(hostname);
+    public void liberarTodosAgendamentoPorHostname(String hostAddress) {
+        //notificacaoRepository.releaseSchedulebyHostname(hostAddress);
     }
 }

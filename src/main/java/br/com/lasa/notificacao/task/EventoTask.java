@@ -2,6 +2,7 @@ package br.com.lasa.notificacao.task;
 
 import br.com.lasa.notificacao.domain.Notificacao;
 import br.com.lasa.notificacao.domain.lais.Recipient;
+import br.com.lasa.notificacao.repository.NotificacaoRepository;
 import br.com.lasa.notificacao.service.NotificacaoService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,6 +31,9 @@ public class EventoTask extends ThreadPoolTaskScheduler {
     @Autowired private Recipient gustavoUser;
 
     @Autowired
+    private NotificacaoRepository notificacaoRepository;
+
+    @Autowired
     private NotificacaoService notificacaoService;
 
     public void agendar(Notificacao notificacao) {
@@ -55,7 +59,7 @@ public class EventoTask extends ThreadPoolTaskScheduler {
     @Scheduled(cron = "0/5 * * * * *")
     public void bloquearIntervalo() {
         log.info("Finding notification schedule pending...");
-        notificacaoService.buscarNotificacaoNaoProgramada().forEach(this::agendar);
+        notificacaoService.buscarNotificacaoNaoProgramada().stream().forEach(this::agendar);
         log.info("Finish scheduling timer...");
     }
 

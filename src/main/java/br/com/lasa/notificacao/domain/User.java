@@ -1,17 +1,14 @@
 package br.com.lasa.notificacao.domain;
 
 import lombok.Data;
-
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
 
 @Data
-@Entity
+@Document
 public class User {
 
     @Id
-    @Column(length = 15)
     private String login;
     private String storeId;
     private String hierarchy;

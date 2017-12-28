@@ -1,22 +1,23 @@
 package br.com.lasa.notificacao.domain;
 
 import lombok.*;
+import org.bson.types.ObjectId;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
 
-import javax.persistence.*;
 import java.util.Collection;
 
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString
 @Builder
-@Entity
+@Document
 @Data
 public class Canal {
 
     @Id
+    private ObjectId id;
     private String channelId;
-    @Lob
-    @ElementCollection(fetch = FetchType.EAGER, targetClass = String.class)
     private Collection<String> users;
 
 }
