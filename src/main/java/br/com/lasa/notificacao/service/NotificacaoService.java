@@ -32,15 +32,14 @@ public class NotificacaoService {
 
 
     public boolean enviarNotificacao(String channelId) {
-        log.debug("sending notification...");
+        if (log.isDebugEnabled())
+            log.debug("Sending notification...");
         Canal canal = channelRepository.readByChannelId(channelId);
         canal.getUsers().parallelStream().forEach(enviarNoticacaoController::doNotify);
-        log.debug("notification done.");
-
+        if (log.isDebugEnabled())
+            log.debug("Notification done.");
         return true;
     }
-
-
 
     @Transactional
     public List<Notificacao> buscarNotificacaoNaoProgramada() {
@@ -54,7 +53,6 @@ public class NotificacaoService {
         }
 
         notificacaoRepository.setScheduleAndUuiAndHostnameFor(true, uuid , hostAddress, 2);
-
         return notificacaoRepository.findAllByUuid(uuid);
     }
 

@@ -21,9 +21,8 @@ public class NotificacaoRepositoryImpl implements NotificacaoRepositoryCustom {
 
     @Override
     public int setScheduleAndUuiAndHostnameFor(boolean scheduled, String uuid, String hostname, int limit) {
-        Query query = new Query(Criteria.where("scheduled").is(false)).limit(limit);
+        Query query = new Query(Criteria.where("scheduled").is(false)).maxScan(limit);
         BasicQuery basicQuery = new BasicQuery(Criteria.where("scheduled").is(false).getCriteriaObject());
-        basicQuery.limit(limit);
         log.info("Query {}", basicQuery.getQueryObject().toString());
         Update update = new Update().set("uuid", uuid).set("scheduled", scheduled).set("hostname", hostname);
         WriteResult writeResult = mongoTemplate.updateMulti(query, update, Notificacao.class);

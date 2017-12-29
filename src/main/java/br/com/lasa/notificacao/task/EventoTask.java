@@ -40,7 +40,7 @@ public class EventoTask extends ThreadPoolTaskScheduler {
         log.info("Scheduling cron...");
         ScheduledFuture<?> schedule = schedule(() -> {
             log.info(" Notifying users on channel {}", notificacao.getChannelId());
-            notificacaoService.enviarNotificacao(notificacao.getChannelId());
+            //notificacaoService.enviarNotificacao(notificacao.getChannelId());
         }, new CronTrigger(notificacao.getTimeUnit().getCronTrigger()));
 
         ScheduledFuture scheduledFuture = null;

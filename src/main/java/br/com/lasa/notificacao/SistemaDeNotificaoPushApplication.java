@@ -89,14 +89,11 @@ public class SistemaDeNotificaoPushApplication {
 		ObjectMapper mapper = new ObjectMapper();
 		// mapper.configure(JsonGenerator.Feature.ESCAPE_NON_ASCII, true);
 		mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES,false);
-
 		//Algumas exception que podem vir a ser serializadas podem conter atributos não serializáveis
 		mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
-
 		// TODO desabilitar timestamp passa a usar uma notação
 		// ISO8061-compilant, acho que pode ser um bom formato pode ser definido outro formato também, talvez com o timezone mais simples usando a letra Z
 		mapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
-
 		// habilitar loose/non-standard format
 		// to allow C/C++ style comments in JSON (non-standard, disabled by
 		// default)
@@ -118,6 +115,7 @@ public class SistemaDeNotificaoPushApplication {
 		// definir mediatypes
 		List<MediaType> lstMedia = new ArrayList<MediaType>();
 		lstMedia.add(MediaType.APPLICATION_JSON_UTF8);
+		lstMedia.add(MediaType.APPLICATION_JSON);
 		lstMedia.add(MediaType.TEXT_HTML);
 		lstMedia.add(MediaType.TEXT_PLAIN);
 		lstMedia.add(MediaType.ALL);
