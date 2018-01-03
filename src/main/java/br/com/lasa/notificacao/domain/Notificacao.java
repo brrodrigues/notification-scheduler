@@ -26,21 +26,19 @@ public class Notificacao {
     private Date scheduleTime;
     @JsonFormat(pattern = "dd/MM/yyyy HH:mm:ssZ", shape = JsonFormat.Shape.STRING, timezone = "America/Sao_Paulo")
     private Date createDate;
-    private TimeUnit timeUnit;
-    private Long delay;
+    private int delayInMinute;
     private boolean scheduled;
+    @JsonFormat(pattern = "dd/MM/yyyy HH:mm:ssZ", shape = JsonFormat.Shape.STRING, timezone = "America/Sao_Paulo")
+    private Date scheduleOn;
     private String hostname;
     private String uuid;
-    private boolean uniqueExecution;
 
-    public Notificacao(String channelId, Date scheduleTime, String eventName, long delay, TimeUnit timeUnit, boolean uniqueExecution) {
+    public Notificacao(String channelId, Date scheduleTime, String eventName, int delayInMinute, boolean uniqueExecution) {
         this.createDate = new Date();
         this.scheduleTime = scheduleTime;
         this.eventName = eventName;
         this.channelId = channelId;
-        this.timeUnit = timeUnit;
-        this.delay = delay;
-        this.uniqueExecution = uniqueExecution;
+        this.delayInMinute = delayInMinute;
     }
 
 

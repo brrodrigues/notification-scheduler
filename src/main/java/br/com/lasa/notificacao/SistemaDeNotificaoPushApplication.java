@@ -2,12 +2,13 @@ package br.com.lasa.notificacao;
 
 import br.com.lasa.notificacao.domain.Canal;
 import br.com.lasa.notificacao.domain.Notificacao;
-import br.com.lasa.notificacao.domain.TimeUnit;
+import br.com.lasa.notificacao.domain.UsuarioNotificacaoImp;
 import br.com.lasa.notificacao.domain.lais.BotUser;
 import br.com.lasa.notificacao.domain.lais.Conversation;
 import br.com.lasa.notificacao.domain.lais.UserIdentification;
 import br.com.lasa.notificacao.repository.ChannelRepository;
 import br.com.lasa.notificacao.repository.NotificacaoRepository;
+import br.com.lasa.notificacao.repository.UsuarioNotificacaoRepository;
 import br.com.lasa.notificacao.service.NotificacaoService;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -53,13 +54,19 @@ public class SistemaDeNotificaoPushApplication {
 	@Bean
 	@Order(1)
 	@Autowired
-	CommandLineRunner initializeDatabase(final NotificacaoRepository notificacaoRepository, final ChannelRepository channelRepository){
+	CommandLineRunner initializeDatabase(final UsuarioNotificacaoRepository usuarioNotificacaoRepository, final NotificacaoRepository notificacaoRepository, final ChannelRepository channelRepository){
 		return (strings -> {
 			log.info("Criando evento para teste");
 			ObjectMapper objectMapper = new ObjectMapper();
-			channelRepository.save(Canal.builder().channelId("without.sale.1min").users(Arrays.asList(objectMapper.writeValueAsString(usuarioJonatasLais()))).build());
-			channelRepository.save(Canal.builder().channelId("without.sale.1min").users(Arrays.asList(objectMapper.writeValueAsString(usuarioJonatasLais()))).build());
-			notificacaoRepository.save(new Notificacao("without.sale.1min", new Date(), "Check de loja sem venda entre 1 min", 1, TimeUnit.MINUTO, false ));
+			channelRepository.deleteAll();
+			notificacaoRepository.deleteAll();
+			usuarioNotificacaoRepository.deleteAll();
+			usuarioNotificacaoRepository.save(usuarioJonatasLais());
+			usuarioNotificacaoRepository.save(usuarioGustavoLais());
+			channelRepository.save(Canal.builder().channelId("without.sale.1min").users(Arrays.asList(usuarioGustavoLais(), usuarioJonatasLais())).build());
+			channelRepository.save(Canal.builder().channelId("without.sale.5min").users(Arrays.asList(usuarioJonatasLais())).build());
+			notificacaoRepository.save(new Notificacao("without.sale.1min", new Date(), "Evento de 1 min", 1, false ));
+			notificacaoRepository.save(new Notificacao("without.sale.5min", new Date(), "Evento de 2 min", 2, false ));
 
 			log.info("Notificacao criado !!!!");
 		});
@@ -126,7 +133,7 @@ public class SistemaDeNotificaoPushApplication {
 
 	@Bean
 	@Autowired
-	CommandLineRunner clearScheduledByLocalhost(NotificacaoService notificacaoService) {
+	CommandLineRunner clearScheduledByLocalhost(final NotificacaoService notificacaoService) {
 		return strings -> {
 			InetAddress inetAddress = InetAddress.getLocalHost();
 			notificacaoService.liberarTodosAgendamentoPorHostname(inetAddress.getHostAddress());
@@ -134,15 +141,16 @@ public class SistemaDeNotificaoPushApplication {
 	}
 
 	@Bean
-    UserIdentification usuarioJonatasLais() {
-		return new UserIdentification("mid.$cAAA7URkk_Xxmi7uHeVgWnY_Fi0fm", "facebook", BotUser.builder().id("1696672097072999").name("Jônatas Ricardo").build(), BotUser.builder().id("107349120032554").name("LAIS-SAC-HML").build(), Conversation.builder().isGroup(false).id("1696672097072999-107349120032554").build(),"https://facebook.botframework.com/");
+    UsuarioNotificacaoImp usuarioJonatasLais() {
+		List<Object> userIdentifications = Arrays.asList(new UserIdentification("mid.$cAAA7URkk_Xxmi7uHeVgWnY_Fi0fm", "facebook", BotUser.builder().id("1696672097072999").name("Jônatas Ricardo").build(), BotUser.builder().id("107349120032554").name("LAIS-SAC-HML").build(), Conversation.builder().isGroup(false).id("1696672097072999-107349120032554").build(), "https://facebook.botframework.com/"));
+		return UsuarioNotificacaoImp.builder().perfis(userIdentifications).build();
 	}
 
 	@Bean
-    UserIdentification usuarioGustavoLais() {
-		return new UserIdentification("mid.$cAAA7UQtt0cFmq7rohFgenWfiZhZL", "facebook", BotUser.builder().id("1652887001413594").name("Gustavo Gomes").build(), BotUser.builder().id("107349120032554").name("LAIS-SAC-HML").build(), Conversation.builder().isGroup(false).id("1652887001413594-107349120032554").build(),"https://facebook.botframework.com/");
+	UsuarioNotificacaoImp usuarioGustavoLais() {
+		List<Object> userIdentifications = Arrays.asList(new UserIdentification("mid.$cAAA7UQtt0cFmq7rohFgenWfiZhZL", "facebook", BotUser.builder().id("1652887001413594").name("Gustavo Gomes").build(), BotUser.builder().id("107349120032554").name("LAIS-SAC-HML").build(), Conversation.builder().isGroup(false).id("1652887001413594-107349120032554").build(),"https://facebook.botframework.com/"));
+		return UsuarioNotificacaoImp.builder().perfis(userIdentifications).build();
 	}
-
 
 	@Bean
 	RestTemplate restTemplate() throws KeyStoreException, NoSuchAlgorithmException, KeyManagementException {

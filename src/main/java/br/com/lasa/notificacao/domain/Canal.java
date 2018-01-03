@@ -18,6 +18,6 @@ public class Canal {
     @Id
     private ObjectId id;
     private String channelId;
-    private Collection<String> users;
+    private Collection<UsuarioNotificacao> users;
 
 }

@@ -1,19 +1,22 @@
 package br.com.lasa.notificacao.domain;
 
-import lombok.Data;
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.Document;
 
-import java.util.Collection;
+import java.util.List;
 
-@Data
-@Document(collection = "Cadastro_Usuario_Notificacao")
-public class UsuarioNotificacao {
+public interface UsuarioNotificacao {
+    String getLogin();
 
-    @Id
-    private String login;
-    private String storeId;
-    private String hierarchy;
-    private Collection<Object> perfis;
+    String getStoreId();
 
+    String getHierarchy();
+
+    List<Object> getPerfis();
+
+    void setLogin(String login);
+
+    void setStoreId(String storeId);
+
+    void setHierarchy(String hierarchy);
+
+    void setPerfis(List<Object> perfis);
 }

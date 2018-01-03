@@ -1,11 +1,11 @@
 package br.com.lasa.notificacao.service;
 
-import br.com.lasa.notificacao.domain.Canal;
 import br.com.lasa.notificacao.domain.Notificacao;
 import br.com.lasa.notificacao.repository.ChannelRepository;
 import br.com.lasa.notificacao.repository.NotificacaoRepository;
 import br.com.lasa.notificacao.rest.EnviarNoticacaoController;
 import lombok.extern.slf4j.Slf4j;
+import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
@@ -15,11 +15,16 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ScheduledFuture;
 
 @Service
 @Slf4j
 @Scope(value = "singleton")
 public class NotificacaoService {
+
+    private final ConcurrentMap<String, ScheduledFuture> scheduledTasks = new ConcurrentHashMap<>();
 
     @Autowired
     private NotificacaoRepository notificacaoRepository;
@@ -31,13 +36,14 @@ public class NotificacaoService {
     private EnviarNoticacaoController enviarNoticacaoController;
 
 
-    public boolean enviarNotificacao(String channelId) {
-        if (log.isDebugEnabled())
-            log.debug("Sending notification...");
-        Canal canal = channelRepository.readByChannelId(channelId);
-        canal.getUsers().parallelStream().forEach(enviarNoticacaoController::doNotify);
-        if (log.isDebugEnabled())
-            log.debug("Notification done.");
+    public ConcurrentMap<String, ScheduledFuture> getScheduledTasks() {
+        return scheduledTasks;
+    }
+
+    public boolean enviarNotificacao(Notificacao notificacao) {
+        if (log.isDebugEnabled()) log.debug("Sending notification...");
+        enviarNoticacaoController.notificar(notificacao);
+        if (log.isDebugEnabled()) log.debug("Notification done.");
         return true;
     }
 
@@ -56,9 +62,22 @@ public class NotificacaoService {
         return notificacaoRepository.findAllByUuid(uuid);
     }
 
-
-
     public void liberarTodosAgendamentoPorHostname(String hostAddress) {
         notificacaoRepository.releaseSchedulebyHostname(hostAddress);
+    }
+
+    public void setScheduleFor(ObjectId id, boolean schedule) {
+        notificacaoRepository.setScheduleFor(id, schedule);
+    }
+
+
+    public void liberarAgendamento(String id) {
+        ScheduledFuture scheduledFuture = scheduledTasks.get(id);
+        if (scheduledFuture == null) {
+            throw new IllegalAccessError("Não existe o agendamento programado para este ID");
+        }
+        scheduledFuture.cancel(true);
+        scheduledTasks.remove(id);
+        notificacaoRepository.setScheduleFor(new ObjectId(id), false);
     }
 }

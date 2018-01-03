@@ -1,9 +1,8 @@
 package br.com.lasa.notificacao.rest;
 
-import br.com.lasa.notificacao.task.EventoTask;
+import br.com.lasa.notificacao.service.NotificacaoService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ScheduledFuture;
@@ -12,13 +11,20 @@ import java.util.concurrent.ScheduledFuture;
 public class ScheduleController {
 
     @Autowired
-    private EventoTask eventoTask;
+    private NotificacaoService notificacaoService;
 
     @GetMapping(path = "/schedules")
-    public ConcurrentMap<String, ScheduledFuture> getSchedules(){
-        ConcurrentMap<String, ScheduledFuture> queues = eventoTask.getScheduledTasks();
+    ConcurrentMap<String, ScheduledFuture> getSchedules(){
+        ConcurrentMap<String, ScheduledFuture> queues = notificacaoService.getScheduledTasks();
 
         return queues;
+    }
+
+    @DeleteMapping
+    @ResponseBody
+    String deleteSchedule(@RequestBody String id ) {
+        notificacaoService.liberarAgendamento(id);
+        return "OK";
     }
 
 }
