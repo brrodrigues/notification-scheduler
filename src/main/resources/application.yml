@@ -2,33 +2,38 @@ application:
   endpoint-lais:
     url: ${ENDPOINT_LAIS_URL:https://lasa-lais-hml-sac.us-west-2.elasticbeanstalk.com/api/notification}
     authorization-password: ${ENDPOINT_LAIS_AUTHORIZATION_VALUE:#Lasa2017}
-
 management:
   context-path: /jmx
   port: 8081
   security:
     enabled: false
 info:
-  name: @project.artifactId@
-  version: @project.version@
+  application:
+    name: @project.artifactId@
+    version: @project.version@
 
 logging:
   level:
     org:
       springframework: INFO
+      boot:
+        autoconfigure:
+          security: INFO
+    br:
+      com:
+        lasa: DEBUG
 
 spring:
   data:
     rest:
       base-path: /api
     mongodb:
-      #host: ${MONGODB_HOST:localhost}
-      #database: ${MONGODB_DATABASE:test}
-      #port: ${MONGODB_PORT:27017}
-      #username: ${MONGODB_USERNAME:}
-      #password: ${MONGODB_PASSWORD:}
       repositories:
         enabled: true
-      uri: mongo://${MONGODB_USERNAME}:${MONGODB_PASSWORD}@${MONGODB_HOST}:${MONGODB_PORT}/${MONGODB_DATABASE}
 
-debug: false
+debug: true
+security:
+  basic:
+    enabled: false
+    authorize-mode: none
+    path: /**

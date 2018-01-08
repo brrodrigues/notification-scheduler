@@ -11,13 +11,13 @@ import java.util.Collection;
 @NoArgsConstructor
 @ToString
 @Builder
-@Document
+@Document(collection = "Cadastro_Eventos")
 @Data
-public class Canal {
+public class Event {
 
     @Id
     private ObjectId id;
     private String channelId;
-    private Collection<UsuarioNotificacao> users;
+    private Collection<NotificationUser> users;
 
 }

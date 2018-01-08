@@ -4,9 +4,10 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.bson.types.ObjectId;
-import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.*;
 import org.springframework.data.mongodb.core.mapping.Document;
+
+import java.util.Date;
 
 @Data
 @Document(collection = "Cadastro_Lojas")
@@ -16,8 +17,18 @@ import org.springframework.data.mongodb.core.mapping.Document;
 public class Loja {
 
     @Id
-    private ObjectId id;
-    private String nome;
+    private String id;
+    private String responsavelGeral;
     private String horaAbertura;
+    @Version
+    private Long versao;
+    @CreatedDate
+    private Date criadoEm;
+    @CreatedBy
+    private String criadoPor;
+    @LastModifiedDate
+    private Date modificadoEm;
+    @LastModifiedBy
+    private String modificadoPor;
 
 }

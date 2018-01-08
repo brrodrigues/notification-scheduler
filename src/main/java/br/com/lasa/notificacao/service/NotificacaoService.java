@@ -1,7 +1,6 @@
 package br.com.lasa.notificacao.service;
 
 import br.com.lasa.notificacao.domain.Notificacao;
-import br.com.lasa.notificacao.repository.ChannelRepository;
 import br.com.lasa.notificacao.repository.NotificacaoRepository;
 import br.com.lasa.notificacao.rest.EnviarNoticacaoController;
 import lombok.extern.slf4j.Slf4j;
@@ -30,9 +29,6 @@ public class NotificacaoService {
     private NotificacaoRepository notificacaoRepository;
 
     @Autowired
-    private ChannelRepository channelRepository;
-
-    @Autowired
     private EnviarNoticacaoController enviarNoticacaoController;
 
 
@@ -48,8 +44,8 @@ public class NotificacaoService {
     }
 
     @Transactional
-    public List<Notificacao> buscarNotificacaoNaoProgramada() {
-        log.info("Buscando eventos nao programados");
+    public List<Notificacao> buscarNotificacaoNaoProgramada(int minute) {
+        log.info("Finding events no scheduling");
         String uuid = UUID.randomUUID().toString();
         String hostAddress = null;
         try {
@@ -58,11 +54,11 @@ public class NotificacaoService {
             e.printStackTrace();
         }
 
-        notificacaoRepository.setScheduleAndUuiAndHostnameFor(true, uuid , hostAddress, 2);
+        notificacaoRepository.setScheduleAndUuiAndHostnameFor(minute,true, uuid , hostAddress, 2);
         return notificacaoRepository.findAllByUuid(uuid);
     }
 
-    public void liberarTodosAgendamentoPorHostname(String hostAddress) {
+    public void releaseAllByHostname(String hostAddress) {
         notificacaoRepository.releaseSchedulebyHostname(hostAddress);
     }
 
@@ -74,7 +70,7 @@ public class NotificacaoService {
     public void liberarAgendamento(String id) {
         ScheduledFuture scheduledFuture = scheduledTasks.get(id);
         if (scheduledFuture == null) {
-            throw new IllegalAccessError("Não existe o agendamento programado para este ID");
+            throw new IllegalAccessError("There is no scheduled thread for this ID");
         }
         scheduledFuture.cancel(true);
         scheduledTasks.remove(id);

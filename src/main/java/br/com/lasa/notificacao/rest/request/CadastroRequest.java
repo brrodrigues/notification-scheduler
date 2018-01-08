@@ -1,6 +1,6 @@
 package br.com.lasa.notificacao.rest.request;
 
-import br.com.lasa.notificacao.domain.lais.UserIdentification;
+import br.com.lasa.notificacao.domain.lais.Recipient;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 
@@ -11,9 +11,9 @@ import java.io.Serializable;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class CadastroGGLRequest implements Serializable {
+public class CadastroRequest implements Serializable {
 
-    private UserIdentification address;
+    private Recipient address;
     @JsonProperty(value = "loja_ggl" )
     private String lojaGGL;
     @JsonProperty(value = "nome_ggl" )
