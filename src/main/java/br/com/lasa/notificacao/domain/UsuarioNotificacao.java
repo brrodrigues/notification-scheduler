@@ -13,7 +13,7 @@ import java.io.Serializable;
 @Builder
 @AllArgsConstructor
 @Document(collection = "Cadastro_Usuario_Notificacao")
-public class NotificationUser implements Serializable {
+public class UsuarioNotificacao implements Serializable {
 
     @Id
     private String login;

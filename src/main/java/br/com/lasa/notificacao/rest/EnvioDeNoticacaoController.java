@@ -1,10 +1,8 @@
 package br.com.lasa.notificacao.rest;
 
-import br.com.lasa.notificacao.domain.Event;
 import br.com.lasa.notificacao.domain.Notificacao;
-import br.com.lasa.notificacao.domain.NotificationUser;
 import br.com.lasa.notificacao.domain.lais.Recipient;
-import br.com.lasa.notificacao.repository.EventRepository;
+import br.com.lasa.notificacao.repository.UsuarioNotificacaoRepository;
 import br.com.lasa.notificacao.rest.request.EnvioNotificacaoRequest;
 import br.com.lasa.notificacao.util.AppConstants;
 import lombok.extern.slf4j.Slf4j;
@@ -19,17 +17,15 @@ import org.springframework.web.client.RestTemplate;
 
 import java.net.URI;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
-import java.util.Objects;
 
 @RestController
 @RequestMapping("/api/do-notify")
 @Slf4j
-public class EnviarNoticacaoController {
+public class EnvioDeNoticacaoController {
 
     @Autowired
-    private EventRepository eventRepository;
+    private UsuarioNotificacaoRepository usuarioNotificacaoRepository;
 
     @Autowired
     RestTemplate restTemplate;
@@ -48,35 +44,23 @@ public class EnviarNoticacaoController {
 
         String channelId = notificacao.getChannelId();
 
-        Event event = eventRepository.readByChannelId(channelId);
+        String[] storeIds = notificacao.getStoreIds().toArray(new String[notificacao.getStoreIds().size()]);
 
-        if ( Objects.isNull(event) ) {
-            log.warn(String.format("There is no channel %s to send notification.", channelId));
-            return ;
-        }
-
-        if ( event.getUsers().isEmpty() ) {
-            log.warn(String.format("There is no user on channel %s to send notification.", channelId));
-            return ;
-        }
-
-        Collection<NotificationUser> perfis = event.getUsers();
-
-        for (NotificationUser notificationUser : perfis) {
-            List<Recipient> recipients = Arrays.asList(notificationUser.getProfile());
+        usuarioNotificacaoRepository.findAllByStoreIdIn(storeIds).forEach(usuarioNotificacao -> {
+            List<Recipient> recipients = Arrays.asList(usuarioNotificacao.getProfile());
             EnvioNotificacaoRequest envioNotificacaoRequest = EnvioNotificacaoRequest.builder().
                     messageType(notificacao.getEventName()).
                     recipients(recipients).
                     build();
-            log.info("Sending to '{}' to event '{}'", notificationUser.getProfile().getUser().getName(), notificacao.getEventName());
+            log.info("Sending to '{}' to event '{}'", usuarioNotificacao.getProfile().getUser().getName(), notificacao.getEventName());
             ResponseEntity<String> responseEntity = restTemplate.exchange(URI.create(applicationEndpointLaisUrl), HttpMethod.POST, createRequest(envioNotificacaoRequest), String.class);
 
             if (responseEntity.getStatusCode() == HttpStatus.OK) {
-                log.info("Alert to  '{}' on channel {} successfully sent.", notificationUser.getProfile().getUser().getName(), channelId);
+                log.info("Alert to  '{}' on channel {} successfully sent.", usuarioNotificacao.getProfile().getUser().getName(), channelId);
             } else {
-                log.warn("Occur problem to send alert to {} on channel {}.", notificationUser.getProfile().getUser().getName(), channelId);
+                log.warn("Occur problem to send alert to {} on channel {}.", usuarioNotificacao.getProfile().getUser().getName(), channelId);
             }
-        }
+        });
     }
 
     private HttpEntity<EnvioNotificacaoRequest> createRequest(EnvioNotificacaoRequest requestObject){

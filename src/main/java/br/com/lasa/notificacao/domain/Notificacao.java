@@ -38,10 +38,11 @@ public class Notificacao {
     private String uuid;
     private Set<String> storeIds = new LinkedHashSet<>();
 
-    public Notificacao(String channelId, Date scheduleTime, String eventName, int delayInMinute, boolean uniqueExecution) {
+    public Notificacao(String channelId, Date scheduleTime, String eventName, int delayInMinute, boolean uniqueExecution, Set<String> storeIds) {
         this.createDate = new Date();
         this.scheduleTime = scheduleTime;
         this.eventName = eventName;
+        this.storeIds = storeIds;
         this.channelId = channelId;
         this.delayInMinute = delayInMinute;
     }

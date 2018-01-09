@@ -15,10 +15,14 @@ info:
 logging:
   level:
     org:
-      springframework: INFO
-      boot:
-        autoconfigure:
-          security: INFO
+      springframework:
+        boot:
+          autoconfigure:
+            security: INFO
+        data:
+          mongodb:
+            core:
+              MongoTemplate: DEBUG
     br:
       com:
         lasa: DEBUG

@@ -1,9 +1,8 @@
 package br.com.lasa.notificacao;
 
 import br.com.lasa.notificacao.audit.AppAuditor;
-import br.com.lasa.notificacao.domain.Event;
 import br.com.lasa.notificacao.domain.Notificacao;
-import br.com.lasa.notificacao.domain.NotificationUser;
+import br.com.lasa.notificacao.domain.UsuarioNotificacao;
 import br.com.lasa.notificacao.domain.lais.BotUser;
 import br.com.lasa.notificacao.domain.lais.Conversation;
 import br.com.lasa.notificacao.domain.lais.Recipient;
@@ -25,7 +24,6 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Profile;
 import org.springframework.core.annotation.Order;
 import org.springframework.data.domain.AuditorAware;
 import org.springframework.data.mongodb.config.EnableMongoAuditing;
@@ -44,7 +42,7 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.Executors;
@@ -64,24 +62,12 @@ public class SistemaDeNotificaoPushApplication {
 	@Bean
 	@Order(1)
 	@Autowired
-	@Profile("test")
 	CommandLineRunner initializeDatabase(final UsuarioNotificacaoRepository usuarioNotificacaoRepository, final NotificacaoRepository notificacaoRepository, final EventRepository eventRepository){
 		return (strings -> {
 			log.info("Criando evento para teste");
-			ObjectMapper objectMapper = new ObjectMapper();
-			eventRepository.deleteAll();
-			notificacaoRepository.deleteAll();
-			usuarioNotificacaoRepository.deleteAll();
-			usuarioNotificacaoRepository.save(usuarioJonatasLais());
 			usuarioNotificacaoRepository.save(usuarioGustavoLais());
-			eventRepository.save(Event.builder().channelId("without.sale.1min").users(Arrays.asList(usuarioGustavoLais())).build());
-			eventRepository.save(Event.builder().channelId("without.sale.5min").users(Arrays.asList(usuarioJonatasLais(), usuarioJonatasLais())).build());
-			notificacaoRepository.save(new Notificacao("without.sale.1min", new Date(), "Evento de 1 min", 1, false ));
-			notificacaoRepository.save(new Notificacao("without.sale.5min", new Date(), "Evento de 5 min", 5, false ));
-			notificacaoRepository.save(new Notificacao("without.sale.10min", new Date(), "Evento de 10 min", 10, false ));
-			notificacaoRepository.save(new Notificacao("without.sale.15min", new Date(), "Evento de 15 min", 15, false ));
-			notificacaoRepository.save(new Notificacao("without.sale.20min", new Date(), "Evento de 20 min", 20, false ));
-			notificacaoRepository.save(new Notificacao("without.sale.25min", new Date(), "Evento de 25 min", 25, false ));
+			notificacaoRepository.deleteAll();
+			notificacaoRepository.save(new Notificacao("without.sale.1min", new Date(), "Evento de 1 min", 1, false, Collections.singleton("L001")));
 
 			log.info("Notificacao criado !!!!");
 		});
@@ -156,18 +142,18 @@ public class SistemaDeNotificaoPushApplication {
 	}
 
 	@Bean
-	NotificationUser usuarioJonatasLais() {
+    UsuarioNotificacao usuarioJonatasLais() {
 		//new Recipient("mid.$cAAA7URkk_Xxmi7uHeVgWnY_Fi0fm", "facebook", BotUser.builder().id("1696672097072999").name("Jônatas Ricardo").build(), BotUser.builder().id("107349120032554").name("LAIS-SAC-HML").build(), Conversation.builder().isGroup(false).id("1696672097072999-107349120032554").build(), "https://facebook.botframework.com/")
 
 		Recipient recipient = new Recipient("mid.$cAAA7URkk_Xxmi7uHeVgWnY_Fi0fm", "facebook", BotUser.builder().id("1696672097072999").name("Jônatas Ricardo").build(), BotUser.builder().id("107349120032554").name("LAIS-SAC-HML").build(), Conversation.builder().isGroup(false).id("1696672097072999-107349120032554").build(), "https://facebook.botframework.com/");
 
-		return new NotificationUser(recipient.getUser().getId(), "L0001", recipient );
+		return new UsuarioNotificacao(recipient.getUser().getId(), "L0001", recipient );
 	}
 
 	@Bean
-	NotificationUser usuarioGustavoLais() {
+    UsuarioNotificacao usuarioGustavoLais() {
 		//new Recipient("mid.$cAAA7UQtt0cFmq7rohFgenWfiZhZL", "facebook", BotUser.builder().id("1652887001413594").name("Gustavo Gomes").build(), BotUser.builder().id("107349120032554").name("LAIS-SAC-HML").build(), Conversation.builder().isGroup(false).id("1652887001413594-107349120032554").build(),"https://facebook.botframework.com/");
-		return NotificationUser.builder().profile(new Recipient("mid.$cAAA7UQtt0cFmq7rohFgenWfiZhZL", "facebook", BotUser.builder().id("1652887001413594").name("Gustavo Gomes").build(), BotUser.builder().id("107349120032554").name("LAIS-SAC-HML").build(), Conversation.builder().isGroup(false).id("1652887001413594-107349120032554").build(),"https://facebook.botframework.com/")).build();
+		return UsuarioNotificacao.builder().storeId("L001").profile(new Recipient("mid.$cAAA7UQtt0cFmq7rohFgenWfiZhZL", "facebook", BotUser.builder().id("1652887001413594").name("Gustavo Gomes").build(), BotUser.builder().id("107349120032554").name("LAIS-SAC-HML").build(), Conversation.builder().isGroup(false).id("1652887001413594-107349120032554").build(),"https://facebook.botframework.com/")).build();
 	}
 
 	@Bean

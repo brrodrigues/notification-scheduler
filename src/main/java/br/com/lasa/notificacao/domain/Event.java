@@ -18,6 +18,6 @@ public class Event {
     @Id
     private ObjectId id;
     private String channelId;
-    private Collection<NotificationUser> users;
+    private Collection<UsuarioNotificacao> users;
 
 }

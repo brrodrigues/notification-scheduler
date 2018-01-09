@@ -1,7 +1,7 @@
 package br.com.lasa.notificacao.service;
 
 import br.com.lasa.notificacao.domain.Loja;
-import br.com.lasa.notificacao.domain.NotificationUser;
+import br.com.lasa.notificacao.domain.UsuarioNotificacao;
 import br.com.lasa.notificacao.domain.lais.Recipient;
 import br.com.lasa.notificacao.repository.LojaRepository;
 import br.com.lasa.notificacao.repository.NotificacaoRepository;
@@ -31,7 +31,7 @@ public class CadastroUsuarioService {
         Assert.notNull(request.getAddress(), "Attribute address was not found or is null");
 
         Recipient requestUser = request.getAddress();
-        NotificationUser usuario = NotificationUser.builder().login(requestUser.getId()).profile(requestUser).storeId(request.getLojaGGL()).build();
+        UsuarioNotificacao usuario = UsuarioNotificacao.builder().login(requestUser.getId()).profile(requestUser).storeId(request.getLojaGGL()).build();
         Loja loja = Loja.builder().id(request.getLojaGGL()).responsavelGeral(request.getNomeGGL()).build();
 
         try {
@@ -43,6 +43,8 @@ public class CadastroUsuarioService {
         }
 
         usuarioNotificacaoRepository.save(usuario);
+
+
 
         return "OK";
     }

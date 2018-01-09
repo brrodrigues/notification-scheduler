@@ -1,6 +1,6 @@
 package br.com.lasa.notificacao.service;
 
-import br.com.lasa.notificacao.domain.NotificationUser;
+import br.com.lasa.notificacao.domain.UsuarioNotificacao;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -24,11 +24,11 @@ public class CadastroUsuarioServiceTest {
 
     @Autowired
     @Qualifier("usuarioJonatasLais")
-    private NotificationUser usuarioJonatas;
+    private UsuarioNotificacao usuarioJonatas;
 
     @Autowired
     @Qualifier("usuarioGustavoLais")
-    private NotificationUser usuarioGustavo;
+    private UsuarioNotificacao usuarioGustavo;
 
     @Before
     public void setUp() throws Exception {
