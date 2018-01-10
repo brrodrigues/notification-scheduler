@@ -16,8 +16,10 @@ import java.io.Serializable;
 public class UsuarioNotificacao implements Serializable {
 
     @Id
-    private String login;
+    private String id;
+    private String nome;
     private String storeId;
     private Recipient profile;
+    private boolean status;
 
 }

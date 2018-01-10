@@ -31,7 +31,7 @@ public class CadastroUsuarioService {
         Assert.notNull(request.getAddress(), "Attribute address was not found or is null");
 
         Recipient requestUser = request.getAddress();
-        UsuarioNotificacao usuario = UsuarioNotificacao.builder().login(requestUser.getId()).profile(requestUser).storeId(request.getLojaGGL()).build();
+        UsuarioNotificacao usuario = UsuarioNotificacao.builder().nome(request.getNomeGGL()).profile(requestUser).storeId(request.getLojaGGL()).build();
         Loja loja = Loja.builder().id(request.getLojaGGL()).responsavelGeral(request.getNomeGGL()).build();
 
         try {

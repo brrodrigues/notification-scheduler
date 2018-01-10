@@ -143,13 +143,13 @@ public class SistemaDeNotificaoPushApplication {
 
 		Recipient recipient = new Recipient("mid.$cAAA7URkk_Xxmi7uHeVgWnY_Fi0fm", "facebook", BotUser.builder().id("1696672097072999").name("Jônatas Ricardo").build(), BotUser.builder().id("107349120032554").name("LAIS-SAC-HML").build(), Conversation.builder().isGroup(false).id("1696672097072999-107349120032554").build(), "https://facebook.botframework.com/");
 
-		return new UsuarioNotificacao(recipient.getUser().getId(), "L0001", recipient );
+		return new UsuarioNotificacao(recipient.getUser().getId(), "Bruno Rodrigues","L0001", recipient, true );
 	}
 
 	@Bean
     UsuarioNotificacao usuarioGustavoLais() {
 		//new Recipient("mid.$cAAA7UQtt0cFmq7rohFgenWfiZhZL", "facebook", BotUser.builder().id("1652887001413594").name("Gustavo Gomes").build(), BotUser.builder().id("107349120032554").name("LAIS-SAC-HML").build(), Conversation.builder().isGroup(false).id("1652887001413594-107349120032554").build(),"https://facebook.botframework.com/");
-		return UsuarioNotificacao.builder().storeId("L001").profile(new Recipient("mid.$cAAA7UQtt0cFmq7rohFgenWfiZhZL", "facebook", BotUser.builder().id("1652887001413594").name("Gustavo Gomes").build(), BotUser.builder().id("107349120032554").name("LAIS-SAC-HML").build(), Conversation.builder().isGroup(false).id("1652887001413594-107349120032554").build(),"https://facebook.botframework.com/")).build();
+		return UsuarioNotificacao.builder().status(true).storeId("L001").profile(new Recipient("mid.$cAAA7UQtt0cFmq7rohFgenWfiZhZL", "facebook", BotUser.builder().id("1652887001413594").name("Gustavo Gomes").build(), BotUser.builder().id("107349120032554").name("LAIS-SAC-HML").build(), Conversation.builder().isGroup(false).id("1652887001413594-107349120032554").build(),"https://facebook.botframework.com/")).build();
 	}
 
 	@Bean

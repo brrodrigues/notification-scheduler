@@ -1,8 +1,6 @@
 package br.com.lasa.notificacao.repository;
 
 import br.com.lasa.notificacao.domain.Notificacao;
-import com.mongodb.BasicDBObject;
-import com.mongodb.DBObject;
 import com.mongodb.WriteResult;
 import lombok.extern.slf4j.Slf4j;
 import org.bson.types.ObjectId;
@@ -13,9 +11,6 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 import java.util.Optional;
 
 
@@ -46,18 +41,7 @@ public class NotificacaoRepositoryImpl implements NotificacaoRepositoryCustom {
         return updated;
 
     }
-
-    private DBObject prepareStatementForUpdateScheduleAndUuidAndHostname(int minute) {
-        DBObject dbObject = new BasicDBObject();
-        dbObject.put("scheduled", false);
-        List<Object> list = new ArrayList<>();
-        DBObject dbObjectAnd = new BasicDBObject();
-        dbObjectAnd.put("delayInMinute", new BasicDBObject().append("$mod", Arrays.asList(minute, "$delayInMinute")));
-        list.add( dbObjectAnd );
-        dbObject.put("$and", list );
-        return dbObject;
-    }
-
+    
     @Override
     public int setScheduleFor(ObjectId objectId, boolean scheduled) {
 

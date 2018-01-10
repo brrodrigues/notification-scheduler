@@ -4,6 +4,7 @@ import br.com.lasa.notificacao.domain.Notificacao;
 import br.com.lasa.notificacao.domain.lais.Recipient;
 import br.com.lasa.notificacao.repository.UsuarioNotificacaoRepository;
 import br.com.lasa.notificacao.rest.request.EnvioNotificacaoRequest;
+import br.com.lasa.notificacao.service.ConsultaUltimaVendaService;
 import br.com.lasa.notificacao.util.AppConstants;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +18,9 @@ import org.springframework.web.client.RestTemplate;
 
 import java.net.URI;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/do-notify")
@@ -37,6 +40,9 @@ public class EnvioDeNoticacaoController {
     private String applicationEndpointAuthorizationPassword;
 
     @Autowired
+    private ConsultaUltimaVendaService ultimaVendaService;
+
+    @Autowired
     @Qualifier(value = AppConstants.APP_URL)
     private String appUrl;
 
@@ -45,6 +51,15 @@ public class EnvioDeNoticacaoController {
         String channelId = notificacao.getChannelId();
 
         String[] storeIds = notificacao.getStoreIds().toArray(new String[notificacao.getStoreIds().size()]);
+
+        Map<String,Object> map = new HashMap();
+
+        for (String storeId: storeIds) {
+
+
+
+        }
+
 
         usuarioNotificacaoRepository.findAllByStoreIdIn(storeIds).forEach(usuarioNotificacao -> {
             List<Recipient> recipients = Arrays.asList(usuarioNotificacao.getProfile());

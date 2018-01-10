@@ -20,7 +20,7 @@ public class EnvioNotificacaoTask extends ThreadPoolTaskScheduler {
     @Autowired
     private NotificacaoService notificacaoService;
 
-    private void agendar(Notificacao notificacao) {
+    private void enviar(Notificacao notificacao) {
         log.info("Scheduling cron...");
 
         notificacaoService.enviarNotificacao(notificacao);
@@ -32,15 +32,13 @@ public class EnvioNotificacaoTask extends ThreadPoolTaskScheduler {
     @Scheduled( cron = "0/60 * * * * *" )
     public void bloquearIntervalo() {
         log.info("*********Finding notification schedule pending at the moment*********");
-
         int minute = LocalTime.now().getMinute();
-
-        CompletableFuture.runAsync(() -> notificacaoService.buscarNotificacaoNaoProgramada(minute).stream().forEach(EnvioNotificacaoTask.this::agendar)).exceptionally(this::showException);
+        CompletableFuture.runAsync(() -> notificacaoService.buscarNotificacaoNaoProgramada(minute).stream().forEach(EnvioNotificacaoTask.this::enviar)).exceptionally(this::showException);
         log.info("**************Finish scheduling timer******************");
     }
 
     private Void showException(Throwable e){
-        log.error("Erro ao efetuar a buscar por notificacao nao programada", e);
+        log.error("Error finding schedule pending", e);
         return null;
     }
 }
