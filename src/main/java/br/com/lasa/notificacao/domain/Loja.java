@@ -18,6 +18,7 @@ public class Loja {
 
     @Id
     private String id;
+    private String nomeLoja;
     private String responsavelGeral;
     private String horaAbertura;
     @Version
