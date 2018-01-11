@@ -16,8 +16,11 @@ import org.apache.http.conn.ssl.NoopHostnameVerifier;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
+import org.springframework.boot.actuate.trace.Trace;
+import org.springframework.boot.actuate.trace.TraceRepository;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.annotation.Order;
@@ -26,10 +29,12 @@ import org.springframework.data.mongodb.config.EnableMongoAuditing;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.web.client.RestTemplate;
 
+import javax.sql.DataSource;
 import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -39,6 +44,7 @@ import java.security.NoSuchAlgorithmException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
@@ -188,5 +194,33 @@ public class SistemaDeNotificaoPushApplication {
 		return new AppAuditor();
 
 	}
+
+	/**
+	@Bean(name = AppConstants.FLASH_DATASOURCE_PROPERTIES)
+	@ConfigurationProperties("spring.datasource")
+	public DataSourceProperties flashDBDataSourceProperties() {
+		DataSourceProperties dataSource = new DataSourceProperties();
+		return dataSource;
+	}
+
+	@Bean(name = AppConstants.FLASH_DS)
+	@ConfigurationProperties
+	DataSource flashDBDataSource(@Qualifier(AppConstants.FLASH_DATASOURCE_PROPERTIES) @Autowired DataSourceProperties properties) {
+		DataSource dataSource = properties.initializeDataSourceBuilder().build();
+		log.info("Starting datasource {} with parameters {} {} ", AppConstants.FLASH_DS, properties.getUrl(), properties.getUsername());
+
+		if (dataSource != null) {
+			log.info("Initialized datasource {}", AppConstants.FLASH_DS );
+		}
+
+		return dataSource;
+	}
+	**/
+
+	@Bean(name = AppConstants.FLASH_JDBC_TEMPLATE)
+	JdbcTemplate jdbcTemplateFlash(@Qualifier("dataSource") @Autowired DataSource dataSource ){
+		return new JdbcTemplate(dataSource);
+	}
+
 
 }

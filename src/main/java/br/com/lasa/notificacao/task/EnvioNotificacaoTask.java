@@ -22,10 +22,7 @@ public class EnvioNotificacaoTask extends ThreadPoolTaskScheduler {
 
     private void enviar(Notificacao notificacao) {
         log.info("Scheduling cron...");
-
         notificacaoService.enviarNotificacao(notificacao);
-
-        notificacaoService.setScheduleFor(notificacao.getId(), true);
         log.info("scheduled cron!!!");
     }
 

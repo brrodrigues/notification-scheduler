@@ -56,4 +56,8 @@ public class NotificacaoService {
         notificacaoRepository.setScheduleFor(id, schedule);
     }
 
+    public void setScheduleFor(String id, boolean schedule) {
+        notificacaoRepository.setScheduleFor(new ObjectId(id), schedule);
+    }
+
 }

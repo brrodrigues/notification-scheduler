@@ -1,10 +1,13 @@
 package br.com.lasa.notificacao.rest;
 
 import br.com.lasa.notificacao.domain.Notificacao;
+import br.com.lasa.notificacao.domain.UltimaVendaLoja;
 import br.com.lasa.notificacao.domain.lais.Recipient;
 import br.com.lasa.notificacao.repository.UsuarioNotificacaoRepository;
+import br.com.lasa.notificacao.repository.exception.MysqlNoDataFoundException;
+import br.com.lasa.notificacao.repository.external.InfoPDVRepository;
 import br.com.lasa.notificacao.rest.request.EnvioNotificacaoRequest;
-import br.com.lasa.notificacao.service.ConsultaUltimaVendaService;
+import br.com.lasa.notificacao.service.NotificacaoService;
 import br.com.lasa.notificacao.util.AppConstants;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +20,7 @@ import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
 
 import java.net.URI;
+import java.time.LocalTime;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -28,7 +32,13 @@ import java.util.Map;
 public class EnvioDeNoticacaoController {
 
     @Autowired
+    private NotificacaoService notificacaoService;
+
+    @Autowired
     private UsuarioNotificacaoRepository usuarioNotificacaoRepository;
+
+    @Autowired
+    private InfoPDVRepository infoPDVRepository;
 
     @Autowired
     RestTemplate restTemplate;
@@ -38,9 +48,6 @@ public class EnvioDeNoticacaoController {
 
     @Value("${application.endpoint-lais.authorization-password}")
     private String applicationEndpointAuthorizationPassword;
-
-    @Autowired
-    private ConsultaUltimaVendaService ultimaVendaService;
 
     @Autowired
     @Qualifier(value = AppConstants.APP_URL)
@@ -54,28 +61,51 @@ public class EnvioDeNoticacaoController {
 
         Map<String,Object> map = new HashMap();
 
-        for (String storeId: storeIds) {
+        try {
+            usuarioNotificacaoRepository.findAllByStoreIdIn(storeIds).forEach(usuarioNotificacao -> {
 
+                UltimaVendaLoja ultimaVendaLoja = null;
 
+                String storeId = usuarioNotificacao.getStoreId();
+                try {
+                    ultimaVendaLoja = infoPDVRepository.buscarUltimaVenda(storeId);
+                } catch (MysqlNoDataFoundException e) {
+                    log.info("Nao foi encontrado venda {}", storeId);
+                }
 
+                if (ultimaVendaLoja != null){
+
+                    log.info("****{}", ultimaVendaLoja.getDataConsulta());
+                    log.info("****{}", ultimaVendaLoja.getDataUltimaConsulta());
+
+                    LocalTime dataConsulta = ultimaVendaLoja.getDataConsulta().toLocalTime();
+                    LocalTime dataUltimaConsulta = ultimaVendaLoja.getDataUltimaConsulta().toLocalTime();
+
+                    LocalTime dataUltimVendaMaisTempoDeIntervalo = dataUltimaConsulta.plusMinutes(notificacao.getDelayInMinute());
+
+                    if (!dataUltimVendaMaisTempoDeIntervalo.isAfter(dataUltimaConsulta)) {
+                        List<Recipient> recipients = Arrays.asList(usuarioNotificacao.getProfile());
+                        EnvioNotificacaoRequest envioNotificacaoRequest = EnvioNotificacaoRequest.builder().
+                                messageType(notificacao.getEventName()).
+                                recipients(recipients).
+                                build();
+                        log.info("Sending to '{}' to event '{}'", usuarioNotificacao.getProfile().getUser().getName(), notificacao.getEventName());
+                        ResponseEntity<String> responseEntity = restTemplate.exchange(URI.create(applicationEndpointLaisUrl), HttpMethod.POST, createRequest(envioNotificacaoRequest), String.class);
+
+                        if (responseEntity.getStatusCode() == HttpStatus.OK) {
+                            log.info("Alert to  '{}' on channel {} successfully sent.", usuarioNotificacao.getProfile().getUser().getName(), channelId);
+                        } else {
+                            log.warn("Occur problem to send alert to {} on channel {}.", usuarioNotificacao.getProfile().getUser().getName(), channelId);
+                        }
+                    }
+                }
+            });
+        } catch(Exception e){
+            log.error("Occur exception ", e);
+            //Liberando a notificacao para a proxima execucao
+        }finally {
+            notificacaoService.setScheduleFor(notificacao.getId(), false);
         }
-
-
-        usuarioNotificacaoRepository.findAllByStoreIdIn(storeIds).forEach(usuarioNotificacao -> {
-            List<Recipient> recipients = Arrays.asList(usuarioNotificacao.getProfile());
-            EnvioNotificacaoRequest envioNotificacaoRequest = EnvioNotificacaoRequest.builder().
-                    messageType(notificacao.getEventName()).
-                    recipients(recipients).
-                    build();
-            log.info("Sending to '{}' to event '{}'", usuarioNotificacao.getProfile().getUser().getName(), notificacao.getEventName());
-            ResponseEntity<String> responseEntity = restTemplate.exchange(URI.create(applicationEndpointLaisUrl), HttpMethod.POST, createRequest(envioNotificacaoRequest), String.class);
-
-            if (responseEntity.getStatusCode() == HttpStatus.OK) {
-                log.info("Alert to  '{}' on channel {} successfully sent.", usuarioNotificacao.getProfile().getUser().getName(), channelId);
-            } else {
-                log.warn("Occur problem to send alert to {} on channel {}.", usuarioNotificacao.getProfile().getUser().getName(), channelId);
-            }
-        });
     }
 
     private HttpEntity<EnvioNotificacaoRequest> createRequest(EnvioNotificacaoRequest requestObject){
