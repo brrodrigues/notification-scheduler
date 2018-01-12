@@ -2,18 +2,23 @@ package br.com.lasa.notificacao.repository;
 
 import br.com.lasa.notificacao.domain.Behavior;
 import br.com.lasa.notificacao.domain.Notificacao;
+import com.mongodb.BasicDBObject;
 import com.mongodb.WriteResult;
 import lombok.extern.slf4j.Slf4j;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.aggregation.Aggregation;
+import org.springframework.data.mongodb.core.aggregation.AggregationResults;
+import org.springframework.data.mongodb.core.aggregation.MatchOperation;
+import org.springframework.data.mongodb.core.aggregation.ProjectionOperation;
 import org.springframework.data.mongodb.core.query.BasicQuery;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 
 import java.time.LocalTime;
+import java.util.Arrays;
 import java.util.Optional;
 
 
@@ -24,34 +29,44 @@ public class NotificacaoRepositoryImpl implements NotificacaoRepositoryCustom {
     MongoTemplate mongoTemplate;
 
     @Override
-    public int setScheduleAndUuiAndHostnameForSpecificScheduleTime(LocalTime minute, Behavior behavior, boolean scheduled, String uuid, String hostname, int limit){
+    public int setScheduleAndUuiAndHostnameForSpecificScheduleTimeAfter(LocalTime minute, boolean scheduled, String uuid, String hostname, int limit){
 
-        /*Aggregation addFieldsAggregation = Aggregation.newAggregation(Aggregation.project("horarioReferencia").and(aggregationOperationContext -> {
+        ProjectionOperation.ProjectionOperationBuilder projectAggregation = Aggregation.project("horarioReferencia").and(aggregationOperationContext -> {
             BasicDBObject multiplyDBObject = new BasicDBObject();
             multiplyDBObject.put("$multiply", new BasicDBObject("$intervalTime", Arrays.asList(1000, 60))); // Transforma o minuto para milisegundo
-            DBObject subtractDBObject = new BasicDBObject();
+            BasicDBObject subtractDBObject = new BasicDBObject();
 
-            if (behavior.equals(Behavior.SPECIFIC_TIME_BEFORE)) {
-                subtractDBObject.put("$subtract", Arrays.asList("$createDate", multiplyDBObject )); //Adiciona dentro de funcao $
-            } else if (behavior.equals(Behavior.SPECIFIC_TIME_AFTER)) {
-                subtractDBObject.put("$add", Arrays.asList("$createDate", multiplyDBObject )); //Adiciona dentro de funcao $
-            }
+            subtractDBObject.put("$subtract", Arrays.asList("$createDate", multiplyDBObject)); //Adiciona dentro de funcao $
 
-            DBObject dateToStringValue = new BasicDBObject();
+            BasicDBObject dateToStringValue = new BasicDBObject();
             dateToStringValue.put("format", "%H:%M");
             dateToStringValue.put("date", subtractDBObject);
 
-            DBObject dateToStringObject = new BasicDBObject();
+            BasicDBObject dateToStringObject = new BasicDBObject();
             dateToStringObject.put("$dateToString", dateToStringValue);
             return new BasicDBObject("$addFields", dateToStringObject);
-        }));
-        */
+        });
 
-        Aggregation matchAggregation = Aggregation.newAggregation(Aggregation.match(Criteria.where("horarioReferencia").is(minute.toString())));
+        MatchOperation matchAggregation = Aggregation.match(Criteria.where("horarioReferencia").is(minute.toString()));
+
+        Aggregation aggregation = Aggregation.newAggregation(projectAggregation, matchAggregation);
+
+        AggregationResults<Notificacao> notificacao = mongoTemplate.aggregate(aggregation, "notificacao", Notificacao.class);
+
+        Query query = new BasicQuery(notificacao.getRawResults());
+        Update update = new Update().set("uuid", uuid).set("scheduled", scheduled).set("hostname", hostname);
+
+        WriteResult writeResult = mongoTemplate.updateMulti(query, update, Notificacao.class);
+
+        if (!Optional.ofNullable(writeResult).isPresent()) {
+            return 0;
+        }
+
+        int updated = writeResult.getN();
+
+        log.info("Update {} documents ", updated);
 
 
-        int updated = 0;
-        //mongoTemplate.aggregate(new TypedAggregation<Object>()
 
         /*
         if (!Optional.ofNullable(writeResult).isPresent()) {

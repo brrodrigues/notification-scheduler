@@ -45,7 +45,7 @@ public class NotificacaoServiceImpl implements NotificacaoService {
             e.printStackTrace();
         }
 
-        //notificacaoRepository.setScheduleAndUuiAndHostnameForSpecificScheduleTime(scheduleTime,true, uuid , hostAddress, 2);
+        notificacaoRepository.setScheduleAndUuiAndHostnameForSpecificScheduleTimeAfter(scheduleTime,true, uuid , hostAddress, 2);
         return notificacaoRepository.findAllByUuid(uuid);
     }
 
