@@ -21,6 +21,7 @@ public class Loja {
     private String nomeLoja;
     private String responsavelGeral;
     private String horaAbertura;
+    private String horaFechamento;
     @Version
     private Long versao;
     @CreatedDate

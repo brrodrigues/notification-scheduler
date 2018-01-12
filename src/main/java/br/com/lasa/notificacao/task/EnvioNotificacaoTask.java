@@ -29,9 +29,11 @@ public class EnvioNotificacaoTask extends ThreadPoolTaskScheduler {
     @Scheduled( cron = "0/60 * * * * *" )
     public void bloquearIntervalo() {
         log.info("*********Finding notification schedule pending at the moment*********");
-        int minute = LocalTime.now().getMinute();
+        LocalTime horario = LocalTime.now();
+        int minute = horario.getMinute();
         CompletableFuture.runAsync(() -> notificacaoService.buscarNotificacaoNaoProgramada(minute).stream().forEach(EnvioNotificacaoTask.this::enviar)).exceptionally(this::showException);
-        log.info("**************Finish scheduling timer******************");
+        CompletableFuture.runAsync(() -> notificacaoService.buscarNotificacaoNaoProgramada(horario).stream().forEach(EnvioNotificacaoTask.this::enviar)).exceptionally(this::showException);
+        log.info("**********************Finish scheduling timer************************");
     }
 
     private Void showException(Throwable e){

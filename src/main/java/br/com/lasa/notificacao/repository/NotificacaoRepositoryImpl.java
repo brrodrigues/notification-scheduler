@@ -1,16 +1,19 @@
 package br.com.lasa.notificacao.repository;
 
+import br.com.lasa.notificacao.domain.Behavior;
 import br.com.lasa.notificacao.domain.Notificacao;
 import com.mongodb.WriteResult;
 import lombok.extern.slf4j.Slf4j;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.aggregation.Aggregation;
 import org.springframework.data.mongodb.core.query.BasicQuery;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 
+import java.time.LocalTime;
 import java.util.Optional;
 
 
@@ -21,9 +24,55 @@ public class NotificacaoRepositoryImpl implements NotificacaoRepositoryCustom {
     MongoTemplate mongoTemplate;
 
     @Override
-    public int setScheduleAndUuiAndHostnameFor(int minute, boolean scheduled, String uuid, String hostname, int limit) {
+    public int setScheduleAndUuiAndHostnameForSpecificScheduleTime(LocalTime minute, Behavior behavior, boolean scheduled, String uuid, String hostname, int limit){
 
-        StringBuilder builder = new StringBuilder("{ $where : '((").append(minute).append(" % this.delayInMinute == 0 && this.delayInMinute != 1) || this.delayInMinute == 1) && this.scheduled == ").append(false).append("' }");
+        /*Aggregation addFieldsAggregation = Aggregation.newAggregation(Aggregation.project("horarioReferencia").and(aggregationOperationContext -> {
+            BasicDBObject multiplyDBObject = new BasicDBObject();
+            multiplyDBObject.put("$multiply", new BasicDBObject("$intervalTime", Arrays.asList(1000, 60))); // Transforma o minuto para milisegundo
+            DBObject subtractDBObject = new BasicDBObject();
+
+            if (behavior.equals(Behavior.SPECIFIC_TIME_BEFORE)) {
+                subtractDBObject.put("$subtract", Arrays.asList("$createDate", multiplyDBObject )); //Adiciona dentro de funcao $
+            } else if (behavior.equals(Behavior.SPECIFIC_TIME_AFTER)) {
+                subtractDBObject.put("$add", Arrays.asList("$createDate", multiplyDBObject )); //Adiciona dentro de funcao $
+            }
+
+            DBObject dateToStringValue = new BasicDBObject();
+            dateToStringValue.put("format", "%H:%M");
+            dateToStringValue.put("date", subtractDBObject);
+
+            DBObject dateToStringObject = new BasicDBObject();
+            dateToStringObject.put("$dateToString", dateToStringValue);
+            return new BasicDBObject("$addFields", dateToStringObject);
+        }));
+        */
+
+        Aggregation addFieldsAggregation
+
+
+        Aggregation matchAggregation = Aggregation.newAggregation(Aggregation.match(Criteria.where("horarioReferencia").is(minute.toString())));
+
+
+        int updated = 0;
+        //mongoTemplate.aggregate(new TypedAggregation<Object>()
+
+        /*
+        if (!Optional.ofNullable(writeResult).isPresent()) {
+            return 0;
+        }
+
+        int updated = writeResult.getN();
+
+        log.info("Update {} documents ", updated);
+*/
+        return updated;
+
+    }
+
+    @Override
+    public int setScheduleAndUuiAndHostnameForMinute(int minute, boolean scheduled, String uuid, String hostname, int limit) {
+
+        StringBuilder builder = new StringBuilder("{ $where : '((").append(minute).append(" % this.intervalTime == 0 && this.intervalTime != 1) || this.intervalTime == 1) && this.scheduled == ").append(false).append(" && type == \"INTERVAL_TIME\"' }");
 
         Query query = new BasicQuery(builder.toString());
         Update update = new Update().set("uuid", uuid).set("scheduled", scheduled).set("hostname", hostname);
@@ -43,7 +92,7 @@ public class NotificacaoRepositoryImpl implements NotificacaoRepositoryCustom {
     }
     
     @Override
-    public int setScheduleFor(ObjectId objectId, boolean scheduled) {
+    public int setNotificacaoFor(ObjectId objectId, boolean scheduled) {
 
         Query query = new Query(Criteria.where("id").is(objectId));
         log.info("Query {}", query.getQueryObject().toString());
@@ -56,12 +105,12 @@ public class NotificacaoRepositoryImpl implements NotificacaoRepositoryCustom {
     }
 
     @Override
-    public void releaseSchedulebyHostname(String hostname) {
+    public void releaseNotificacaoByHostname(String hostname) {
         Query query = new Query(Criteria.where("hostname").is(hostname)).limit(2);
         Update update = new Update().set("uuid", "").set("scheduled", false).set("hostname", "");
         WriteResult writeResult = mongoTemplate.updateMulti(query, update, Notificacao.class);
 
-        log.info("Liberando {} scheduled by hostname {}", Optional.of(writeResult).get().getN(), hostname);
+        log.info("Released {} scheduled by hostname {}", Optional.of(writeResult).get().getN(), hostname);
     }
 
     @Override
@@ -70,8 +119,9 @@ public class NotificacaoRepositoryImpl implements NotificacaoRepositoryCustom {
         Notificacao notificacao = mongoTemplate.findById(new ObjectId(objectId), Notificacao.class);
 
         notificacao.addStore(numeroLoja);
-
         mongoTemplate.save(notificacao);
+
+        log.info("Adding store {} into Notificacao identified by {}", numeroLoja, objectId);
 
     }
 

@@ -1,10 +1,14 @@
 package br.com.lasa.notificacao;
 
 import br.com.lasa.notificacao.audit.AppAuditor;
+import br.com.lasa.notificacao.domain.Notificacao;
 import br.com.lasa.notificacao.domain.UsuarioNotificacao;
 import br.com.lasa.notificacao.domain.lais.BotUser;
 import br.com.lasa.notificacao.domain.lais.Conversation;
 import br.com.lasa.notificacao.domain.lais.Recipient;
+import br.com.lasa.notificacao.repository.EventRepository;
+import br.com.lasa.notificacao.repository.NotificacaoRepository;
+import br.com.lasa.notificacao.repository.UsuarioNotificacaoRepository;
 import br.com.lasa.notificacao.service.NotificacaoService;
 import br.com.lasa.notificacao.util.AppConstants;
 import com.fasterxml.jackson.core.JsonParser;
@@ -19,8 +23,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
-import org.springframework.boot.actuate.trace.Trace;
-import org.springframework.boot.actuate.trace.TraceRepository;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.annotation.Order;
@@ -42,9 +44,11 @@ import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.text.MessageFormat;
+import java.time.LocalTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
@@ -66,14 +70,23 @@ public class SistemaDeNotificaoPushApplication {
 	CommandLineRunner initializeDatabase(final UsuarioNotificacaoRepository usuarioNotificacaoRepository, final NotificacaoRepository notificacaoRepository, final EventRepository eventRepository){
 		return (strings -> {
 			log.info("Criando evento para teste");
+			usuarioNotificacaoRepository.deleteAll();
 			usuarioNotificacaoRepository.save(usuarioGustavoLais());
 			notificacaoRepository.deleteAll();
-			notificacaoRepository.save(new Notificacao("without.sale.1min", new Date(), "Evento de 1 min", 1, false, Collections.singleton("L001")));
+
+			//Execucao em horario especifico
+			notificacaoRepository.save(new Notificacao( "Evento de 10 min", 10, Collections.singleton("1")));
+			//Execucao em periodo de intervalo
+
+			LocalTime localTime = LocalTime.now().plusMinutes(3);
+
+			notificacaoRepository.save(new Notificacao(String.format("Evento de %s min", localTime), localTime, Collections.singleton("1")));
 
 			log.info("Notificacao criado !!!!");
 		});
 	}
 	*/
+
 
 	@Bean(destroyMethod="shutdown")
 	@Order(1)
@@ -218,7 +231,7 @@ public class SistemaDeNotificaoPushApplication {
 	**/
 
 	@Bean(name = AppConstants.FLASH_JDBC_TEMPLATE)
-	JdbcTemplate jdbcTemplateFlash(@Qualifier("dataSource") @Autowired DataSource dataSource ){
+	JdbcTemplate jdbcTemplateFlash(@Autowired DataSource dataSource ){
 		return new JdbcTemplate(dataSource);
 	}
 

@@ -1,14 +1,19 @@
 package br.com.lasa.notificacao.repository;
 
+import br.com.lasa.notificacao.domain.Behavior;
 import org.bson.types.ObjectId;
+
+import java.time.LocalTime;
 
 public interface NotificacaoRepositoryCustom {
 
-    int setScheduleAndUuiAndHostnameFor(int minute, boolean schedule, String uuid, String hostname, int limit);
+    int setScheduleAndUuiAndHostnameForSpecificScheduleTime(LocalTime minute, Behavior behavior, boolean scheduled, String uuid, String hostname, int limit);
 
-    int setScheduleFor(ObjectId objectId, boolean schedule);
+    int setScheduleAndUuiAndHostnameForMinute(int minute, boolean schedule, String uuid, String hostname, int limit);
 
-    void releaseSchedulebyHostname(String hostname);
+    int setNotificacaoFor(ObjectId objectId, boolean schedule);
+
+    void releaseNotificacaoByHostname(String hostname);
 
     void addUser(String objectId, String numeroLoja);
 

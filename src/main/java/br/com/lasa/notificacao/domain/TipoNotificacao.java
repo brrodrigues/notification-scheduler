@@ -19,7 +19,8 @@ public class TipoNotificacao implements Serializable {
 
     @Id
     private ObjectId id;
-    private String nome;
-    private String descricao;
+    private String name;
+    private String description;
+    private Behavior behavior;
 
 }

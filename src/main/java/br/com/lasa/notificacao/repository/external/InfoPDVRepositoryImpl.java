@@ -1,7 +1,7 @@
 package br.com.lasa.notificacao.repository.external;
 
 import br.com.lasa.notificacao.domain.UltimaVendaLoja;
-import br.com.lasa.notificacao.repository.exception.MysqlNoDataFoundException;
+import br.com.lasa.notificacao.repository.exception.NoDataFoundException;
 import br.com.lasa.notificacao.util.AppConstants;
 import br.com.lasa.notificacao.util.DaoUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,7 +22,7 @@ public class InfoPDVRepositoryImpl implements InfoPDVRepository {
     private JdbcTemplate template;
 
     @Override
-    public UltimaVendaLoja buscarUltimaVenda(String store) throws MysqlNoDataFoundException {
+    public UltimaVendaLoja buscarUltimaVenda(String store) throws NoDataFoundException {
         List<UltimaVendaLoja> query = template.query(SQL, Collections.singletonList(store).toArray(), (rs, indexColumn) -> {
             UltimaVendaLoja ultimaVendaLoja = new UltimaVendaLoja(DaoUtil.getLocalDateTime(rs, 1), DaoUtil.getLocalDateTime(rs,2));
             return ultimaVendaLoja;
@@ -33,6 +33,6 @@ public class InfoPDVRepositoryImpl implements InfoPDVRepository {
             return ultimaVendaLoja;
         }
 
-        throw new MysqlNoDataFoundException("Nao foi encontrado venda");
+        throw new NoDataFoundException("Sale not found for store " + store);
     }
 }
