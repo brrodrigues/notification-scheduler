@@ -47,9 +47,6 @@ public class NotificacaoRepositoryImpl implements NotificacaoRepositoryCustom {
         }));
         */
 
-        Aggregation addFieldsAggregation
-
-
         Aggregation matchAggregation = Aggregation.newAggregation(Aggregation.match(Criteria.where("horarioReferencia").is(minute.toString())));
 
 
