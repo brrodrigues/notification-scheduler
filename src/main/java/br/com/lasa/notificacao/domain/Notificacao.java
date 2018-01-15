@@ -27,7 +27,7 @@ public class Notificacao {
     @Id
     private ObjectId id;
     private String eventName;
-    private TipoNotificacao type;
+    private Behavior type;
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private String interval;
     @JsonFormat(pattern = "dd/MM/yyyy HH:mm:ssZ", shape = JsonFormat.Shape.STRING, timezone = "America/Sao_Paulo")
