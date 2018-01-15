@@ -10,7 +10,7 @@ import org.springframework.data.mongodb.core.query.Query;
 import java.util.Date;
 import java.util.List;
 
-public class AuditEventImplRepository implements AuditEventRepository{
+public class AuditEventImplRepository implements AuditEventRepository {
 
     @Autowired
     private MongoTemplate mongoTemplate;

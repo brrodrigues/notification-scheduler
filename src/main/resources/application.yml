@@ -31,13 +31,6 @@ logging:
       com:
         lasa: DEBUG
 
-  data:
-    rest:
-      base-path: /api
-    mongodb:
-      repositories:
-        enabled: true
-
 debug: true
 security:
   basic:
@@ -51,3 +44,9 @@ spring:
     url: jdbc:mysql://52.31.153.157:3306/pdv?useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=America/Sao_Paulo&useSSL=false&autoReconnect=true
     username: consulta_iot
     password: jesem2f_Ju-E
+  data:
+    rest:
+      base-path: /api
+    mongodb:
+      repositories:
+        enabled: true

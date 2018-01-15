@@ -1,17 +1,14 @@
 package br.com.lasa.notificacao.repository;
 
-import br.com.lasa.notificacao.domain.Behavior;
 import br.com.lasa.notificacao.domain.Notificacao;
 import com.mongodb.BasicDBObject;
+import com.mongodb.DBObject;
 import com.mongodb.WriteResult;
 import lombok.extern.slf4j.Slf4j;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
-import org.springframework.data.mongodb.core.aggregation.Aggregation;
-import org.springframework.data.mongodb.core.aggregation.AggregationResults;
-import org.springframework.data.mongodb.core.aggregation.MatchOperation;
-import org.springframework.data.mongodb.core.aggregation.ProjectionOperation;
+import org.springframework.data.mongodb.core.aggregation.*;
 import org.springframework.data.mongodb.core.query.BasicQuery;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
@@ -31,26 +28,11 @@ public class NotificacaoRepositoryImpl implements NotificacaoRepositoryCustom {
     @Override
     public int setScheduleAndUuiAndHostnameForSpecificScheduleTimeAfter(LocalTime minute, boolean scheduled, String uuid, String hostname, int limit){
 
-        ProjectionOperation.ProjectionOperationBuilder projectAggregation = Aggregation.project("horarioReferencia").and(aggregationOperationContext -> {
-            BasicDBObject multiplyDBObject = new BasicDBObject();
-            multiplyDBObject.put("$multiply", new BasicDBObject("$intervalTime", Arrays.asList(1000, 60))); // Transforma o minuto para milisegundo
-            BasicDBObject subtractDBObject = new BasicDBObject();
-
-            subtractDBObject.put("$subtract", Arrays.asList("$createDate", multiplyDBObject)); //Adiciona dentro de funcao $
-
-            BasicDBObject dateToStringValue = new BasicDBObject();
-            dateToStringValue.put("format", "%H:%M");
-            dateToStringValue.put("date", subtractDBObject);
-
-            BasicDBObject dateToStringObject = new BasicDBObject();
-            dateToStringObject.put("$dateToString", dateToStringValue);
-            return new BasicDBObject("$addFields", dateToStringObject);
-        });
-
+        int updated = 0;
+        /*
+        ProjectionOperation.ProjectionOperationBuilder projectAggregation = Aggregation.project("horarioReferencia").and(mountAggregationExpression());
         MatchOperation matchAggregation = Aggregation.match(Criteria.where("horarioReferencia").is(minute.toString()));
-
         Aggregation aggregation = Aggregation.newAggregation(projectAggregation, matchAggregation);
-
         AggregationResults<Notificacao> notificacao = mongoTemplate.aggregate(aggregation, "notificacao", Notificacao.class);
 
         Query query = new BasicQuery(notificacao.getRawResults());
@@ -146,4 +128,22 @@ public class NotificacaoRepositoryImpl implements NotificacaoRepositoryCustom {
         mongoTemplate.save(notificacao);
     }
 
+    private AggregationExpression mountAggregationExpression() {
+        return new AggregationExpression() {
+            @Override
+            public DBObject toDbObject(AggregationOperationContext aggregationOperationContext) {
+            BasicDBObject multiplyDBObject = new BasicDBObject();
+            multiplyDBObject.put("$multiply", new BasicDBObject("$intervalTime", Arrays.asList(1000, 60))); // Transforma o minuto para milisegundo
+            BasicDBObject subtractDBObject = new BasicDBObject();
+            subtractDBObject.put("$subtract", Arrays.asList("$createDate", multiplyDBObject)); //Adiciona dentro de funcao $subtract
+            BasicDBObject dateToStringValue = new BasicDBObject();
+            dateToStringValue.put("format", "%H:%M");
+            dateToStringValue.put("date", subtractDBObject);
+
+            BasicDBObject dateToStringObject = new BasicDBObject();
+            dateToStringObject.put("$dateToString", dateToStringValue);
+            return new BasicDBObject("$addFields", dateToStringObject);
+        }
+    };
+    }
 }

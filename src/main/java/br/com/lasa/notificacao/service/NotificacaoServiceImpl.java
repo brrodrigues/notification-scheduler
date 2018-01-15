@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.time.LocalTime;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.UUID;
 
@@ -39,6 +40,8 @@ public class NotificacaoServiceImpl implements NotificacaoService {
         log.info("Finding events no scheduling");
         String uuid = UUID.randomUUID().toString();
         String hostAddress = null;
+
+        scheduleTime = scheduleTime.truncatedTo(ChronoUnit.MINUTES);
         try {
             hostAddress = InetAddress.getLocalHost().getHostAddress();
         } catch (UnknownHostException e) {
