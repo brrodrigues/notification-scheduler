@@ -11,8 +11,6 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import java.time.LocalTime;
-import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -22,19 +20,19 @@ import java.util.Set;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class Notificacao {
+public class Notification {
 
     @Id
     private ObjectId id;
     private String eventName;
     private Behavior type;
-    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
-    private String interval;
-    @JsonFormat(pattern = "dd/MM/yyyy HH:mm:ssZ", shape = JsonFormat.Shape.STRING, timezone = "America/Sao_Paulo")
+    @JsonFormat(pattern = "dd/MM/yyyy HH:mm:ss", shape = JsonFormat.Shape.STRING, timezone = "America/Sao_Paulo")
+    private Date scheduleTime;
+    @JsonFormat(pattern = "dd/MM/yyyy HH:mm:ss", shape = JsonFormat.Shape.STRING, timezone = "America/Sao_Paulo")
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private Date createDate;
     @Indexed
-    private Integer intervalTime;
+    private Integer intervalTime = 0;
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private boolean scheduled;
     private String hostname;
@@ -42,18 +40,20 @@ public class Notificacao {
     private String uuid;
     private Set<String> storeIds = new LinkedHashSet<>();
 
-    public Notificacao(String eventName, LocalTime specificTime, Set<String> storeIds) {
+    public Notification(String eventName, Date specificTime, Set<String> storeIds, Behavior behavior) {
         this.createDate = new Date();
-        this.interval = specificTime.truncatedTo(ChronoUnit.MINUTES).toString();
+        this.scheduleTime = specificTime;
         this.eventName = eventName;
         this.storeIds = storeIds;
+        this.type = behavior;
     }
 
-    public Notificacao(String eventName, Integer intervalTime, Set<String> storeIds) {
+    public Notification(String eventName, Integer intervalTime, Set<String> storeIds, Behavior behavior) {
         this.createDate = new Date();
         this.eventName = eventName;
         this.storeIds = storeIds;
         this.intervalTime = intervalTime;
+        this.type = behavior;
     }
 
     public void addStore(String store) {

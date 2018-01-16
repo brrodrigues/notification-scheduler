@@ -11,7 +11,7 @@ import java.io.Serializable;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class BotUser implements Serializable{
+public class BotUser implements Serializable {
 
     private String id;
     private String name;

@@ -14,7 +14,7 @@ public class AppAuditor implements AuditorAware<String>{
         Optional<Authentication> authentication = Optional.ofNullable(SecurityContextHolder.getContext().getAuthentication());
 
         if (!authentication.isPresent())
-            return "unknown";
+            return "unknown-user";
 
         return authentication.get().getName();
 

@@ -1,15 +1,19 @@
 package br.com.lasa.notificacao.repository.event.listener;
 
-import br.com.lasa.notificacao.domain.Notificacao;
-import org.springframework.data.rest.core.event.AbstractRepositoryEventListener;
+import br.com.lasa.notificacao.domain.Notification;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.rest.core.annotation.HandleBeforeSave;
+import org.springframework.data.rest.core.annotation.RepositoryEventHandler;
 
+@Slf4j
+@RepositoryEventHandler
 public class NotificaoBeforeSaveNotificacaoRepositoryListener
-        extends AbstractRepositoryEventListener<Notificacao>
 {
 
-    @Override
-    protected void onBeforeSave(Notificacao entity) {
-        super.onBeforeSave(entity);
+    @HandleBeforeSave
+    protected void onBeforeSave(Notification entity) {
+      log.info("Exeemplo de before {}", entity.toString());
+
     }
 
 }

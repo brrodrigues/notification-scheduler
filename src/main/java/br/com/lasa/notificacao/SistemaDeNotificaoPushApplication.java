@@ -1,7 +1,8 @@
 package br.com.lasa.notificacao;
 
 import br.com.lasa.notificacao.audit.AppAuditor;
-import br.com.lasa.notificacao.domain.Notificacao;
+import br.com.lasa.notificacao.domain.Behavior;
+import br.com.lasa.notificacao.domain.Notification;
 import br.com.lasa.notificacao.domain.UsuarioNotificacao;
 import br.com.lasa.notificacao.domain.lais.BotUser;
 import br.com.lasa.notificacao.domain.lais.Conversation;
@@ -20,7 +21,6 @@ import org.apache.http.conn.ssl.NoopHostnameVerifier;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -44,10 +44,10 @@ import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.text.MessageFormat;
-import java.time.LocalTime;
-import java.time.temporal.ChronoUnit;
+import java.time.*;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -73,19 +73,17 @@ public class SistemaDeNotificaoPushApplication {
 			usuarioNotificacaoRepository.deleteAll();
 			usuarioNotificacaoRepository.save(usuarioGustavoLais());
 			notificacaoRepository.deleteAll();
-
 			//Execucao em horario especifico
-			notificacaoRepository.save(new Notificacao( "Evento de 10 min", 10, Collections.singleton("1")));
+			notificacaoRepository.save(new Notification( "Evento de 10 min", 10, Collections.singleton("1"), Behavior.INTERVAL_TIME));
 			//Execucao em periodo de intervalo
-
-			LocalTime localTime = LocalTime.now().plusMinutes(3);
-
-			notificacaoRepository.save(new Notificacao(String.format("Evento de %s min", localTime), localTime, Collections.singleton("1")));
-
-			log.info("Notificacao criado !!!!");
+			Instant localDate = LocalDateTime.now().plusMinutes(2).toInstant(ZoneOffset.UTC);
+			Date date = Date.from(localDate);
+			notificacaoRepository.save(new Notification(String.format("Evento de %s min", date), date, Collections.singleton("1"), Behavior.SPECIFIC_TIME_AFTER) );
+			log.info("Notification criado !!!!");
 		});
 	}
 	*/
+
 
 
 	@Bean(destroyMethod="shutdown")
@@ -168,7 +166,7 @@ public class SistemaDeNotificaoPushApplication {
 	@Bean
     UsuarioNotificacao usuarioGustavoLais() {
 		//new Recipient("mid.$cAAA7UQtt0cFmq7rohFgenWfiZhZL", "facebook", BotUser.builder().id("1652887001413594").name("Gustavo Gomes").build(), BotUser.builder().id("107349120032554").name("LAIS-SAC-HML").build(), Conversation.builder().isGroup(false).id("1652887001413594-107349120032554").build(),"https://facebook.botframework.com/");
-		return UsuarioNotificacao.builder().status(true).storeId("L001").profile(new Recipient("mid.$cAAA7UQtt0cFmq7rohFgenWfiZhZL", "facebook", BotUser.builder().id("1652887001413594").name("Gustavo Gomes").build(), BotUser.builder().id("107349120032554").name("LAIS-SAC-HML").build(), Conversation.builder().isGroup(false).id("1652887001413594-107349120032554").build(),"https://facebook.botframework.com/")).build();
+		return UsuarioNotificacao.builder().status(true).storeId("1").profile(new Recipient("mid.$cAAA7UQtt0cFmq7rohFgenWfiZhZL", "facebook", BotUser.builder().id("1652887001413594").name("Gustavo Gomes").build(), BotUser.builder().id("107349120032554").name("LAIS-SAC-HML").build(), Conversation.builder().isGroup(false).id("1652887001413594-107349120032554").build(),"https://facebook.botframework.com/")).build();
 	}
 
 	@Bean

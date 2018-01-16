@@ -1,6 +1,6 @@
 package br.com.lasa.notificacao.service;
 
-import br.com.lasa.notificacao.domain.Notificacao;
+import br.com.lasa.notificacao.domain.Notification;
 import br.com.lasa.notificacao.domain.UltimaVendaLoja;
 import br.com.lasa.notificacao.domain.lais.Recipient;
 import br.com.lasa.notificacao.repository.exception.NoDataFoundException;
@@ -18,10 +18,7 @@ import org.springframework.web.client.RestTemplate;
 
 import java.net.URI;
 import java.time.LocalDateTime;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service
 @Slf4j
@@ -50,13 +47,13 @@ public class EnvioNoticacaoServiceImpl implements EnvioNoticacaoService {
     private String appUrl;
 
     @Override
-    public void notificar(Notificacao notificacao) throws HttpStatusCodeException {
+    public void notificar(Notification notification) throws HttpStatusCodeException {
 
-        String[] storeIds = notificacao.getStoreIds().toArray(new String[notificacao.getStoreIds().size()]);
+        String[] storeIds = notification.getStoreIds().toArray(new String[notification.getStoreIds().size()]);
 
         Map<String,UltimaVendaLoja> mapaDeLojaPorVenda = new HashMap();
 
-        //Doing query by store at once
+        //Doing query at once by store
         for (String storeId: storeIds){
             if (storeId == null || storeId.isEmpty()){
                 continue;
@@ -78,17 +75,15 @@ public class EnvioNoticacaoServiceImpl implements EnvioNoticacaoService {
                     LocalDateTime dataConsulta = ultimaVendaLoja.getDataConsulta();
                     LocalDateTime dataUltimaVenda = ultimaVendaLoja.getDataUltimaConsulta();
 
-                    LocalDateTime dataUltimVendaMaisTempoDeIntervalo = dataUltimaVenda.plusMinutes(notificacao.getIntervalTime());
-
+                    LocalDateTime dataUltimVendaMaisTempoDeIntervalo = dataUltimaVenda.plusMinutes(Long.valueOf(Optional.of(notification.getIntervalTime()).orElse(0)));
                     log.info("*Comparing data between {} (current date) and {} (last store sale)", ultimaVendaLoja.getDataConsulta(), ultimaVendaLoja.getDataUltimaConsulta());
-
                     if (dataUltimVendaMaisTempoDeIntervalo.isBefore(dataConsulta)) {
                         List<Recipient> recipients = Arrays.asList(usuarioNotificacao.getProfile());
                         EnvioNotificacaoRequest envioNotificacaoRequest = EnvioNotificacaoRequest.builder().
-                                                                            messageType(notificacao.getEventName()).
+                                                                            messageType(notification.getEventName()).
                                                                             recipients(recipients).
                                                                             build();
-                        log.info("Sending to '{}' to event '{}'", usuarioNotificacao.getProfile().getUser().getName(), notificacao.getEventName());
+                        log.info("Sending to '{}' to event '{}'", usuarioNotificacao.getProfile().getUser().getName(), notification.getEventName());
                         ResponseEntity<String> responseEntity = restTemplate.exchange(URI.create(applicationEndpointLaisUrl), HttpMethod.POST, createRequest(envioNotificacaoRequest), String.class);
 
                         if (responseEntity.getStatusCode() == HttpStatus.OK) {
@@ -101,9 +96,9 @@ public class EnvioNoticacaoServiceImpl implements EnvioNoticacaoService {
             });
         } catch(Exception e){
             log.error("Occur exception ", e);
-            //Liberando a notificacao para a proxima execucao
+            //Liberando a notification para a proxima execucao
         }finally {
-            notificacaoService.setScheduleFor(notificacao.getId(), false);
+            notificacaoService.setScheduleFor(notification.getId(), false);
         }
     }
 

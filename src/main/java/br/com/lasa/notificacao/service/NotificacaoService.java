@@ -1,6 +1,7 @@
 package br.com.lasa.notificacao.service;
 
-import br.com.lasa.notificacao.domain.Notificacao;
+
+import br.com.lasa.notificacao.domain.Notification;
 import org.bson.types.ObjectId;
 
 import java.time.LocalTime;
@@ -8,11 +9,11 @@ import java.util.List;
 
 public interface NotificacaoService {
 
-    boolean enviarNotificacao(Notificacao notificacao);
+    boolean enviarNotificacao(Notification notification);
 
-    List<Notificacao> buscarNotificacaoNaoProgramada(LocalTime scheduleTime);
+    List<Notification> buscarNotificacaoNaoProgramada(LocalTime scheduleTime);
 
-    List<Notificacao> buscarNotificacaoNaoProgramada(int minute);
+    List<Notification> buscarNotificacaoNaoProgramada(int minute);
 
     void releaseAllByHostname(String hostAddress);
 

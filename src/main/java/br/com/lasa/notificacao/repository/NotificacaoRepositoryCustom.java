@@ -6,9 +6,7 @@ import java.time.LocalTime;
 
 public interface NotificacaoRepositoryCustom {
 
-    public int setScheduleAndUuiAndHostnameForSpecificScheduleTimeAfter(LocalTime minute, boolean scheduled, String uuid, String hostname, int limit);
-
-    //int setScheduleAndUuiAndHostnameForSpecificScheduleTimebefore(LocalTime minute, boolean scheduled, String uuid, String hostname, int limit);
+    int setScheduleAndUuiAndHostnameForSpecificScheduleTime(LocalTime minute, boolean scheduled, String uuid, String hostname, int limit);
 
     int setScheduleAndUuiAndHostnameForMinute(int minute, boolean schedule, String uuid, String hostname, int limit);
 

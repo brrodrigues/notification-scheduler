@@ -1,6 +1,6 @@
 package br.com.lasa.notificacao.task;
 
-import br.com.lasa.notificacao.domain.Notificacao;
+import br.com.lasa.notificacao.domain.Notification;
 import br.com.lasa.notificacao.service.NotificacaoService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,9 +20,9 @@ public class EnvioNotificacaoTask extends ThreadPoolTaskScheduler {
     @Autowired
     private NotificacaoService notificacaoService;
 
-    private void enviar(Notificacao notificacao) {
+    private void enviar(Notification notification) {
         log.info("Scheduling cron...");
-        notificacaoService.enviarNotificacao(notificacao);
+        notificacaoService.enviarNotificacao(notification);
         log.info("scheduled cron!!!");
     }
 

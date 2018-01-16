@@ -1,6 +1,6 @@
 package br.com.lasa.notificacao.service;
 
-import br.com.lasa.notificacao.domain.Notificacao;
+import br.com.lasa.notificacao.domain.Notification;
 import br.com.lasa.notificacao.repository.NotificacaoRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.bson.types.ObjectId;
@@ -27,16 +27,16 @@ public class NotificacaoServiceImpl implements NotificacaoService {
     private EnvioNoticacaoService envioNoticacaoServiceImpl;
 
     @Override
-    public boolean enviarNotificacao(Notificacao notificacao) {
-        if (log.isDebugEnabled()) log.debug("Sending notification...");
-        envioNoticacaoServiceImpl.notificar(notificacao);
-        if (log.isDebugEnabled()) log.debug("Notification done.");
+    public boolean enviarNotificacao(Notification notification) {
+        log.debug("Sending notification...");
+        envioNoticacaoServiceImpl.notificar(notification);
+        log.debug("Notification done.");
         return true;
     }
 
     @Override
     @Transactional
-    public List<Notificacao> buscarNotificacaoNaoProgramada(LocalTime scheduleTime) {
+    public List<Notification> buscarNotificacaoNaoProgramada(LocalTime scheduleTime) {
         log.info("Finding events no scheduling");
         String uuid = UUID.randomUUID().toString();
         String hostAddress = null;
@@ -48,13 +48,13 @@ public class NotificacaoServiceImpl implements NotificacaoService {
             e.printStackTrace();
         }
 
-        notificacaoRepository.setScheduleAndUuiAndHostnameForSpecificScheduleTimeAfter(scheduleTime,true, uuid , hostAddress, 2);
+        notificacaoRepository.setScheduleAndUuiAndHostnameForSpecificScheduleTime(scheduleTime,true, uuid , hostAddress, 2);
         return notificacaoRepository.findAllByUuid(uuid);
     }
 
     @Override
     @Transactional
-    public List<Notificacao> buscarNotificacaoNaoProgramada(int minute) {
+    public List<Notification> buscarNotificacaoNaoProgramada(int minute) {
         log.info("Finding events no scheduling by specifiedScheduleTime");
         String uuid = UUID.randomUUID().toString();
         String hostAddress = null;

@@ -18,15 +18,15 @@ info:
 
 logging:
   level:
+    com:
+      mongodb: DEBUG
     org:
       springframework:
         boot:
           autoconfigure:
             security: INFO
         data:
-          mongodb:
-            core:
-              MongoTemplate: DEBUG
+          mongodb: DEBUG
     br:
       com:
         lasa: DEBUG
