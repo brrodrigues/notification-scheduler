@@ -21,6 +21,7 @@ public class UsuarioNotificacao implements Serializable {
     private String id;
     private String nome;
     private String storeId;
+    private String loginRede;
     private Recipient profile;
     private Boolean status;
 

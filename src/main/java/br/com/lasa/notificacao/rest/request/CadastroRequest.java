@@ -18,5 +18,7 @@ public class CadastroRequest implements Serializable {
     private String lojaGGL;
     @JsonProperty(value = "nome_ggl" )
     private String nomeGGL;
+    @JsonProperty(value = "login_rede" )
+    private String loginRede;
 
 }
