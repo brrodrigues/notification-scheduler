@@ -66,7 +66,7 @@ public class EnvioNoticacaoServiceImpl implements EnvioNoticacaoService {
         }*/
 
         try {
-            usuarioNotificacaoService.buscarUsuariosPorStatusAndLojas(true, storeIds ).forEach(usuarioNotificacao -> {
+            usuarioNotificacaoService.buscarUsuariosPorStatusAndLojas(true, storeIds ).stream().forEach(usuarioNotificacao -> {
                 /*UltimaVendaLoja ultimaVendaLoja = mapaDeLojaPorVenda.get(usuarioNotificacao.getStoreId());
                 if (ultimaVendaLoja != null){
 
