@@ -1,15 +1,10 @@
 package br.com.lasa.notificacao;
 
 import br.com.lasa.notificacao.audit.AppAuditor;
-import br.com.lasa.notificacao.domain.Behavior;
-import br.com.lasa.notificacao.domain.Notification;
 import br.com.lasa.notificacao.domain.UsuarioNotificacao;
 import br.com.lasa.notificacao.domain.lais.BotUser;
 import br.com.lasa.notificacao.domain.lais.Conversation;
 import br.com.lasa.notificacao.domain.lais.Recipient;
-import br.com.lasa.notificacao.repository.EventRepository;
-import br.com.lasa.notificacao.repository.NotificacaoRepository;
-import br.com.lasa.notificacao.repository.UsuarioNotificacaoRepository;
 import br.com.lasa.notificacao.service.NotificacaoService;
 import br.com.lasa.notificacao.util.AppConstants;
 import com.fasterxml.jackson.core.JsonParser;
@@ -44,10 +39,7 @@ import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.text.MessageFormat;
-import java.time.*;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;

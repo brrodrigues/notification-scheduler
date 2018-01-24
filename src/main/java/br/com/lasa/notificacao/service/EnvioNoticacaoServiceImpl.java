@@ -1,9 +1,7 @@
 package br.com.lasa.notificacao.service;
 
 import br.com.lasa.notificacao.domain.Notification;
-import br.com.lasa.notificacao.domain.UltimaVendaLoja;
 import br.com.lasa.notificacao.domain.lais.Recipient;
-import br.com.lasa.notificacao.repository.exception.NoDataFoundException;
 import br.com.lasa.notificacao.rest.request.EnvioNotificacaoRequest;
 import br.com.lasa.notificacao.service.external.ConsultaUltimaVendaService;
 import br.com.lasa.notificacao.util.AppConstants;
@@ -17,8 +15,9 @@ import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
 
 import java.net.URI;
-import java.time.LocalDateTime;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
 
 @Service
 @Slf4j
@@ -51,7 +50,7 @@ public class EnvioNoticacaoServiceImpl implements EnvioNoticacaoService {
 
         String[] storeIds = notification.getStoreIds().toArray(new String[notification.getStoreIds().size()]);
 
-        Map<String,UltimaVendaLoja> mapaDeLojaPorVenda = new HashMap();
+        /*Map<String,UltimaVendaLoja> mapaDeLojaPorVenda = new HashMap();
 
         //Doing query at once by store
         for (String storeId: storeIds){
@@ -64,12 +63,11 @@ public class EnvioNoticacaoServiceImpl implements EnvioNoticacaoService {
             } catch (NoDataFoundException e) {
                 log.info("Sale not found on store {}", storeId);
             }
-
-        }
+        }*/
 
         try {
-            usuarioNotificacaoService.buscarUsuariosPorLojas(storeIds).forEach(usuarioNotificacao -> {
-                UltimaVendaLoja ultimaVendaLoja = mapaDeLojaPorVenda.get(usuarioNotificacao.getStoreId());
+            usuarioNotificacaoService.buscarUsuariosPorStatusAndLojas(true, storeIds ).forEach(usuarioNotificacao -> {
+                /*UltimaVendaLoja ultimaVendaLoja = mapaDeLojaPorVenda.get(usuarioNotificacao.getStoreId());
                 if (ultimaVendaLoja != null){
 
                     LocalDateTime dataConsulta = ultimaVendaLoja.getDataConsulta();
@@ -77,22 +75,24 @@ public class EnvioNoticacaoServiceImpl implements EnvioNoticacaoService {
 
                     LocalDateTime dataUltimVendaMaisTempoDeIntervalo = dataUltimaVenda.plusMinutes(Long.valueOf(Optional.of(notification.getIntervalTime()).orElse(0)));
                     log.info("*Comparing data between {} (current date) and {} (last store sale)", ultimaVendaLoja.getDataConsulta(), ultimaVendaLoja.getDataUltimaConsulta());
-                    if (dataUltimVendaMaisTempoDeIntervalo.isBefore(dataConsulta)) {
+                    if (dataUltimVendaMaisTempoDeIntervalo.isBefore(dataConsulta)) {*/
                         List<Recipient> recipients = Arrays.asList(usuarioNotificacao.getProfile());
                         EnvioNotificacaoRequest envioNotificacaoRequest = EnvioNotificacaoRequest.builder().
-                                                                            messageType(notification.getEventName()).
+                                                                            messageType(notification.getType().name()).
                                                                             recipients(recipients).
                                                                             build();
                         log.info("Sending to '{}' to event '{}'", usuarioNotificacao.getProfile().getUser().getName(), notification.getEventName());
+                        long startSend = new Date().getTime();
                         ResponseEntity<String> responseEntity = restTemplate.exchange(URI.create(applicationEndpointLaisUrl), HttpMethod.POST, createRequest(envioNotificacaoRequest), String.class);
+                        long endSend = new Date().getTime();
 
                         if (responseEntity.getStatusCode() == HttpStatus.OK) {
-                            log.info("Alert to  '{}' successfully sent.", usuarioNotificacao.getProfile().getUser().getName());
+                            log.info("Alert to  '{}' successfully sent in  {} ms.", usuarioNotificacao.getProfile().getUser().getName(), endSend - startSend);
                         } else {
-                            log.warn("Occur problem to send alert to {}.", usuarioNotificacao.getProfile().getUser().getName());
+                            log.warn("Occur problem to send alert to {} in {} ms.", usuarioNotificacao.getProfile().getUser().getName(), endSend - startSend);
                         }
-                    }
-                }
+//                    }
+//                }
             });
         } catch(Exception e){
             log.error("Occur exception ", e);

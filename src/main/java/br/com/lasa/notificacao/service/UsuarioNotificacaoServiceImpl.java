@@ -14,8 +14,8 @@ public class UsuarioNotificacaoServiceImpl implements UsuarioNotificacaoService 
     private UsuarioNotificacaoRepository usuarioNotificacaoRepository;
 
     @Override
-    public List<UsuarioNotificacao> buscarUsuariosPorLojas(String... storeIds) {
-        return usuarioNotificacaoRepository.findAllByStoreIdIn(storeIds);
+    public List<UsuarioNotificacao> buscarUsuariosPorStatusAndLojas(boolean status, String... storeIds) {
+        return usuarioNotificacaoRepository.findAllByStatusAndStoreIdIn(status, storeIds);
     }
 
     @Override

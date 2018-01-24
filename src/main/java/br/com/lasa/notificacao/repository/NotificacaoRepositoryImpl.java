@@ -92,7 +92,7 @@ public class NotificacaoRepositoryImpl implements NotificacaoRepositoryCustom {
     @Override
     public int setScheduleAndUuiAndHostnameForMinute(int minute, boolean scheduled, String uuid, String hostname, int limit) {
 
-        StringBuilder builder = new StringBuilder("{ $where : '((").append(minute).append(" % this.intervalTime == 0 && this.intervalTime != 1) || this.intervalTime == 1) && this.scheduled == ").append(false).append(" && type == \"INTERVAL_TIME\"' }");
+        StringBuilder builder = new StringBuilder("{ $where : '((").append(minute).append(" % this.intervalTime == 0 && this.intervalTime != 1) || this.intervalTime == 1) && this.scheduled == ").append(false).append(" && this.type == \"INTERVAL_TIME\"' }");
 
         Query query = new BasicQuery(builder.toString());
         Update update = new Update().set("uuid", uuid).set("scheduled", scheduled).set("hostname", hostname);

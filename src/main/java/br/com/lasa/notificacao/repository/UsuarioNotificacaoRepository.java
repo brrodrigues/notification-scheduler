@@ -18,4 +18,8 @@ public interface UsuarioNotificacaoRepository extends MongoRepository<UsuarioNot
     @Query(value = "{storeId : { $in : ?0 }}")
     List<UsuarioNotificacao> findAllByStoreIdIn(@Param("storeIds") String... storeIds);
 
+    @RestResource(path = "/findAllByStore", exported = false)
+    @Query(value = "{status : ?0, storeId : { $in : ?1 }}")
+    List<UsuarioNotificacao> findAllByStatusAndStoreIdIn(boolean status, String... storeIds);
+
 }
