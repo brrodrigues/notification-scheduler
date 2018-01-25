@@ -14,8 +14,8 @@ import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 
 import java.time.LocalTime;
-import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 
 
@@ -29,10 +29,27 @@ public class NotificacaoRepositoryImpl implements NotificacaoRepositoryCustom {
     public int setScheduleAndUuiAndHostnameForSpecificScheduleTime(LocalTime minute, boolean scheduled, String uuid, String hostname, int limit){
 
         String collectionName = mongoTemplate.getCollectionName(Notification.class);
+        String lojaCollectionName = mongoTemplate.getCollectionName(Loja.class);
 
         String fieldName = "horarioExecucao";
 
-        Cursor aggregate = mongoTemplate.getCollection(collectionName).aggregate(Arrays.asList($matchType(), $addFieldsForAggregate(fieldName), $matchHorario(fieldName, minute.truncatedTo(ChronoUnit.MINUTES).toString())), AggregationOptions.builder().outputMode(AggregationOptions.OutputMode.CURSOR).allowDiskUse(true).build());
+        BasicDBObject projectFields = new BasicDBObject();
+        projectFields.put("_id",0);
+        projectFields.put("horaAbertura",0);
+        projectFields.put("horaFechamento",0);
+
+        BasicDBObject $match = $toDBObject("{ $match:   { $expr: { $eq: [ \"$$storeId\", \"$_id\" ] } } }");
+        BasicDBObject $project = $toDBObject("{ $project: { _id: 0, horaAbertura: 1, horaFechamento: 1 } }");
+
+        Cursor aggregate = mongoTemplate.getCollection(collectionName).aggregate(
+                Arrays.asList(
+                        $unwind(),
+                        $lookup( lojaCollectionName, new BasicDBObject("storeId", "$storeIds" ), Arrays.asList($match, $project), "storeInfo" ),
+                        $toDBObject("{ $project : { \"eventName\" : 1, \"type\" : 1, \"intervalTime\" : 1, \"storeId\" : 1,  \"loja\" : { $arrayElemAt: [ \"$storeInfo\", 0 ] } } }"),
+                        $toDBObject(",{ $addFields : { abertura : { $dateToString : { format : \"%H:%M\" , date : { $add : [ \"$loja.horaAbertura\" , { $multiply : [ \"$intervalTime\" , 1000 , 60]}]}}}}}"),
+                        $toDBObject(",{ $addFields : { fechamento : { $dateToString : { format : \"%H:%M\" , date : { $add : [ \"$loja.horaAbertura\" , { $multiply : [ \"$intervalTime\" , 1000 , 60]}]}}}}}"),
+                        $toDBObject(String.format(",{ $match : { $or : [ {$and : [ {\"abertura\" : { $eq : \"%s\" } } , { type: {$eq : \"SPECIFIC_TIME_BEFORE\" }}  ] }, {$and : [ {\"fechamento\" : { $eq : \"%s\" } } , { type: {$eq : \"SPECIFIC_TIME_AFTER\" }}  ] }]}}", minute.toString(),minute.toString()))),
+                AggregationOptions.builder().outputMode(AggregationOptions.OutputMode.CURSOR).allowDiskUse(true).build());
 
         int updated = 0;
 
@@ -53,6 +70,11 @@ public class NotificacaoRepositoryImpl implements NotificacaoRepositoryCustom {
 
     }
 
+    private BasicDBObject $toDBObject(String json) {
+        BasicDBObject $project = new BasicDBObject(BasicDBObject.parse(json));
+        return $project;
+    }
+
     private BasicDBObject $unwind() {
         BasicDBObject unwind = new BasicDBObject("$unwind", "$storeIds");
 
@@ -60,22 +82,38 @@ public class NotificacaoRepositoryImpl implements NotificacaoRepositoryCustom {
         return unwind;
     }
 
-    private BasicDBObject $lookup() {
+    private BasicDBObject $lookup(String from, BasicDBObject let, List<BasicDBObject> pipeline, String as) {
 
         String lojaCollectionName = mongoTemplate.getCollectionName(Loja.class);
 
         BasicDBObject lookupDBasicDBObject = new BasicDBObject();
 
         lookupDBasicDBObject.put("from", lojaCollectionName);
-        lookupDBasicDBObject.put("localField", "storeIds");
-        lookupDBasicDBObject.put("foreignField", "_id");
-        lookupDBasicDBObject.put("as", "loja");
+        lookupDBasicDBObject.put("let", let);
+        lookupDBasicDBObject.put("pipeline", pipeline);
+        lookupDBasicDBObject.put("as", as);
 
         BasicDBObject basicDBObject = new BasicDBObject("$lookup", lookupDBasicDBObject);
 
         log.info("{}",  lookupDBasicDBObject);
 
         return basicDBObject;
+    }
+
+
+    private BasicDBObject $match(BasicDBObject basicDBObject) {
+        BasicDBObject $expr = new BasicDBObject("$match", basicDBObject);
+        return $expr;
+    }
+
+    private BasicDBObject $expr(BasicDBObject basicDBObject) {
+        BasicDBObject $expr = new BasicDBObject("$expr", basicDBObject);
+        return $expr;
+    }
+
+    private BasicDBObject $eq(List<String> strings) {
+        BasicDBObject $eq = new BasicDBObject("$eq", strings);
+        return $eq;
     }
 
     private BasicDBObject $matchHorario(String referenceField, String horarioEspecifico) {
@@ -149,7 +187,7 @@ public class NotificacaoRepositoryImpl implements NotificacaoRepositoryCustom {
         mongoTemplate.save(notification);
     }
 
-    private BasicDBObject $matchType() {
+    private BasicDBObject $match() {
         BasicDBObject $orMatchAfter = new BasicDBObject("type", Behavior.SPECIFIC_TIME_AFTER.name());
         BasicDBObject $orMatchBefore = new BasicDBObject("type", Behavior.SPECIFIC_TIME_BEFORE.name());
         BasicDBObject $orMatch = new BasicDBObject("$or", Arrays.asList($orMatchBefore, $orMatchAfter) );

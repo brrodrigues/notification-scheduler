@@ -20,8 +20,8 @@ public class Loja {
     private String id;
     private String nomeLoja;
     private String responsavelGeral;
-    private String horaAbertura;
-    private String horaFechamento;
+    private Date horaAbertura;
+    private Date horaFechamento;
     @Version
     private Long versao;
     @CreatedDate
