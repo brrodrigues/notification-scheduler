@@ -12,7 +12,7 @@ public class NotificaoBeforeSaveNotificacaoRepositoryListener
 
     @HandleBeforeSave
     protected void onBeforeSave(Notification entity) {
-      log.info("Exeemplo de before {}", entity.toString());
+      log.info("Exemplo de before {}", entity.toString());
 
     }
 

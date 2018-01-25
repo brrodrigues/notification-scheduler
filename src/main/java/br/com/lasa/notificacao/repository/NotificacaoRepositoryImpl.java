@@ -25,8 +25,6 @@ public class NotificacaoRepositoryImpl implements NotificacaoRepositoryCustom {
     @Autowired
     MongoTemplate mongoTemplate;
 
-    MongoClient mongoClient;
-
     @Override
     public int setScheduleAndUuiAndHostnameForSpecificScheduleTime(LocalTime minute, boolean scheduled, String uuid, String hostname, int limit){
 
@@ -34,13 +32,10 @@ public class NotificacaoRepositoryImpl implements NotificacaoRepositoryCustom {
 
         String fieldName = "horarioExecucao";
 
-        //AggregationOptions projectAggregation = Aggregation.newAggregationOptions().cursor($addFieldsForAggregate()).explain(true).build();
-
-        //Aggregation.match(Criteria.where("type").is(Behavior.SPECIFIC_TIME_BEFORE).orOperator(Criteria.where("type").is(Behavior.SPECIFIC_TIME_AFTER))).toDBObject(mongoTemplate.);
-
         Cursor aggregate = mongoTemplate.getCollection(collectionName).aggregate(Arrays.asList($matchType(), $addFieldsForAggregate(fieldName), $matchHorario(fieldName, minute.truncatedTo(ChronoUnit.MINUTES).toString())), AggregationOptions.builder().outputMode(AggregationOptions.OutputMode.CURSOR).allowDiskUse(true).build());
 
         int updated = 0;
+
         while (aggregate.hasNext()) {
             DBObject dbObject = aggregate.next();
             log.info(dbObject.toString());
