@@ -10,6 +10,7 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalTime;
+import java.time.ZoneId;
 import java.util.concurrent.CompletableFuture;
 
 @Component
@@ -29,8 +30,10 @@ public class EnvioNotificacaoTask extends ThreadPoolTaskScheduler {
     @Scheduled( cron = "0/60 * * * * *" )
     public void bloquearIntervalo() {
         log.info("*********Finding notification schedule pending at the moment*********");
-        LocalTime horario = LocalTime.now();
+        ZoneId zoneId = ZoneId.of("America/Sao_Paulo");
+        LocalTime horario = LocalTime.now(zoneId);
         int minute = horario.getMinute();
+        log.info(" Current time {} at zone {}", minute, zoneId.getId() );
         CompletableFuture.runAsync(() -> notificacaoService.buscarNotificacaoNaoProgramada(minute).stream().forEach(EnvioNotificacaoTask.this::enviar)).exceptionally(this::showException);
         log.info("**********************Finish scheduling timer************************");
     }
@@ -38,8 +41,12 @@ public class EnvioNotificacaoTask extends ThreadPoolTaskScheduler {
     @Scheduled( cron = "0/60 * * * * *" )
     public void bloquearIntervaloPontual() {
         log.info("*********Finding pontual notification schedule pending at the moment*********");
-        LocalTime horario = LocalTime.now();
+
+        ZoneId zoneId = ZoneId.of("America/Sao_Paulo");
+
+        LocalTime horario = LocalTime.now(zoneId);
         int minute = horario.getMinute();
+        log.info(" Current minute {} at zone {}", minute, zoneId.getId() );
         CompletableFuture.runAsync(() -> notificacaoService.buscarNotificacaoNaoProgramada(horario).stream().forEach(EnvioNotificacaoTask.this::enviar)).exceptionally(this::showException);
         log.info("**********************Finish scheduling timer************************");
     }
