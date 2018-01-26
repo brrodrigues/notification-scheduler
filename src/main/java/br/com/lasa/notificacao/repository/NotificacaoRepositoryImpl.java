@@ -45,7 +45,8 @@ public class NotificacaoRepositoryImpl implements NotificacaoRepositoryCustom {
                 Arrays.asList(
                         $toDBObject("{ $match : { $or : [ { type : { $eq : 'SPECIFIC_TIME_AFTER'}} , { type : { $eq : 'SPECIFIC_TIME_BEFORE'}}]}}"),
                         $toDBObject("{ $unwind: '$storeIds'}"),
-                        $lookup( lojaCollectionName, new BasicDBObject("storeId", "$storeIds" ), Arrays.asList($match, $project), "storeInfo" ),
+                        $toDBObject(String.format("{ $lookup : { from : '%s' , localField: 'storeIds', foreignField: '_id' , as : 'storeInfo'}}", lojaCollectionName)),
+                        //$lookup( lojaCollectionName, new BasicDBObject("storeId", "$storeIds" ), Arrays.asList($match, $project), "storeInfo" ),
                         $toDBObject("{ $project : { 'storeIds': 1, 'eventName' : 1, 'type' : 1, 'intervalTime' : 1, 'storeId' : 1,  'loja' : { $arrayElemAt: [ '$storeInfo', 0 ] } } }"),
                         $toDBObject("{ $addFields : { abertura : { $dateToString : { format : '%H:%M' , date : { $add : [ '$loja.horaAbertura' , { $multiply : [ '$intervalTime' , 1000 , 60]}]}}}}}"),
                         $toDBObject("{ $addFields : { fechamento : { $dateToString : { format : '%H:%M' , date : { $subtract : [ '$loja.horaFechamento' , { $multiply : [ '$intervalTime' , 1000 , 60]}]}}}}}"),
