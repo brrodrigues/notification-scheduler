@@ -13,4 +13,5 @@ artifacts:
  files:
    - "target/application.war"
    - "Procfile"
+   - ".ebextensions"
  discard-paths: yes
