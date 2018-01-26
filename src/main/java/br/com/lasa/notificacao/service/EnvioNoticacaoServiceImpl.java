@@ -2,6 +2,7 @@ package br.com.lasa.notificacao.service;
 
 import br.com.lasa.notificacao.domain.Notification;
 import br.com.lasa.notificacao.domain.UltimaVendaLoja;
+import br.com.lasa.notificacao.domain.UsuarioNotificacao;
 import br.com.lasa.notificacao.domain.lais.Recipient;
 import br.com.lasa.notificacao.repository.exception.NoDataFoundException;
 import br.com.lasa.notificacao.rest.request.EnvioNotificacaoRequest;
@@ -67,34 +68,41 @@ public class EnvioNoticacaoServiceImpl implements EnvioNoticacaoService {
         }
 
         try {
-            usuarioNotificacaoService.buscarUsuariosPorStatusAndLojas(true, storeIds ).forEach(usuarioNotificacao -> {
-                UltimaVendaLoja ultimaVendaLoja = mapaDeLojaPorVenda.get(usuarioNotificacao.getStoreId());
-                if (ultimaVendaLoja != null){
+            List<UsuarioNotificacao> usuarioNotificacaos = usuarioNotificacaoService.buscarUsuariosPorStatusAndLojas(true, storeIds);
 
-                    LocalDateTime dataConsulta = ultimaVendaLoja.getDataConsulta();
-                    LocalDateTime dataUltimaVenda = ultimaVendaLoja.getDataUltimaConsulta();
+            if ( usuarioNotificacaos.isEmpty())
+            {
+                log.warn("User to notificate not found on store {}", storeIds);
+            }else {
+                usuarioNotificacaos.forEach(usuarioNotificacao -> {
+                    UltimaVendaLoja ultimaVendaLoja = mapaDeLojaPorVenda.get(usuarioNotificacao.getStoreId());
+                    if (ultimaVendaLoja != null){
 
-                    LocalDateTime dataUltimVendaMaisTempoDeIntervalo = dataUltimaVenda.plusMinutes(Long.valueOf(Optional.of(notification.getIntervalTime()).orElse(0)));
-                    log.info("*Comparing data between {} (current date) and {} (last store sale)", ultimaVendaLoja.getDataConsulta(), ultimaVendaLoja.getDataUltimaConsulta());
-                    if (dataUltimVendaMaisTempoDeIntervalo.isBefore(dataConsulta)) {
-                        List<Recipient> recipients = Arrays.asList(usuarioNotificacao.getProfile());
-                        EnvioNotificacaoRequest envioNotificacaoRequest = EnvioNotificacaoRequest.builder().
-                                                                            messageType(notification.getType().name()).
-                                                                            recipients(recipients).
-                                                                            build();
-                        log.info("Sending to '{}' to event '{}'", usuarioNotificacao.getProfile().getUser().getName(), notification.getEventName());
-                        long startSend = new Date().getTime();
-                        ResponseEntity<String> responseEntity = restTemplate.exchange(URI.create(applicationEndpointLaisUrl), HttpMethod.POST, createRequest(envioNotificacaoRequest), String.class);
-                        long endSend = new Date().getTime();
+                        LocalDateTime dataConsulta = ultimaVendaLoja.getDataConsulta();
+                        LocalDateTime dataUltimaVenda = ultimaVendaLoja.getDataUltimaConsulta();
 
-                        if (responseEntity.getStatusCode() == HttpStatus.OK) {
-                            log.info("Alert to  '{}' successfully sent in  {} ms.", usuarioNotificacao.getProfile().getUser().getName(), endSend - startSend);
-                        } else {
-                            log.warn("Occur problem to send alert to {} in {} ms.", usuarioNotificacao.getProfile().getUser().getName(), endSend - startSend);
+                        LocalDateTime dataUltimVendaMaisTempoDeIntervalo = dataUltimaVenda.plusMinutes(Long.valueOf(Optional.of(notification.getIntervalTime()).orElse(0)));
+                        log.info("*Comparing data between {} (current date) and {} (last store sale)", ultimaVendaLoja.getDataConsulta(), ultimaVendaLoja.getDataUltimaConsulta());
+                        if (dataUltimVendaMaisTempoDeIntervalo.isBefore(dataConsulta)) {
+                            List<Recipient> recipients = Arrays.asList(usuarioNotificacao.getProfile());
+                            EnvioNotificacaoRequest envioNotificacaoRequest = EnvioNotificacaoRequest.builder().
+                                                                                messageType(notification.getType().name()).
+                                                                                recipients(recipients).
+                                                                                build();
+                            log.info("Sending to '{}' to event '{}'", usuarioNotificacao.getProfile().getUser().getName(), notification.getEventName());
+                            long startSend = new Date().getTime();
+                            ResponseEntity<String> responseEntity = restTemplate.exchange(URI.create(applicationEndpointLaisUrl), HttpMethod.POST, createRequest(envioNotificacaoRequest), String.class);
+                            long endSend = new Date().getTime();
+
+                            if (responseEntity.getStatusCode() == HttpStatus.OK) {
+                                log.info("Alert to  '{}' successfully sent in  {} ms.", usuarioNotificacao.getProfile().getUser().getName(), endSend - startSend);
+                            } else {
+                                log.warn("Occur problem to send alert to {} in {} ms.", usuarioNotificacao.getProfile().getUser().getName(), endSend - startSend);
+                            }
                         }
                     }
-                }
-            });
+                });
+            }
         } catch(Exception e){
             log.error("Occur exception ", e);
             //Liberando a notification para a proxima execucao
