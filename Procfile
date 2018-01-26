@@ -1,1 +1,1 @@
-web: java -jar application.war
+web: java -jar application.war -Duser.timezone=America/Sao_Paulo
