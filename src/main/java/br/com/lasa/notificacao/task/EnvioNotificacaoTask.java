@@ -45,8 +45,7 @@ public class EnvioNotificacaoTask extends ThreadPoolTaskScheduler {
         ZoneId zoneId = ZoneId.of("America/Sao_Paulo");
 
         LocalTime horario = LocalTime.now(zoneId);
-        int minute = horario.getMinute();
-        log.info(" Current minute {} at zone {}", minute, zoneId.getId() );
+        log.info(" Current minute {} at zone {}", horario, zoneId.getId() );
         CompletableFuture.runAsync(() -> notificacaoService.buscarNotificacaoNaoProgramada(horario).stream().forEach(EnvioNotificacaoTask.this::enviar)).exceptionally(this::showException);
         log.info("**********************Finish scheduling timer************************");
     }
