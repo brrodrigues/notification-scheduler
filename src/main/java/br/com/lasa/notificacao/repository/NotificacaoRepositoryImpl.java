@@ -46,9 +46,8 @@ public class NotificacaoRepositoryImpl implements NotificacaoRepositoryCustom {
                         $toDBObject("{ $match : { $or : [ { type : { $eq : 'SPECIFIC_TIME_AFTER'}} , { type : { $eq : 'SPECIFIC_TIME_BEFORE'}}]}}"),
                         $toDBObject("{ $unwind: '$storeIds'}"),
                         $toDBObject(String.format("{ $lookup : { from : '%s' , localField: 'storeIds', foreignField: '_id' , as : 'storeInfo'}}", lojaCollectionName)),
-                        $toDBObject("{ $project : { 'storeIds': 1, 'eventName': 1, 'type': 1, 'intervalTime': 1, 'storeId': 1, 'loja': 1, 'abertura': {'$dateToString' : { 'format' : '%H:%M' , 'date' : { '$add' : [ '$loja.horaAbertura' , { '$multiply' : [ '$intervalTime' , 1000 , 60]}]}}}, 'fechamento' : { '$dateToString' : { 'format' : '%H:%M' , 'date' : { '$subtract' : [ '$loja.horaFechamento' , { '$multiply' : [ '$intervalTime' , 1000 , 60]}]}}}}"),
-                        $toDBObject("{ $addFields : { abertura : { $dateToString : { format : '%H:%M' , date : { $add : [ '$loja.horaAbertura' , { $multiply : [ '$intervalTime' , 1000 , 60]}]}}}}}"),
-                        $toDBObject("{ $addFields : { fechamento : { $dateToString : { format : '%H:%M' , date : { $subtract : [ '$loja.horaFechamento' , { $multiply : [ '$intervalTime' , 1000 , 60]}]}}}}}"),
+                        $toDBObject("{ $project : { storeIds: 1, eventName : 1, type : 1, intervalTime : 1, storeId : 1,  loja : { $arrayElemAt: [ '$storeInfo', 0 ] } } }"),
+                        $toDBObject("{ $project : { storeIds: 1, eventName: 1, type: 1, intervalTime: 1, storeId: 1, loja: 1, abertura: { $dateToString : { format : '%H:%M' , date : { $add : [ '$loja.horaAbertura' , { $multiply : [ '$intervalTime' , 1000 , 60]}]}}}, fechamento : { $dateToString : { format : '%H:%M' , date : { $subtract : [ '$loja.horaFechamento' , { $multiply : [ '$intervalTime' , 1000 , 60]}]}}}}}"),
                         $toDBObject(String.format("{ $match : { $or : [ {$and : [ {'abertura' : { $eq : '%s' } } , { type: {$eq : 'SPECIFIC_TIME_BEFORE' }}  ] }, {$and : [ {'fechamento' : { $eq : '%s' } } , { type: {$eq : \"SPECIFIC_TIME_AFTER\" }}  ] }]}}", minute.toString(),minute.toString()))),
                 AggregationOptions.builder().outputMode(AggregationOptions.OutputMode.CURSOR).allowDiskUse(true).build());
 
