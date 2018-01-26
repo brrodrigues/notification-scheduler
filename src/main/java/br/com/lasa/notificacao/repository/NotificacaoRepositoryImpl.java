@@ -43,19 +43,21 @@ public class NotificacaoRepositoryImpl implements NotificacaoRepositoryCustom {
 
         Cursor aggregate = mongoTemplate.getCollection(collectionName).aggregate(
                 Arrays.asList(
+                        $toDBObject("{ $match : { $or : [ { type : { $eq : \"SPECIFIC_TIME_AFTER\"}} , { type : { $eq : \"SPECIFIC_TIME_BEFORE\"}}]}}"),
                         $unwind(),
                         $lookup( lojaCollectionName, new BasicDBObject("storeId", "$storeIds" ), Arrays.asList($match, $project), "storeInfo" ),
-                        $toDBObject("{ $project : { \"eventName\" : 1, \"type\" : 1, \"intervalTime\" : 1, \"storeId\" : 1,  \"loja\" : { $arrayElemAt: [ \"$storeInfo\", 0 ] } } }"),
-                        $toDBObject(",{ $addFields : { abertura : { $dateToString : { format : \"%H:%M\" , date : { $add : [ \"$loja.horaAbertura\" , { $multiply : [ \"$intervalTime\" , 1000 , 60]}]}}}}}"),
-                        $toDBObject(",{ $addFields : { fechamento : { $dateToString : { format : \"%H:%M\" , date : { $add : [ \"$loja.horaAbertura\" , { $multiply : [ \"$intervalTime\" , 1000 , 60]}]}}}}}"),
-                        $toDBObject(String.format(",{ $match : { $or : [ {$and : [ {\"abertura\" : { $eq : \"%s\" } } , { type: {$eq : \"SPECIFIC_TIME_BEFORE\" }}  ] }, {$and : [ {\"fechamento\" : { $eq : \"%s\" } } , { type: {$eq : \"SPECIFIC_TIME_AFTER\" }}  ] }]}}", minute.toString(),minute.toString()))),
+                        $toDBObject("{ $project : { \"storeIds\": 1, \"eventName\" : 1, \"type\" : 1, \"intervalTime\" : 1, \"storeId\" : 1,  \"loja\" : { $arrayElemAt: [ \"$storeInfo\", 0 ] } } }"),
+                        $toDBObject("{ $addFields : { abertura : { $dateToString : { format : \"%H:%M\" , date : { $add : [ \"$loja.horaAbertura\" , { $multiply : [ \"$intervalTime\" , 1000 , 60]}]}}}}}"),
+                        $toDBObject("{ $addFields : { fechamento : { $dateToString : { format : \"%H:%M\" , date : { $subtract : [ \"$loja.horaFechamento\" , { $multiply : [ \"$intervalTime\" , 1000 , 60]}]}}}}}"),
+                        $toDBObject(String.format("{ $match : { $or : [ {$and : [ {\"abertura\" : { $eq : \"%s\" } } , { type: {$eq : \"SPECIFIC_TIME_BEFORE\" }}  ] }, {$and : [ {\"fechamento\" : { $eq : \"%s\" } } , { type: {$eq : \"SPECIFIC_TIME_AFTER\" }}  ] }]}}", minute.toString(),minute.toString()))),
                 AggregationOptions.builder().outputMode(AggregationOptions.OutputMode.CURSOR).allowDiskUse(true).build());
 
         int updated = 0;
 
         while (aggregate.hasNext()) {
+
             DBObject dbObject = aggregate.next();
-            log.info(dbObject.toString());
+            log.info(" Result setScheduleAndUuiAndHostnameForSpecificScheduleTime : {} " ,dbObject.toString());
 
             Query query = new Query(Criteria.where("_id").is(dbObject.get("_id").toString()));
             Update update = new Update().set("uuid", uuid).set("scheduled", scheduled).set("hostname", hostname);
@@ -71,8 +73,9 @@ public class NotificacaoRepositoryImpl implements NotificacaoRepositoryCustom {
     }
 
     private BasicDBObject $toDBObject(String json) {
-        BasicDBObject $project = new BasicDBObject(BasicDBObject.parse(json));
-        return $project;
+        BasicDBObject $toObject = new BasicDBObject(BasicDBObject.parse(json));
+        log.info("{}", $toObject.toString());
+        return $toObject;
     }
 
     private BasicDBObject $unwind() {
@@ -95,7 +98,7 @@ public class NotificacaoRepositoryImpl implements NotificacaoRepositoryCustom {
 
         BasicDBObject basicDBObject = new BasicDBObject("$lookup", lookupDBasicDBObject);
 
-        log.info("{}",  lookupDBasicDBObject);
+        log.info("{}",  basicDBObject);
 
         return basicDBObject;
     }
