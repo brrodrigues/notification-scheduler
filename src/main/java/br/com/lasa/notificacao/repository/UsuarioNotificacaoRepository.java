@@ -22,4 +22,8 @@ public interface UsuarioNotificacaoRepository extends MongoRepository<UsuarioNot
     @Query(value = "{status : ?0, storeId : { $in : ?1 }}")
     List<UsuarioNotificacao> findAllByStatusAndStoreIdIn(boolean status, String... storeIds);
 
+    @RestResource(path = "/findByProfileBotId", exported = false)
+    @Query(value = "{ profile.user.id : ?0}")
+    UsuarioNotificacao findByProfileBotId(String botId);
+
 }
