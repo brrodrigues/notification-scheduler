@@ -37,7 +37,7 @@ public class CadastrarUsuarioController {
 
         cadastroUsuarioService.criarCadastro(request);
 
-        return ResponseEntity.ok("Seu cadastro de registrado com sucesso");
+        return ResponseEntity.ok("Seu cadastro foi registrado com sucesso.");
     }
 
 }
