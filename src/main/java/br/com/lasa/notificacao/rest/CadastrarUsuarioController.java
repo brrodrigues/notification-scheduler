@@ -22,12 +22,12 @@ public class CadastrarUsuarioController {
     private CadastroUsuarioService cadastroUsuarioService;
 
     @PostMapping
-    public ResponseEntity<String> send(@RequestBody CadastroRequest request){
-        log.info("RECEIVED :: {}", request);
+    public ResponseEntity<String> send(@RequestBody CadastroRequest request) {
+        log.info("received :: {}", request);
 
         if (Objects.isNull(request)) {
             log.error("O parametro do usuario nao foi localizado");
-            return ResponseEntity.badRequest().contentType(MediaType.APPLICATION_JSON).body("O parametro do usuario nao foi localizado");
+            return ResponseEntity.badRequest().contentType(MediaType.APPLICATION_JSON).body("O parametro do usuario nao foi localizado para prosseguir com o cadastro");
         }
 
         if (Objects.isNull(request.getAddress())) {
