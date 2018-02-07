@@ -19,7 +19,7 @@ public class LojaServiceImpl implements LojaService {
         return lojaRepository.findOne(codigoLoja);
     }
 
-    public Loja atualizar(String id, Loja loja){
+    public Loja atualizar(String id, Loja loja) {
         //Atribui o horario de abertura e fechamento para todos os dias ao atualizar
         Loja lojaId = lojaRepository.findOne(id);
 

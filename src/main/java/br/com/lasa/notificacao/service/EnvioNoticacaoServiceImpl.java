@@ -11,6 +11,8 @@ import br.com.lasa.notificacao.service.external.ConsultaUltimaVendaService;
 import br.com.lasa.notificacao.util.AppConstants;
 import br.com.lasa.notificacao.util.DateUtils;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
@@ -28,6 +30,8 @@ import java.util.*;
 @Service
 @Slf4j
 public class EnvioNoticacaoServiceImpl implements EnvioNoticacaoService {
+
+    private final static Logger LOGGER = LoggerFactory.getLogger(EnvioNoticacaoServiceImpl.class);
 
     @Autowired
     private NotificacaoService notificacaoService;
@@ -172,12 +176,13 @@ public class EnvioNoticacaoServiceImpl implements EnvioNoticacaoService {
             LocalTime horarioAbertura = DateUtils.toLocalTimeViaInstant(horaAbertura);
             LocalTime horarioFechamento = DateUtils.toLocalTimeViaInstant(horaFechamento);
 
+            LOGGER.info("Is {} between {} and {} ", horarioReferencia.toLocalTime(), horaAbertura.toInstant(), horaFechamento.toInstant());
 
             for (Horario horario : loja.getHorarios()) {
                 if (!Objects.isNull(horario.getDia()) &&
                         horario.getDia().equals(diaDaSemana) &&
                         horarioReferencia.toLocalTime().isAfter(horarioAbertura) && horarioReferencia.toLocalTime().isBefore(horarioFechamento)) {
-                    continue;
+                    return true;
                 }
             }
         }

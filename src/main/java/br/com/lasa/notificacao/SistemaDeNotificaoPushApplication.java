@@ -43,14 +43,13 @@ import java.net.UnknownHostException;
 import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
+import java.text.DateFormat;
 import java.text.MessageFormat;
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
-import java.util.Objects;
+import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
@@ -121,6 +120,9 @@ public class SistemaDeNotificaoPushApplication {
 		// habilitar loose/non-standard format
 		// to allow C/C++ style comments in JSON (non-standard, disabled by
 		// default)
+		DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
+		dateFormat.setTimeZone(TimeZone.getTimeZone("CET"));
+		mapper.setDateFormat(dateFormat);
 		mapper.configure(JsonParser.Feature.ALLOW_COMMENTS, true);
 		// to allow (non-standard) unquoted field names in JSON:
 		mapper.configure(JsonParser.Feature.ALLOW_UNQUOTED_FIELD_NAMES, true);

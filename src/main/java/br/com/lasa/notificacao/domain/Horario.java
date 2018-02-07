@@ -15,9 +15,9 @@ import java.util.Date;
 public class Horario {
 
     private String dia;
-    @JsonFormat(pattern = "yyyyMMdd'T'hh:mm:ss.SSS")
+    @JsonFormat(pattern = "yyyyMMdd'T'hh:mm:ss.SSSZ", timezone = "CET")
     private Date abertura;
-    @JsonFormat(pattern = "yyyyMMdd'T'hh:mm:ss.SSS")
+    @JsonFormat(pattern = "yyyyMMdd'T'hh:mm:ss.SSS", timezone = "CET")
     private Date fechamento;
 
 
