@@ -1,5 +1,6 @@
 package br.com.lasa.notificacao.domain;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.NoArgsConstructor;
@@ -11,11 +12,12 @@ import java.util.Date;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-
 public class Horario {
 
     private String dia;
+    @JsonFormat(pattern = "yyyyMMdd'T'hh:mm:ss.SSS")
     private Date abertura;
+    @JsonFormat(pattern = "yyyyMMdd'T'hh:mm:ss.SSS")
     private Date fechamento;
 
 

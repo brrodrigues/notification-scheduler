@@ -1,6 +1,5 @@
 package br.com.lasa.notificacao.domain;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -22,9 +21,7 @@ public class Loja {
     private String id;
     private String nomeLoja;
     private String responsavelGeral;
-    @JsonFormat(timezone = "America/Sao_Paulo")
     private Date horaAbertura;
-    @JsonFormat(timezone = "America/Sao_Paulo")
     private Date horaFechamento;
     private List<Horario> horarios;
     @Version

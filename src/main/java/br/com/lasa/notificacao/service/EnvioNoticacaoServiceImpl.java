@@ -153,8 +153,18 @@ public class EnvioNoticacaoServiceImpl implements EnvioNoticacaoService {
 
         if ( loja != null && loja.getHorarios() != null && !loja.getHorarios().isEmpty() ) {
 
-            Date horaAbertura = loja.getHoraAbertura();
-            Date horaFechamento = loja.getHoraFechamento();
+            String diaDaSemana = horarioReferencia.getDayOfWeek().getDisplayName(TextStyle.SHORT, brazilianLocale).toUpperCase();
+
+            Date horaAbertura = null;
+            Date horaFechamento = null;
+
+            for (Horario horario: loja.getHorarios()) {
+                if (diaDaSemana.equals(horario.getDia())){
+                    horaAbertura = horario.getAbertura();
+                    horaFechamento = horario.getFechamento();
+                    break;
+                }
+            }
 
             if (horaAbertura == null || horaFechamento == null)
                 return false;
@@ -162,7 +172,6 @@ public class EnvioNoticacaoServiceImpl implements EnvioNoticacaoService {
             LocalTime horarioAbertura = DateUtils.toLocalTimeViaInstant(horaAbertura);
             LocalTime horarioFechamento = DateUtils.toLocalTimeViaInstant(horaFechamento);
 
-            String diaDaSemana = horarioReferencia.getDayOfWeek().getDisplayName(TextStyle.SHORT, brazilianLocale).toUpperCase();
 
             for (Horario horario : loja.getHorarios()) {
                 if (!Objects.isNull(horario.getDia()) &&
