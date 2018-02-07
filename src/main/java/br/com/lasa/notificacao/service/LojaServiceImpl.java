@@ -36,6 +36,7 @@ public class LojaServiceImpl implements LojaService {
                 )
         );
 
+        lojaRepository.delete(loja.getId());
         Loja save = lojaRepository.save(loja);
         return save;
     }
