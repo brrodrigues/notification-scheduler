@@ -17,12 +17,12 @@ import org.apache.http.conn.ssl.NoopHostnameVerifier;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.context.annotation.Scope;
 import org.springframework.core.annotation.Order;
 import org.springframework.data.domain.AuditorAware;
@@ -58,6 +58,7 @@ import java.util.concurrent.ScheduledExecutorService;
 @EnableScheduling
 @EnableMongoAuditing
 @SpringBootApplication
+@EnableAspectJAutoProxy(proxyTargetClass=true)
 public class SistemaDeNotificaoPushApplication {
 
 	public static void main(String[] args) {
