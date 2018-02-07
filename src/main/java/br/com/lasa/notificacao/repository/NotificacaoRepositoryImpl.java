@@ -3,19 +3,24 @@ package br.com.lasa.notificacao.repository;
 import br.com.lasa.notificacao.domain.Behavior;
 import br.com.lasa.notificacao.domain.Loja;
 import br.com.lasa.notificacao.domain.Notification;
+import br.com.lasa.notificacao.util.AppConstants;
 import com.mongodb.*;
 import lombok.extern.slf4j.Slf4j;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.ApplicationContext;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.BasicQuery;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 
+import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.format.TextStyle;
 import java.util.Arrays;
-import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 
 
@@ -25,21 +30,29 @@ public class NotificacaoRepositoryImpl implements NotificacaoRepositoryCustom {
     @Autowired
     MongoTemplate mongoTemplate;
 
+    @Autowired
+    private ApplicationContext context;
+
+
+
+    @Autowired
+    @Qualifier(value = AppConstants.BRAZILIAN_LOCALE)
+    Locale brazilianLocale;
+
     @Override
     public int setScheduleAndUuiAndHostnameForSpecificScheduleTime(LocalTime minute, boolean scheduled, String uuid, String hostname, int limit){
 
         String collectionName = mongoTemplate.getCollectionName(Notification.class);
         String lojaCollectionName = mongoTemplate.getCollectionName(Loja.class);
 
-        String fieldName = "horarioExecucao";
+        LocalDate data = context.getBean(LocalDate.class);
+
+        String displayName = data.getDayOfWeek().getDisplayName(TextStyle.SHORT, brazilianLocale).toUpperCase();
 
         BasicDBObject projectFields = new BasicDBObject();
         projectFields.put("_id",0);
         projectFields.put("horaAbertura",0);
         projectFields.put("horaFechamento",0);
-
-        BasicDBObject $match = $toDBObject("{ $match:   { $expr: { $eq: [ '$$storeId', '$_id' ] } } }");
-        BasicDBObject $project = $toDBObject("{ $project: { _id: 0, horaAbertura: 1, horaFechamento: 1 } }");
 
         Cursor aggregate = mongoTemplate.getCollection(collectionName).aggregate(
                 Arrays.asList(
@@ -47,7 +60,9 @@ public class NotificacaoRepositoryImpl implements NotificacaoRepositoryCustom {
                         $toDBObject("{ $unwind: '$storeIds'}"),
                         $toDBObject(String.format("{ $lookup : { from : '%s' , localField: 'storeIds', foreignField: '_id' , as : 'storeInfo'}}", lojaCollectionName)),
                         $toDBObject("{ $project : { storeIds: 1, eventName : 1, type : 1, intervalTime : 1, storeId : 1,  loja : { $arrayElemAt: [ '$storeInfo', 0 ] } } }"),
-                        $toDBObject("{ $project : { storeIds: 1, eventName: 1, type: 1, intervalTime: 1, storeId: 1, loja: 1, abertura: { $dateToString : { format : '%H:%M' , date : { $add : [ '$loja.horaAbertura' , { $multiply : [ '$intervalTime' , 1000 , 60]}]}}}, fechamento : { $dateToString : { format : '%H:%M' , date : { $subtract : [ '$loja.horaFechamento' , { $multiply : [ '$intervalTime' , 1000 , 60]}]}}}}}"),
+                        $toDBObject("{ $unwind: '$loja.horarios'}"),
+                        $toDBObject(String.format("{ $match: { 'loja.horarios.dia' : '%s' }}", displayName )),
+                        $toDBObject("{ $project : { storeIds: 1, eventName: 1, type: 1, intervalTime: 1, storeId: 1, loja: 1, abertura: { $dateToString : { format : '%H:%M' , date : { $add : [ '$loja.horarios.abertura' , { $multiply : [ '$intervalTime' , 1000 , 60]}]}}}, fechamento : { $dateToString : { format : '%H:%M' , date : { $subtract : [ '$loja.horarios.fechamento' , { $multiply : [ '$intervalTime' , 1000 , 60]}]}}}}}"),
                         $toDBObject(String.format("{ $match : { $or : [ {$and : [ {'abertura' : { $eq : '%s' } } , { type: {$eq : 'SPECIFIC_TIME_BEFORE' }}  ] }, {$and : [ {'fechamento' : { $eq : '%s' } } , { type: {$eq : \"SPECIFIC_TIME_AFTER\" }}  ] }]}}", minute.toString(),minute.toString()))),
                 AggregationOptions.builder().outputMode(AggregationOptions.OutputMode.CURSOR).allowDiskUse(true).build());
 
@@ -77,52 +92,7 @@ public class NotificacaoRepositoryImpl implements NotificacaoRepositoryCustom {
         return $toObject;
     }
 
-    private BasicDBObject $unwind() {
-        BasicDBObject unwind = new BasicDBObject("$unwind", "$storeIds");
 
-        log.info("{} ", unwind.toString());
-        return unwind;
-    }
-
-    private BasicDBObject $lookup(String from, BasicDBObject let, List<BasicDBObject> pipeline, String as) {
-
-        String lojaCollectionName = mongoTemplate.getCollectionName(Loja.class);
-
-        BasicDBObject lookupDBasicDBObject = new BasicDBObject();
-
-        lookupDBasicDBObject.put("from", lojaCollectionName);
-        lookupDBasicDBObject.put("let", let);
-        lookupDBasicDBObject.put("pipeline", pipeline);
-        lookupDBasicDBObject.put("as", as);
-
-        BasicDBObject basicDBObject = new BasicDBObject("$lookup", lookupDBasicDBObject);
-
-        log.info("{}",  basicDBObject);
-
-        return basicDBObject;
-    }
-
-
-    private BasicDBObject $match(BasicDBObject basicDBObject) {
-        BasicDBObject $expr = new BasicDBObject("$match", basicDBObject);
-        return $expr;
-    }
-
-    private BasicDBObject $expr(BasicDBObject basicDBObject) {
-        BasicDBObject $expr = new BasicDBObject("$expr", basicDBObject);
-        return $expr;
-    }
-
-    private BasicDBObject $eq(List<String> strings) {
-        BasicDBObject $eq = new BasicDBObject("$eq", strings);
-        return $eq;
-    }
-
-    private BasicDBObject $matchHorario(String referenceField, String horarioEspecifico) {
-        BasicDBObject $matchHorario = new BasicDBObject("$match", new BasicDBObject(referenceField, horarioEspecifico));
-        log.info("{}", $matchHorario.toString());
-        return  $matchHorario;
-    }
 
     @Override
     public int setScheduleAndUuiAndHostnameForMinute(int minute, boolean scheduled, String uuid, String hostname, int limit) {

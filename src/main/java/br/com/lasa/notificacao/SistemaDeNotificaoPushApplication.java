@@ -1,6 +1,7 @@
 package br.com.lasa.notificacao;
 
 import br.com.lasa.notificacao.audit.AppAuditor;
+import br.com.lasa.notificacao.domain.Loja;
 import br.com.lasa.notificacao.domain.UsuarioNotificacao;
 import br.com.lasa.notificacao.domain.lais.BotUser;
 import br.com.lasa.notificacao.domain.lais.Conversation;
@@ -16,10 +17,13 @@ import org.apache.http.conn.ssl.NoopHostnameVerifier;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Scope;
 import org.springframework.core.annotation.Order;
 import org.springframework.data.domain.AuditorAware;
 import org.springframework.data.mongodb.config.EnableMongoAuditing;
@@ -32,6 +36,7 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.web.client.RestTemplate;
 
 import javax.sql.DataSource;
+import java.io.IOException;
 import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -39,8 +44,13 @@ import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.text.MessageFormat;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
+import java.util.Objects;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
@@ -192,10 +202,53 @@ public class SistemaDeNotificaoPushApplication {
 		return urlFormatted;
 	}
 
+	@Bean(name = AppConstants.BRAZILIAN_LOCALE)
+	Locale getBrazilianLocale(){
+		return new Locale("pt", "BR");
+	}
+
 	@Bean
 	AuditorAware<String> auditorAware(){
 		return new AppAuditor();
+	}
 
+	@Bean
+	ZoneId brazilZone() {
+		return ZoneId.of("America/Sao_Paulo");
+	}
+
+	@Bean(AppConstants.BRAZILIAN_TIME)
+	@Scope("prototype")
+	LocalDateTime getHorario() {
+		LocalDateTime horario = LocalDateTime.now(brazilZone());
+		return horario;
+	}
+
+	@Bean
+	@Scope("prototype")
+	LocalDate getBrazilianDate(){
+		return LocalDate.now(brazilZone());
+	}
+
+	@Autowired
+	private ObjectMapper objectMapper;
+
+	@Value("${STORES:}")
+	private String storesString;
+
+	@Bean(name = AppConstants.STORES)
+	Loja[] stores() {
+
+		Loja[] lojas = null;
+
+		if ( !Objects.isNull(storesString) && !storesString.isEmpty()){
+			try {
+				lojas = jacksonObjectMapper().readValue(storesString, Loja[].class);
+			} catch (IOException e) {
+				log.error("It was not possible to create a store list. The application will reject the json store.", e);
+			}
+		}
+		return lojas;
 	}
 
 	/**

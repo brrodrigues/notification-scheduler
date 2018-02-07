@@ -4,13 +4,13 @@ import br.com.lasa.notificacao.domain.Notification;
 import br.com.lasa.notificacao.service.NotificacaoService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Scope;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.stereotype.Component;
 
-import java.time.LocalTime;
-import java.time.ZoneId;
+import java.time.LocalDateTime;
 import java.util.concurrent.CompletableFuture;
 
 @Component
@@ -21,6 +21,9 @@ public class EnvioNotificacaoTask extends ThreadPoolTaskScheduler {
     @Autowired
     private NotificacaoService notificacaoService;
 
+    @Autowired
+    private ApplicationContext context;
+
     private void enviar(Notification notification) {
         log.info("Scheduling cron...");
         notificacaoService.enviarNotificacao(notification);
@@ -30,10 +33,9 @@ public class EnvioNotificacaoTask extends ThreadPoolTaskScheduler {
     @Scheduled( cron = "0/60 * * * * *" )
     public void bloquearIntervalo() {
         log.info("*********Finding notification schedule pending at the moment*********");
-        ZoneId zoneId = ZoneId.of("America/Sao_Paulo");
-        LocalTime horario = LocalTime.now(zoneId);
-        int minute = horario.getMinute();
-        log.info(" Current time {} at zone {}", minute, zoneId.getId() );
+        LocalDateTime brazilianDateTime = context.getBean(LocalDateTime.class);
+        int minute = brazilianDateTime.toLocalTime().getMinute();
+        log.info("Brazilian current minute {}", minute);
         CompletableFuture.runAsync(() -> notificacaoService.buscarNotificacaoNaoProgramada(minute).stream().forEach(EnvioNotificacaoTask.this::enviar)).exceptionally(this::showException);
         log.info("**********************Finish scheduling timer************************");
     }
@@ -42,11 +44,10 @@ public class EnvioNotificacaoTask extends ThreadPoolTaskScheduler {
     public void bloquearIntervaloPontual() {
         log.info("*********Finding pontual notification schedule pending at the moment*********");
 
-        ZoneId zoneId = ZoneId.of("America/Sao_Paulo");
+        LocalDateTime brazilianDateTime = context.getBean(LocalDateTime.class);
 
-        LocalTime horario = LocalTime.now(zoneId);
-        log.info(" Current minute {} at zone {}", horario, zoneId.getId() );
-        CompletableFuture.runAsync(() -> notificacaoService.buscarNotificacaoNaoProgramada(horario).stream().forEach(EnvioNotificacaoTask.this::enviar)).exceptionally(this::showException);
+        log.info(" Brazilian current time {} ", brazilianDateTime);
+        CompletableFuture.runAsync(() -> notificacaoService.buscarNotificacaoNaoProgramada(brazilianDateTime.toLocalTime()).stream().forEach(EnvioNotificacaoTask.this::enviar)).exceptionally(this::showException);
         log.info("**********************Finish scheduling timer************************");
     }
 

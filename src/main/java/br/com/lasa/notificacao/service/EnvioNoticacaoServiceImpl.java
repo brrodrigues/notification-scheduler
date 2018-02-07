@@ -1,5 +1,7 @@
 package br.com.lasa.notificacao.service;
 
+import br.com.lasa.notificacao.domain.Horario;
+import br.com.lasa.notificacao.domain.Loja;
 import br.com.lasa.notificacao.domain.Notification;
 import br.com.lasa.notificacao.domain.UltimaVendaLoja;
 import br.com.lasa.notificacao.domain.lais.Recipient;
@@ -7,10 +9,11 @@ import br.com.lasa.notificacao.repository.exception.NoDataFoundException;
 import br.com.lasa.notificacao.rest.request.EnvioNotificacaoRequest;
 import br.com.lasa.notificacao.service.external.ConsultaUltimaVendaService;
 import br.com.lasa.notificacao.util.AppConstants;
+import br.com.lasa.notificacao.util.DateUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationContext;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpStatusCodeException;
@@ -18,6 +21,8 @@ import org.springframework.web.client.RestTemplate;
 
 import java.net.URI;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.format.TextStyle;
 import java.util.*;
 
 @Service
@@ -26,6 +31,9 @@ public class EnvioNoticacaoServiceImpl implements EnvioNoticacaoService {
 
     @Autowired
     private NotificacaoService notificacaoService;
+
+    @Autowired
+    private LojaService lojaService;
 
     @Autowired
     private UsuarioNotificacaoService usuarioNotificacaoService;
@@ -43,8 +51,10 @@ public class EnvioNoticacaoServiceImpl implements EnvioNoticacaoService {
     private String applicationEndpointAuthorizationPassword;
 
     @Autowired
-    @Qualifier(value = AppConstants.APP_URL)
-    private String appUrl;
+    private Locale brazilianLocale;
+
+    @Autowired
+    private ApplicationContext context;
 
     @Override
     public void notificar(Notification notification) throws HttpStatusCodeException {
@@ -53,21 +63,37 @@ public class EnvioNoticacaoServiceImpl implements EnvioNoticacaoService {
 
         Map<String,UltimaVendaLoja> mapaDeLojaPorVenda = new HashMap();
 
+        LocalDateTime horarioBrasilia = context.getBean(AppConstants.BRAZILIAN_TIME, LocalDateTime.class);
+
         //Doing query at once by store
-        for (String storeId: storeIds){
-            if (storeId == null || storeId.isEmpty()){
+        for ( String storeId: storeIds ) {
+            if (storeId == null || storeId.isEmpty()) {
                 continue;
             }
+
+            Loja loja = lojaService.buscarLojaPorCodigo(storeId); //Caso a validacao acima dê falso, ele buscara os dados da loja na base normalmente.
+
+            if (!podeNotificar(horarioBrasilia, loja)) {
+                continue;
+            }
+
+            //Valida se a notificacao está no periodo de abertura e fechamento
+            if (loja == null || loja.getId() == null || loja.getId().isEmpty()) {
+                continue;
+            }
+
             try {
-                UltimaVendaLoja ultimaVendaLoja =  consultaUltimaVendaService.buscarUltimaVenda(storeId);
+                UltimaVendaLoja ultimaVendaLoja =  consultaUltimaVendaService.buscarUltimaVenda(loja.getId());
                 mapaDeLojaPorVenda.put(storeId, ultimaVendaLoja);
             } catch (NoDataFoundException e) {
                 log.info("Sale not found on store {}", storeId);
             }
         }
 
+        String[] storesToSendNotification = mapaDeLojaPorVenda.keySet().toArray(new String[mapaDeLojaPorVenda.keySet().size()]);
+
         try {
-            usuarioNotificacaoService.buscarUsuariosPorStatusAndLojas(true, storeIds ).forEach(usuarioNotificacao -> {
+            usuarioNotificacaoService.buscarUsuariosPorStatusAndLojas(true, storesToSendNotification ).stream().forEach(usuarioNotificacao -> {
                 UltimaVendaLoja ultimaVendaLoja = mapaDeLojaPorVenda.get(usuarioNotificacao.getStoreId());
                 if (ultimaVendaLoja != null){
 
@@ -84,7 +110,7 @@ public class EnvioNoticacaoServiceImpl implements EnvioNoticacaoService {
                                 build();
                         log.info("Sending to '{}' to event '{}'", usuarioNotificacao.getProfile().getUser().getName(), notification.getEventName());
                         long startSend = new Date().getTime();
-                        ResponseEntity<String> responseEntity = restTemplate.exchange(URI.create(applicationEndpointLaisUrl), HttpMethod.POST, createRequest(envioNotificacaoRequest), String.class);
+                        ResponseEntity<String> responseEntity = restTemplate.exchange(URI.create(applicationEndpointLaisUrl), HttpMethod.POST, criarRequisicao(envioNotificacaoRequest), String.class);
                         long endSend = new Date().getTime();
 
                         if (responseEntity.getStatusCode() == HttpStatus.OK) {
@@ -103,11 +129,53 @@ public class EnvioNoticacaoServiceImpl implements EnvioNoticacaoService {
         }
     }
 
-    private HttpEntity<EnvioNotificacaoRequest> createRequest(EnvioNotificacaoRequest requestObject){
+    private Map<String, Loja> montaEstruturaDeLoja(Loja[] storesCustom) {
+        Map<String, Loja> map = new HashMap<>();
+
+        if ( storesCustom != null && storesCustom.length > 0) {
+            for (Loja loja: storesCustom) {
+                map.put(loja.getId(), loja);
+            }
+        }
+
+        return map;
+    }
+
+    private HttpEntity<EnvioNotificacaoRequest> criarRequisicao(EnvioNotificacaoRequest requestObject){
         HttpHeaders requestHeaders = new HttpHeaders();
         requestHeaders.set(HttpHeaders.AUTHORIZATION, applicationEndpointAuthorizationPassword );
         requestHeaders.setContentType(MediaType.APPLICATION_JSON_UTF8);
         HttpEntity<EnvioNotificacaoRequest> requestEntity = new HttpEntity<>(requestObject, requestHeaders);
         return requestEntity ;
     }
+
+    private boolean podeNotificar(LocalDateTime horarioReferencia, Loja loja){
+
+        if ( loja != null && loja.getHorarios() != null && !loja.getHorarios().isEmpty() ) {
+
+            Date horaAbertura = loja.getHoraAbertura();
+            Date horaFechamento = loja.getHoraFechamento();
+
+            if (horaAbertura == null || horaFechamento == null)
+                return false;
+
+            LocalTime horarioAbertura = DateUtils.toLocalTimeViaInstant(horaAbertura);
+            LocalTime horarioFechamento = DateUtils.toLocalTimeViaInstant(horaFechamento);
+
+            String diaDaSemana = horarioReferencia.getDayOfWeek().getDisplayName(TextStyle.SHORT, brazilianLocale).toUpperCase();
+
+            for (Horario horario : loja.getHorarios()) {
+                if (!Objects.isNull(horario.getDia()) &&
+                        horario.getDia().equals(diaDaSemana) &&
+                        horarioReferencia.toLocalTime().isAfter(horarioAbertura) && horarioReferencia.toLocalTime().isBefore(horarioFechamento)) {
+                    continue;
+                }
+            }
+        }
+
+        return false;
+
+    }
+
+
 }

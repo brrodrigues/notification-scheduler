@@ -1,5 +1,6 @@
 package br.com.lasa.notificacao.domain;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -8,6 +9,7 @@ import org.springframework.data.annotation.*;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.Date;
+import java.util.List;
 
 @Data
 @Document(collection = "Cadastro_Lojas")
@@ -20,8 +22,11 @@ public class Loja {
     private String id;
     private String nomeLoja;
     private String responsavelGeral;
+    @JsonFormat(timezone = "America/Sao_Paulo")
     private Date horaAbertura;
+    @JsonFormat(timezone = "America/Sao_Paulo")
     private Date horaFechamento;
+    private List<Horario> horarios;
     @Version
     private Long versao;
     @CreatedDate

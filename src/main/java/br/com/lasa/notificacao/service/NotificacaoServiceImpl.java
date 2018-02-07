@@ -26,6 +26,7 @@ public class NotificacaoServiceImpl implements NotificacaoService {
     @Autowired
     private EnvioNoticacaoService envioNoticacaoServiceImpl;
 
+
     @Override
     public boolean enviarNotificacao(Notification notification) {
         log.debug("Sending notification...");
