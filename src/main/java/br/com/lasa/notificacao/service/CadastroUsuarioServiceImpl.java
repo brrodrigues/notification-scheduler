@@ -25,7 +25,7 @@ public class CadastroUsuarioServiceImpl implements CadastroUsuarioService {
     @Autowired
     private LojaRepository lojaRepository;
 
-    @Value("${application.message.user-create-sucessfully}")
+    @Value("${application.message.user-sucessfully-created}")
     private String userCreatedMessage;
 
     @Override

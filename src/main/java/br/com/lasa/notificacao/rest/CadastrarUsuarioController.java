@@ -35,9 +35,9 @@ public class CadastrarUsuarioController {
             return ResponseEntity.badRequest().contentType(MediaType.APPLICATION_JSON).body("O atributo address nao foi encontrado ou esta nulo");
         }
 
-        cadastroUsuarioService.criarCadastro(request);
+        String message = cadastroUsuarioService.criarCadastro(request);
 
-        return ResponseEntity.ok("Seu cadastro foi registrado com sucesso.");
+        return ResponseEntity.ok(message);
     }
 
 }

@@ -1,4 +1,6 @@
 application:
+  message:
+    user-sucessfully-created: ${MESSAGE_USER_SUCESSFULLY_CREATED:'Seu cadastro foi registrado com sucesso'}
   endpoint-lais:
     url: ${ENDPOINT_LAIS_URL:https://lasa-lais-hml-sac.us-west-2.elasticbeanstalk.com/api/notification}
     authorization-password: ${ENDPOINT_LAIS_AUTHORIZATION_VALUE:#Lasa2017}
