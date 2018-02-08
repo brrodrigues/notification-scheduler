@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 
 import java.io.Serializable;
+import java.util.Map;
 
 @Data
 @ToString
@@ -20,5 +21,6 @@ public class CadastroRequest implements Serializable {
     private String nomeGGL;
     @JsonProperty(value = "login_rede" )
     private String loginRede;
+    private Map<String, Object> metadata;
 
 }
