@@ -99,7 +99,7 @@ public class EnvioNoticacaoServiceImpl implements EnvioNoticacaoService {
         try {
             usuarioNotificacaoService.buscarUsuariosPorStatusAndLojas(true, storesToSendNotification ).stream().forEach(usuarioNotificacao -> {
                 UltimaVendaLoja ultimaVendaLoja = mapaDeLojaPorVenda.get(usuarioNotificacao.getStoreId());
-                if (ultimaVendaLoja != null){
+                if (ultimaVendaLoja != null) {
 
                     LocalDateTime dataConsulta = ultimaVendaLoja.getDataConsulta();
                     LocalDateTime dataUltimaVenda = ultimaVendaLoja.getDataUltimaConsulta();

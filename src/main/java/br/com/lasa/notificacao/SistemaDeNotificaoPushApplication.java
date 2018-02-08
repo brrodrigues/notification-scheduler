@@ -165,7 +165,7 @@ public class SistemaDeNotificaoPushApplication {
 
 		Recipient recipient = new Recipient("mid.$cAAA7URkk_Xxmi7uHeVgWnY_Fi0fm", "facebook", BotUser.builder().id("1696672097072999").name("Jônatas Ricardo").build(), BotUser.builder().id("107349120032554").name("LAIS-SAC-HML").build(), Conversation.builder().isGroup(false).id("1696672097072999-107349120032554").build(), "https://facebook.botframework.com/");
 
-		return new UsuarioNotificacao(recipient.getUser().getId(), "Bruno Rodrigues","L0001","", recipient, true );
+		return new UsuarioNotificacao(recipient.getUser().getId(), "Bruno Rodrigues","L0001","", recipient, true, null);
 	}
 
 	@Bean
