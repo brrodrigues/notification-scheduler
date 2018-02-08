@@ -9,6 +9,7 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.io.Serializable;
+import java.util.Map;
 
 @Data
 @Builder
@@ -24,5 +25,6 @@ public class UsuarioNotificacao implements Serializable {
     private String loginRede;
     private Recipient profile;
     private Boolean status;
+    private Map<String, Object> metadata;
 
 }
