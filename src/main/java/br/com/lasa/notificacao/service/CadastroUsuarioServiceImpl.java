@@ -9,6 +9,7 @@ import br.com.lasa.notificacao.repository.UsuarioNotificacaoRepository;
 import br.com.lasa.notificacao.rest.request.CadastroRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
@@ -24,12 +25,15 @@ public class CadastroUsuarioServiceImpl implements CadastroUsuarioService {
     @Autowired
     private LojaRepository lojaRepository;
 
+    @Value("${application.message.user-create-sucessfully}")
+    private String userCreatedMessage;
+
     @Override
     public String criarCadastro(final CadastroRequest request) {
 
-        Assert.notNull(request, "There is no parameters to create the user");
-        Assert.notNull(request.getAddress(), "Attribute address was not found or is null");
-        Assert.notNull(request.getAddress().getUser(), "Attribute bot user user was not found or is null");
+        Assert.notNull(request, "There is no parameters to create the user. Check parameters sent");
+        Assert.notNull(request.getAddress(), "Attribute address was not found or is null. Check parameters sent");
+        Assert.notNull(request.getAddress().getUser(), "Attribute bot user user was not found or is null. Check parameters sent");
 
         Recipient requestUser = request.getAddress();
 
@@ -42,7 +46,7 @@ public class CadastroUsuarioServiceImpl implements CadastroUsuarioService {
             if (!lojaRepository.exists(loja.getId())) {
                 lojaRepository.save(loja);
             }
-        }catch (Exception ex){
+        } catch (Exception ex){
 
         }
 
@@ -57,7 +61,7 @@ public class CadastroUsuarioServiceImpl implements CadastroUsuarioService {
 
         usuarioNotificacaoRepository.save(usuario);
 
-        return "OK";
+        return userCreatedMessage;
     }
 
 }
