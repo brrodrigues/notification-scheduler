@@ -35,7 +35,7 @@ public class CadastroUsuarioServiceImpl implements CadastroUsuarioService {
 
         BotUser user = request.getAddress().getUser();
 
-        UsuarioNotificacao usuario = UsuarioNotificacao.builder().nome(request.getNomeGGL()).profile(requestUser).storeId(request.getLojaGGL()).loginRede(request.getLoginRede()).build();
+        UsuarioNotificacao usuario = UsuarioNotificacao.builder().metadata(request.getMetadata()).nome(request.getNomeGGL()).profile(requestUser).storeId(request.getLojaGGL()).loginRede(request.getLoginRede()).build();
         Loja loja = Loja.builder().id(request.getLojaGGL()).responsavelGeral(request.getNomeGGL()).build();
 
         try {
