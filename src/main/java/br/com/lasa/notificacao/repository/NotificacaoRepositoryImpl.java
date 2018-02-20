@@ -4,6 +4,7 @@ import br.com.lasa.notificacao.domain.Behavior;
 import br.com.lasa.notificacao.domain.Loja;
 import br.com.lasa.notificacao.domain.Notification;
 import br.com.lasa.notificacao.util.AppConstants;
+import br.com.lasa.notificacao.util.MongoDBUtil;
 import com.mongodb.*;
 import lombok.extern.slf4j.Slf4j;
 import org.bson.types.ObjectId;
@@ -16,10 +17,14 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 
-import java.time.LocalDate;
+import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.ZoneId;
 import java.time.format.TextStyle;
+import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.Locale;
 import java.util.Optional;
 
@@ -27,13 +32,16 @@ import java.util.Optional;
 @Slf4j
 public class NotificacaoRepositoryImpl implements NotificacaoRepositoryCustom {
 
+    SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyyMMddHHmm");
+
     @Autowired
     MongoTemplate mongoTemplate;
 
     @Autowired
     private ApplicationContext context;
 
-
+    @Autowired
+    ZoneId zoneId;
 
     @Autowired
     @Qualifier(value = AppConstants.BRAZILIAN_LOCALE)
@@ -45,25 +53,26 @@ public class NotificacaoRepositoryImpl implements NotificacaoRepositoryCustom {
         String collectionName = mongoTemplate.getCollectionName(Notification.class);
         String lojaCollectionName = mongoTemplate.getCollectionName(Loja.class);
 
-        LocalDate data = context.getBean(LocalDate.class);
+        LocalDateTime dataTime = context.getBean(LocalDateTime.class);
 
-        String displayName = data.getDayOfWeek().getDisplayName(TextStyle.SHORT, brazilianLocale).toUpperCase();
+        Date dataFrom = Date.from(dataTime.atZone(zoneId).toInstant());
 
-        BasicDBObject projectFields = new BasicDBObject();
-        projectFields.put("_id",0);
-        projectFields.put("horaAbertura",0);
-        projectFields.put("horaFechamento",0);
+        String dataTimeString = dataTime.truncatedTo(ChronoUnit.MINUTES).toString();
+
+        String displayName = dataTime.getDayOfWeek().getDisplayName(TextStyle.SHORT, brazilianLocale).toUpperCase();
+
+        StringBuilder $project2 = new StringBuilder("{ $project : { storeIds: 1, eventName: 1, type: 1, intervalTime: 1, storeId: 1, loja: 1, dataReferencia : { $literal : '").append(simpleDateFormat.format(dataFrom)).append("'} , abertura: { $dateToString : { format : '%H:%M' , date : { $add : [ '$loja.horarios.abertura' , { $multiply : [ '$intervalTime' , 1000 , 60]}]}}}, fechamento : { $dateToString : { format : '%H:%M' , date : { $subtract : [ '$loja.horarios.fechamento' , { $multiply : [ '$intervalTime' , 1000 , 60]}]}}}}}");
 
         Cursor aggregate = mongoTemplate.getCollection(collectionName).aggregate(
                 Arrays.asList(
-                        $toDBObject("{ $match : { $or : [ { type : { $eq : 'SPECIFIC_TIME_AFTER'}} , { type : { $eq : 'SPECIFIC_TIME_BEFORE'}}]}}"),
-                        $toDBObject("{ $unwind: '$storeIds'}"),
-                        $toDBObject(String.format("{ $lookup : { from : '%s' , localField: 'storeIds', foreignField: '_id' , as : 'storeInfo'}}", lojaCollectionName)),
-                        $toDBObject("{ $project : { storeIds: 1, eventName : 1, type : 1, intervalTime : 1, storeId : 1,  loja : { $arrayElemAt: [ '$storeInfo', 0 ] } } }"),
-                        $toDBObject("{ $unwind: '$loja.horarios'}"),
-                        $toDBObject(String.format("{ $match: { 'loja.horarios.dia' : '%s' }}", displayName )),
-                        $toDBObject("{ $project : { storeIds: 1, eventName: 1, type: 1, intervalTime: 1, storeId: 1, loja: 1, abertura: { $dateToString : { format : '%H:%M' , date : { $add : [ '$loja.horarios.abertura' , { $multiply : [ '$intervalTime' , 1000 , 60]}]}}}, fechamento : { $dateToString : { format : '%H:%M' , date : { $subtract : [ '$loja.horarios.fechamento' , { $multiply : [ '$intervalTime' , 1000 , 60]}]}}}}}"),
-                        $toDBObject(String.format("{ $match : { $or : [ {$and : [ {'abertura' : { $eq : '%s' } } , { type: {$eq : 'SPECIFIC_TIME_BEFORE' }}  ] }, {$and : [ {'fechamento' : { $eq : '%s' } } , { type: {$eq : \"SPECIFIC_TIME_AFTER\" }}  ] }]}}", minute.toString(),minute.toString()))),
+                        MongoDBUtil.toDBObject("{ $match : { type : { $not : { $eq : 'INTERVAL_TIME'}}}}"),
+                        MongoDBUtil.toDBObject("{ $unwind: '$storeIds'}"),
+                        MongoDBUtil.toDBObject( String.format("{ $lookup : { from : '%s' , localField: 'storeIds', foreignField: '_id' , as : 'storeInfo'}}", lojaCollectionName)),
+                        MongoDBUtil.toDBObject("{ $project : { storeIds: 1, eventName : 1, type : 1, intervalTime : 1, storeId : 1,  loja : { $arrayElemAt: [ '$storeInfo', 0 ] } } }"),
+                        MongoDBUtil.toDBObject("{ $unwind: '$loja.horarios'}"),
+                        MongoDBUtil.toDBObject( String.format("{ $match: { 'loja.horarios.dia' : '%s' }}", displayName)),
+                        MongoDBUtil.toDBObject( $project2.toString()),
+                        MongoDBUtil.toDBObject( String.format("{ $match : { $or : [ {$and : [ {'abertura' : { $eq : '%s' } } , { type: {$eq : 'SPECIFIC_TIME_BEFORE' }}  ] }, {$and : [ {'fechamento' : { $eq : '%s' } } , { type: {$eq : 'SPECIFIC_TIME_AFTER' }}, {dataReferencia : '%s' } ]}]}}", minute.toString(), minute.toString(), dataTimeString))),
                 AggregationOptions.builder().outputMode(AggregationOptions.OutputMode.CURSOR).allowDiskUse(true).build());
 
         int updated = 0;
@@ -85,13 +94,6 @@ public class NotificacaoRepositoryImpl implements NotificacaoRepositoryCustom {
         return updated;
 
     }
-
-    private BasicDBObject $toDBObject(String json) {
-        BasicDBObject $toObject = new BasicDBObject(BasicDBObject.parse(json));
-        log.info("{}", $toObject.toString());
-        return $toObject;
-    }
-
 
 
     @Override

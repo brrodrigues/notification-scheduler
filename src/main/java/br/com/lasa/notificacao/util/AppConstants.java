@@ -8,5 +8,6 @@ public class AppConstants {
     public static final String FLASH_DATASOURCE_PROPERTIES = "FlashDataSourceProperties";
     public static final String STORES = "Stores";
     public static final String BRAZILIAN_LOCALE = "brazilianLocale";
-    public static final String BRAZILIAN_TIME = "brazilianTime";
+
+
 }

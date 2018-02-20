@@ -8,7 +8,6 @@ import br.com.lasa.notificacao.domain.lais.Recipient;
 import br.com.lasa.notificacao.repository.exception.NoDataFoundException;
 import br.com.lasa.notificacao.rest.request.EnvioNotificacaoRequest;
 import br.com.lasa.notificacao.service.external.ConsultaUltimaVendaService;
-import br.com.lasa.notificacao.util.AppConstants;
 import br.com.lasa.notificacao.util.DateUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
@@ -67,7 +66,7 @@ public class EnvioNoticacaoServiceImpl implements EnvioNoticacaoService {
 
         Map<String,UltimaVendaLoja> mapaDeLojaPorVenda = new HashMap();
 
-        LocalDateTime horarioBrasilia = context.getBean(AppConstants.BRAZILIAN_TIME, LocalDateTime.class);
+        LocalDateTime horarioBrasilia = context.getBean(LocalDateTime.class);
 
         //Doing query at once by store
         for ( String storeId: storeIds ) {

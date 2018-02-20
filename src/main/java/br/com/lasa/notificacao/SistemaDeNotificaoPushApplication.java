@@ -46,7 +46,6 @@ import java.security.NoSuchAlgorithmException;
 import java.text.DateFormat;
 import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.*;
@@ -123,6 +122,7 @@ public class SistemaDeNotificaoPushApplication {
 		DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
 		dateFormat.setTimeZone(TimeZone.getTimeZone("CET"));
 		mapper.setDateFormat(dateFormat);
+
 		mapper.configure(JsonParser.Feature.ALLOW_COMMENTS, true);
 		// to allow (non-standard) unquoted field names in JSON:
 		mapper.configure(JsonParser.Feature.ALLOW_UNQUOTED_FIELD_NAMES, true);
@@ -220,17 +220,11 @@ public class SistemaDeNotificaoPushApplication {
 		return ZoneId.of("America/Sao_Paulo");
 	}
 
-	@Bean(AppConstants.BRAZILIAN_TIME)
+	@Bean
 	@Scope("prototype")
 	LocalDateTime getHorario() {
 		LocalDateTime horario = LocalDateTime.now(brazilZone());
 		return horario;
-	}
-
-	@Bean
-	@Scope("prototype")
-	LocalDate getBrazilianDate(){
-		return LocalDate.now(brazilZone());
 	}
 
 	@Autowired
