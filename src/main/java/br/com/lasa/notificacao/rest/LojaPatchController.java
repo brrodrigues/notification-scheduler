@@ -15,7 +15,7 @@ public class LojaPatchController  {
     private LojaService lojaService;
 
     @CrossOrigin(origins = "*")
-    @RequestMapping( value = "lojas", method= RequestMethod.PATCH, produces= "application/hal+json")
+    @RequestMapping( value = "lojas", method= RequestMethod.PATCH, produces = "application/hal+json")
     public ResponseEntity<Loja> patch(@RequestBody Loja loja) {
 
         Loja atualizar = lojaService.atualizar(loja);

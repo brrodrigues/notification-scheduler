@@ -9,17 +9,19 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.io.Serializable;
 import java.util.Collection;
+import java.util.Date;
 import java.util.Map;
 
 @Data
-@Document(collection = "Cadastro_Usuario_Mensagem")
+@Document(collection = "Cadastro_Conversacao")
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class UsuarioMensagem implements Serializable{
+public class Conversacao implements Serializable{
 
     @Id
     private String id;
+    private Date timestamp;
     private String from;
     private String to;
     private String ref;
