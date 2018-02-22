@@ -1,6 +1,5 @@
 package br.com.lasa.notificacao.domain;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -20,8 +19,7 @@ public class Message {
     private String author;
     private String message;
 
-    @JsonFormat(pattern = "dd/MM/yyyy HH:mm:ss", timezone = "America/Sao_Paulo")
-
+    //@JsonFormat(pattern = "dd/MM/yyyy HH:mm:ss", timezone = "America/Sao_Paulo")
     public Date getTimestamp() {
         return timestamp;
     }

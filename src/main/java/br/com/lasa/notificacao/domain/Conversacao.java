@@ -17,7 +17,7 @@ import java.util.Map;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class Conversacao implements Serializable{
+public class Conversacao implements Serializable {
 
     @Id
     private String id;
