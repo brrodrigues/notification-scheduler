@@ -16,6 +16,7 @@ import java.util.Collection;
 public class EnvioNotificacaoRequest implements Serializable {
 
     private String messageType;
+    private String conversationId;
     private Collection<Recipient> recipients ;
 
 }

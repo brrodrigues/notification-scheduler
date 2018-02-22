@@ -45,6 +45,9 @@ public class EnvioNoticacaoServiceImpl implements EnvioNoticacaoService {
     private ConsultaUltimaVendaService consultaUltimaVendaService;
 
     @Autowired
+    ConversacaoService conversacaoService;
+
+    @Autowired
     RestTemplate restTemplate;
 
     @Value("${application.endpoint-lais.url}")
@@ -113,6 +116,7 @@ public class EnvioNoticacaoServiceImpl implements EnvioNoticacaoService {
                                 build();
                         log.info("Sending to '{}' to event '{}'", usuarioNotificacao.getProfile().getUser().getName(), notification.getEventName());
                         long startSend = new Date().getTime();
+
                         ResponseEntity<String> responseEntity = restTemplate.exchange(URI.create(applicationEndpointLaisUrl), HttpMethod.POST, criarRequisicao(envioNotificacaoRequest), String.class);
                         long endSend = new Date().getTime();
 
