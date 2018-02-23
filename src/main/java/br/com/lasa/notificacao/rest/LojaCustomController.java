@@ -9,7 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @BasePathAwareController
-public class LojaPatchController  {
+public class LojaCustomController {
 
     @Autowired
     private LojaService lojaService;

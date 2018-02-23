@@ -18,6 +18,7 @@ public class ConversacaoService {
     private ConversacaoRepository conversacaoRepository;
 
     public Conversacao enviarMensagem(String id, Message message){
+        message.setTimestamp(new Date());
         return conversacaoRepository.addMessage(id,message);
     }
 

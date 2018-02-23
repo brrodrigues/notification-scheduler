@@ -3,16 +3,34 @@ package br.com.lasa.notificacao.service;
 import br.com.lasa.notificacao.domain.Horario;
 import br.com.lasa.notificacao.domain.Loja;
 import br.com.lasa.notificacao.repository.LojaRepository;
+import br.com.lasa.notificacao.service.external.CalendarioDeLojaService;
+import br.com.lasa.notificacao.service.external.response.InformacaoLoja;
+import br.com.lasa.notificacao.util.TimeFormatterUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
-import java.util.Arrays;
+import java.time.*;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Component
 public class LojaServiceImpl implements LojaService {
 
     @Autowired
     private LojaRepository lojaRepository;
+
+    @Autowired
+    private CalendarioDeLojaService calendarioDeLojaService;
+
+    @Autowired
+    private TimeFormatterUtils timeFormatterUtils;
+
+    @Autowired
+    private ApplicationContext context;
+
+    @Autowired
+    private ZoneId zoneId;
 
     @Override
     public Loja buscarLojaPorCodigo(String codigoLoja) {
@@ -45,9 +63,25 @@ public class LojaServiceImpl implements LojaService {
         return save;
     }
 
+    private List<Horario> montarQuadroHorario(String lojaId){
+        Collection<InformacaoLoja> informacaoLojas = calendarioDeLojaService.get(lojaId);
+        List<Horario> horarios = informacaoLojas.stream().map(this::preencherLoja).collect(Collectors.toList());
+        return horarios;
+
+    }
+
+    private Horario preencherLoja(InformacaoLoja informacaoVendaLoja) {
+
+        Date dateAbertura = atribuirNoDiaDeSemanaCorrenteOHorarioInformado(informacaoVendaLoja.getDiaSemana(), informacaoVendaLoja.getHoraAbertura());
+        Date dateFechamento = atribuirNoDiaDeSemanaCorrenteOHorarioInformado(informacaoVendaLoja.getDiaSemana(), informacaoVendaLoja.getHoraFechamento());
+
+        Horario horario = Horario.builder().abertura(dateAbertura).fechamento(dateFechamento).dia(informacaoVendaLoja.getDiaExtensoSemana()).build();
+
+        return horario;
+    }
+
     public Loja atualizar(Loja loja){
         //Atribui o horario de abertura e fechamento para todos os dias ao atualizar
-
 
         if (loja == null) {
             throw new IllegalArgumentException("Nao foi possivel localizar os dados da loja para serem atualizados. Verifique as informacoes enviadas para o servidor.");
@@ -67,5 +101,19 @@ public class LojaServiceImpl implements LojaService {
         lojaRepository.delete(loja.getId());
         Loja save = lojaRepository.save(loja);
         return save;
+    }
+
+    private Date atribuirNoDiaDeSemanaCorrenteOHorarioInformado(Integer diaSemana, String horario) {
+
+        LocalTime horarioAbertura = timeFormatterUtils.toTime(horario);
+        Calendar instance = Calendar.getInstance(context.getBean(TimeZone.class));
+        instance.set(Calendar.DAY_OF_WEEK, diaSemana);
+
+        LocalDateTime dataReferenteAoDiaSemana = LocalDateTime.of(instance.getTime().toInstant().atZone(zoneId).toLocalDate(), horarioAbertura);
+
+        Date dataFinalAbertura = Date.from(dataReferenteAoDiaSemana.atZone(zoneId).toInstant());
+
+        return dataFinalAbertura;
+
     }
 }
