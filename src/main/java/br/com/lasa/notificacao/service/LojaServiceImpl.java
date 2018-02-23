@@ -48,28 +48,24 @@ public class LojaServiceImpl implements LojaService {
             throw new IllegalArgumentException("Nao foi possivel localizar os dados da loja para serem atualizados. Verifique as informacoes enviadas para o servidor.");
         }
 
-        lojaId.setHorarios(Arrays.asList(
-                Horario.builder().dia("SEG").abertura(loja.getHoraAbertura()).fechamento(loja.getHoraFechamento()).build(),//SEG
-                Horario.builder().dia("TER").abertura(loja.getHoraAbertura()).fechamento(loja.getHoraFechamento()).build(),//TER
-                Horario.builder().dia("QUA").abertura(loja.getHoraAbertura()).fechamento(loja.getHoraFechamento()).build(),//QUA
-                Horario.builder().dia("QUI").abertura(loja.getHoraAbertura()).fechamento(loja.getHoraFechamento()).build(),//QUI
-                Horario.builder().dia("SEX").abertura(loja.getHoraAbertura()).fechamento(loja.getHoraFechamento()).build(),//SEX
-                Horario.builder().dia("SAB").abertura(loja.getHoraAbertura()).fechamento(loja.getHoraFechamento()).build(),//SAB
-                Horario.builder().dia("DOM").abertura(loja.getHoraAbertura()).fechamento(loja.getHoraFechamento()).build()//DOM
-                )
-        );
+        lojaId.setHorarios(montarQuadroDeHorario(id));
 
         Loja save = lojaRepository.save(lojaId);
         return save;
     }
 
-    private List<Horario> montarQuadroHorario(String lojaId){
+    private List<Horario> montarQuadroDeHorario(String lojaId){
         Collection<InformacaoLoja> informacaoLojas = calendarioDeLojaService.get(lojaId);
         List<Horario> horarios = informacaoLojas.stream().map(this::preencherLoja).collect(Collectors.toList());
         return horarios;
 
     }
 
+    /**
+     * Monta os dados da Loja
+     * @param informacaoVendaLoja
+     * @return
+     */
     private Horario preencherLoja(InformacaoLoja informacaoVendaLoja) {
 
         Date dateAbertura = atribuirNoDiaDeSemanaCorrenteOHorarioInformado(informacaoVendaLoja.getDiaSemana(), informacaoVendaLoja.getHoraAbertura());
@@ -87,16 +83,7 @@ public class LojaServiceImpl implements LojaService {
             throw new IllegalArgumentException("Nao foi possivel localizar os dados da loja para serem atualizados. Verifique as informacoes enviadas para o servidor.");
         }
 
-        loja.setHorarios(Arrays.asList(
-                Horario.builder().dia("SEG").abertura(loja.getHoraAbertura()).fechamento(loja.getHoraFechamento()).build(),//SEG
-                Horario.builder().dia("TER").abertura(loja.getHoraAbertura()).fechamento(loja.getHoraFechamento()).build(),//TER
-                Horario.builder().dia("QUA").abertura(loja.getHoraAbertura()).fechamento(loja.getHoraFechamento()).build(),//QUA
-                Horario.builder().dia("QUI").abertura(loja.getHoraAbertura()).fechamento(loja.getHoraFechamento()).build(),//QUI
-                Horario.builder().dia("SEX").abertura(loja.getHoraAbertura()).fechamento(loja.getHoraFechamento()).build(),//SEX
-                Horario.builder().dia("SAB").abertura(loja.getHoraAbertura()).fechamento(loja.getHoraFechamento()).build(),//SAB
-                Horario.builder().dia("DOM").abertura(loja.getHoraAbertura()).fechamento(loja.getHoraFechamento()).build()//DOM
-                )
-        );
+        loja.setHorarios(montarQuadroDeHorario(loja.getId()));
 
         lojaRepository.delete(loja.getId());
         Loja save = lojaRepository.save(loja);
