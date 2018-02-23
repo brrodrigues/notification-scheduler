@@ -1,4 +1,7 @@
 application:
+  url-base:
+    calendario-loja: ${APPLICATION_URL_BASE_CALENDARIO_LOJA:http://52.31.153.101/raiox_geo/api/CalendarioDeLoja}
+    loja-sem-venda: ${APPLICATION_URL_BASE_LOJA_SEM_VENDA:http://52.31.153.101/raiox_geo/api/lojasemvenda}
   message:
     user-created-sucessfully: ${MESSAGE_USER_CREATED_SUCESSFULLY:'Seu cadastro foi registrado com sucesso'}
   endpoint-lais:
