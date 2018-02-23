@@ -1,10 +1,10 @@
 package br.com.lasa.notificacao.domain;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import java.util.Date;
 
@@ -15,9 +15,11 @@ import java.util.Date;
 public class Horario {
 
     private String dia;
-    @JsonFormat(pattern = "yyyyMMdd'T'hh:mm:ss.SSSZ", timezone = "CET")
+    //@JsonFormat(pattern = "yyyyMMdd'T'hh:mm:ss.SSS", timezone = "UTC")
+    @DateTimeFormat(pattern = "yyyyMMdd'T'hh:mm:ss.SSS", iso = DateTimeFormat.ISO.DATE_TIME)
     private Date abertura;
-    @JsonFormat(pattern = "yyyyMMdd'T'hh:mm:ss.SSS", timezone = "CET")
+    //@JsonFormat(pattern = "yyyyMMdd'T'hh:mm:ss.SSS", timezone = "UTC")
+    @DateTimeFormat(pattern = "yyyyMMdd'T'hh:mm:ss.SSS", iso = DateTimeFormat.ISO.DATE_TIME)
     private Date fechamento;
 
 

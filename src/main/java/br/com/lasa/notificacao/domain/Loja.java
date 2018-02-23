@@ -35,4 +35,11 @@ public class Loja {
     @LastModifiedBy
     private String modificadoPor;
 
+    public void setHoraAbertura(Date horaAbertura) {
+        this.horaAbertura = horaAbertura;
+    }
+
+    public void setHoraFechamento(Date horaFechamento) {
+        this.horaFechamento = horaFechamento;
+    }
 }

@@ -1,11 +1,9 @@
 package br.com.lasa.notificacao.service;
 
-import br.com.lasa.notificacao.domain.Horario;
-import br.com.lasa.notificacao.domain.Loja;
-import br.com.lasa.notificacao.domain.Notification;
-import br.com.lasa.notificacao.domain.UltimaVendaLoja;
+import br.com.lasa.notificacao.domain.*;
 import br.com.lasa.notificacao.domain.lais.Recipient;
 import br.com.lasa.notificacao.repository.exception.NoDataFoundException;
+import br.com.lasa.notificacao.rest.ConversacaoCustomController;
 import br.com.lasa.notificacao.rest.request.EnvioNotificacaoRequest;
 import br.com.lasa.notificacao.service.external.ConsultaUltimaVendaService;
 import br.com.lasa.notificacao.util.DateUtils;
@@ -15,6 +13,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
+import org.springframework.hateoas.Link;
+import org.springframework.hateoas.mvc.ControllerLinkBuilder;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpStatusCodeException;
@@ -79,12 +79,12 @@ public class EnvioNoticacaoServiceImpl implements EnvioNoticacaoService {
 
             Loja loja = lojaService.buscarLojaPorCodigo(storeId); //Caso a validacao acima dê falso, ele buscara os dados da loja na base normalmente.
 
-            if (!podeNotificar(horarioBrasilia, loja)) {
+            //Valida se a notificacao está no periodo de abertura e fechamento
+            if (loja == null || loja.getId() == null || loja.getId().isEmpty()) {
                 continue;
             }
 
-            //Valida se a notificacao está no periodo de abertura e fechamento
-            if (loja == null || loja.getId() == null || loja.getId().isEmpty()) {
+            if (!podeNotificar(horarioBrasilia, loja)) {
                 continue;
             }
 
@@ -109,21 +109,32 @@ public class EnvioNoticacaoServiceImpl implements EnvioNoticacaoService {
                     LocalDateTime dataUltimVendaMaisTempoDeIntervalo = dataUltimaVenda.plusMinutes(Long.valueOf(Optional.of(notification.getIntervalTime()).orElse(0)));
                     log.info("*Comparing data between {} (current date) and {} (last store sale)", ultimaVendaLoja.getDataConsulta(), ultimaVendaLoja.getDataUltimaConsulta());
                     if (dataUltimVendaMaisTempoDeIntervalo.isBefore(dataConsulta)) {
-                        List<Recipient> recipients = Arrays.asList(usuarioNotificacao.getProfile());
-                        EnvioNotificacaoRequest envioNotificacaoRequest = EnvioNotificacaoRequest.builder().
+                        Recipient profile = usuarioNotificacao.getProfile();
+                        List<Recipient> recipients = Arrays.asList(profile);
+
+                        Conversacao conversacao = conversacaoService.iniciarConversa(profile, notification.getEventName());
+
+                        String conversacaoId = conversacao.getId();
+
+                        Link link = ControllerLinkBuilder.linkTo(ConversacaoCustomController.class, conversacaoId).withRel("sendMessage");
+
+                        EnvioNotificacaoRequest envioNotificacaoRequest = EnvioNotificacaoRequest.
+                                builder().
                                 messageType(notification.getType().name()).
+                                messageLink(link.getHref()).
                                 recipients(recipients).
                                 build();
-                        log.info("Sending to '{}' to event '{}'", usuarioNotificacao.getProfile().getUser().getName(), notification.getEventName());
+
+                        log.info("Sending to '{}' to event '{}'", profile.getUser().getName(), notification.getEventName());
                         long startSend = new Date().getTime();
 
                         ResponseEntity<String> responseEntity = restTemplate.exchange(URI.create(applicationEndpointLaisUrl), HttpMethod.POST, criarRequisicao(envioNotificacaoRequest), String.class);
                         long endSend = new Date().getTime();
 
                         if (responseEntity.getStatusCode() == HttpStatus.OK) {
-                            log.info("Alert to  '{}' successfully sent in  {} ms.", usuarioNotificacao.getProfile().getUser().getName(), endSend - startSend);
+                            log.info("Alert to  '{}' successfully sent in  {} ms.", profile.getUser().getName(), endSend - startSend);
                         } else {
-                            log.warn("Occur problem to send alert to {} in {} ms.", usuarioNotificacao.getProfile().getUser().getName(), endSend - startSend);
+                            log.warn("Occur problem to send alert to {} in {} ms.", profile.getUser().getName(), endSend - startSend);
                         }
                     }
                 }

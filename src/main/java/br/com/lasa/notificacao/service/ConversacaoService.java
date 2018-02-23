@@ -21,7 +21,7 @@ public class ConversacaoService {
         return conversacaoRepository.addMessage(id,message);
     }
 
-    public Conversacao iniciarConversa(Recipient profile, String eventName, String messageString){
+    public Conversacao iniciarConversa(Recipient profile, String messageString){
 
         Message message = newMessage(profile.getBot().getName(), messageString);
 

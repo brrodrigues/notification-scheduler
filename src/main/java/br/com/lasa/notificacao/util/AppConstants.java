@@ -9,5 +9,6 @@ public class AppConstants {
     public static final String STORES = "Stores";
     public static final String BRAZILIAN_LOCALE = "brazilianLocale";
 
-
+    public static final String BRAZILIAN_ZONE = "BrazilianZone";
+    public static final String UTC_ZONE = "ZoneUTC";
 }

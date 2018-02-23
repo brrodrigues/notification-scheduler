@@ -17,12 +17,14 @@ import org.apache.http.conn.ssl.NoopHostnameVerifier;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
+import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.Scope;
 import org.springframework.core.annotation.Order;
 import org.springframework.data.domain.AuditorAware;
@@ -120,7 +122,7 @@ public class SistemaDeNotificaoPushApplication {
 		// to allow C/C++ style comments in JSON (non-standard, disabled by
 		// default)
 		DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
-		dateFormat.setTimeZone(TimeZone.getTimeZone("CET"));
+		dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
 		mapper.setDateFormat(dateFormat);
 
 		mapper.configure(JsonParser.Feature.ALLOW_COMMENTS, true);
@@ -133,6 +135,13 @@ public class SistemaDeNotificaoPushApplication {
 		mapper.configure(SerializationFeature.INDENT_OUTPUT, true);
 		return mapper;
 	}
+
+
+	@Bean
+	TimeZone timeZone() {
+		return TimeZone.getTimeZone("UTC");
+	}
+
 
 	@Bean
 	public MappingJackson2HttpMessageConverter appJackson2HttpMessageConverter() {
@@ -216,6 +225,13 @@ public class SistemaDeNotificaoPushApplication {
 	}
 
 	@Bean
+	@Qualifier(AppConstants.UTC_ZONE)
+	ZoneId utcZone() {
+		return ZoneId.of("UTC");
+	}
+
+	@Bean
+	@Primary
 	ZoneId brazilZone() {
 		return ZoneId.of("America/Sao_Paulo");
 	}
