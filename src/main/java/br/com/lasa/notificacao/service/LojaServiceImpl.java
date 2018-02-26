@@ -3,16 +3,17 @@ package br.com.lasa.notificacao.service;
 import br.com.lasa.notificacao.domain.Horario;
 import br.com.lasa.notificacao.domain.Loja;
 import br.com.lasa.notificacao.repository.LojaRepository;
-import br.com.lasa.notificacao.service.external.CalendarioDeLojaService;
+import br.com.lasa.notificacao.service.external.CalendarioDeLojaExternalService;
 import br.com.lasa.notificacao.service.external.response.InformacaoLoja;
-import br.com.lasa.notificacao.util.TimeFormatterUtils;
+import br.com.lasa.notificacao.util.DateTimeFormatterUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
+import org.springframework.util.Assert;
 
-import java.time.*;
-import java.util.*;
-import java.util.stream.Collectors;
+import java.time.ZoneId;
+import java.util.Collection;
+import java.util.List;
 
 @Component
 public class LojaServiceImpl implements LojaService {
@@ -21,10 +22,10 @@ public class LojaServiceImpl implements LojaService {
     private LojaRepository lojaRepository;
 
     @Autowired
-    private CalendarioDeLojaService calendarioDeLojaService;
+    private CalendarioDeLojaExternalService calendarioDeLojaExternalService;
 
     @Autowired
-    private TimeFormatterUtils timeFormatterUtils;
+    private DateTimeFormatterUtils dateTimeFormatterUtils;
 
     @Autowired
     private ApplicationContext context;
@@ -48,59 +49,27 @@ public class LojaServiceImpl implements LojaService {
             throw new IllegalArgumentException("Nao foi possivel localizar os dados da loja para serem atualizados. Verifique as informacoes enviadas para o servidor.");
         }
 
-        lojaId.setHorarios(montarQuadroDeHorario(id));
+        Collection<InformacaoLoja> informacaoLojas = calendarioDeLojaExternalService.get(id);
+        List<Horario> horarios = calendarioDeLojaExternalService.montarQuadroDeHorario(informacaoLojas);
+
+        lojaId.setHorarios(horarios);
 
         Loja save = lojaRepository.save(lojaId);
         return save;
     }
 
-    private List<Horario> montarQuadroDeHorario(String lojaId){
-        Collection<InformacaoLoja> informacaoLojas = calendarioDeLojaService.get(lojaId);
-        List<Horario> horarios = informacaoLojas.stream().map(this::preencherLoja).collect(Collectors.toList());
-        return horarios;
-
-    }
-
-    /**
-     * Monta os dados da Loja
-     * @param informacaoVendaLoja
-     * @return
-     */
-    private Horario preencherLoja(InformacaoLoja informacaoVendaLoja) {
-
-        Date dateAbertura = atribuirNoDiaDeSemanaCorrenteOHorarioInformado(informacaoVendaLoja.getDiaSemana(), informacaoVendaLoja.getHoraAbertura());
-        Date dateFechamento = atribuirNoDiaDeSemanaCorrenteOHorarioInformado(informacaoVendaLoja.getDiaSemana(), informacaoVendaLoja.getHoraFechamento());
-
-        Horario horario = Horario.builder().abertura(dateAbertura).fechamento(dateFechamento).dia(informacaoVendaLoja.getDiaExtensoSemana()).build();
-
-        return horario;
-    }
-
-    public Loja atualizar(Loja loja){
+   public Loja atualizar(Loja loja){
         //Atribui o horario de abertura e fechamento para todos os dias ao atualizar
+        Assert.isNull(loja, "Nao foi possivel localizar os dados da loja para serem atualizados. Verifique as informacoes enviadas para o servidor.");
 
-        if (loja == null) {
-            throw new IllegalArgumentException("Nao foi possivel localizar os dados da loja para serem atualizados. Verifique as informacoes enviadas para o servidor.");
-        }
+        Collection<InformacaoLoja> informacaoLojas = calendarioDeLojaExternalService.get(loja.getId());
 
-        loja.setHorarios(montarQuadroDeHorario(loja.getId()));
+        loja.setHorarios(calendarioDeLojaExternalService.montarQuadroDeHorario(informacaoLojas));
 
         lojaRepository.delete(loja.getId());
         Loja save = lojaRepository.save(loja);
         return save;
-    }
+   }
 
-    private Date atribuirNoDiaDeSemanaCorrenteOHorarioInformado(Integer diaSemana, String horario) {
 
-        LocalTime horarioAbertura = timeFormatterUtils.toTime(horario);
-        Calendar instance = Calendar.getInstance(context.getBean(TimeZone.class));
-        instance.set(Calendar.DAY_OF_WEEK, diaSemana);
-
-        LocalDateTime dataReferenteAoDiaSemana = LocalDateTime.of(instance.getTime().toInstant().atZone(zoneId).toLocalDate(), horarioAbertura);
-
-        Date dataFinalAbertura = Date.from(dataReferenteAoDiaSemana.atZone(zoneId).toInstant());
-
-        return dataFinalAbertura;
-
-    }
 }

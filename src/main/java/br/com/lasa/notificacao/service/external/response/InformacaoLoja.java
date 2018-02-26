@@ -1,29 +1,45 @@
 package br.com.lasa.notificacao.service.external.response;
 
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class InformacaoLoja {
 
     private Integer loja;
     private String centro;
+    @JsonProperty(value = "nome_loja")
     private String nomeLoja;
+    @JsonProperty(value = "nome_comb")
     private String nomeCombinado;
     private String regiao;
+    @JsonProperty(value = "id_distrito")
     private String distrito;
+    @JsonProperty(value = "desc_distrito")
     private String descricaoDistrito;
+    @JsonProperty(value = "hora_abertura")
     private String horaAbertura;
+    @JsonProperty(value = "hora_fechamento")
     private String horaFechamento;
+    @JsonProperty(value = "dia_semana")
     private Integer diaSemana;
+    @JsonProperty(value = "dia_ext_semana")
     private String diaExtensoSemana;
     private Integer situacao;
     private String status;
+    @JsonProperty(value = "nome_tipo")
     private String nomeTipo;
+    @JsonProperty(value = "sem_horario_verao")
     private Integer semHorarioVerao;
+    @JsonProperty(value = "com_horario_verao")
     private Integer comHorarioVerao;
+    @JsonProperty(value = "tipo_pdv")
     private String tipoPDV;
+    @JsonProperty(value = "cod_estado")
     private String uf;
     private String bairro;
     private String cep;
     private String endereco;
+    @JsonProperty(value = "horario_local")
     private String horarioLocal;
 
     public Integer getLoja() {
