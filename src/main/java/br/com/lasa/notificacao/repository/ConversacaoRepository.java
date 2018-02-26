@@ -23,7 +23,15 @@ public interface ConversacaoRepository extends MongoRepository<Conversacao, Stri
 
     @Override
     @RestResource(exported = false)
-    void delete(String s);
+    Conversacao insert(Conversacao conversacao);
+
+    @Override
+    @RestResource(exported = false)
+    Conversacao save(Conversacao conversacao);
+
+    @Override
+    @RestResource(exported = false)
+    void delete(String conversationId);
 
     @Override
     @RestResource(exported = false)
@@ -33,4 +41,11 @@ public interface ConversacaoRepository extends MongoRepository<Conversacao, Stri
     @RestResource(exported = false)
     void delete(Iterable<? extends Conversacao> iterable);
 
+    @Override
+    @RestResource(exported = false)
+    <S extends Conversacao> List<S> save(Iterable<S> iterable);
+
+    @Override
+    @RestResource(exported = false)
+    <S extends Conversacao> List<S> insert(Iterable<S> iterable);
 }
