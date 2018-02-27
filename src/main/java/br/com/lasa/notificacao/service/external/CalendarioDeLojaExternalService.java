@@ -1,15 +1,11 @@
 package br.com.lasa.notificacao.service.external;
 
-import br.com.lasa.notificacao.domain.Horario;
-import br.com.lasa.notificacao.service.external.response.InformacaoLoja;
-
-import java.util.Collection;
-import java.util.List;
+import br.com.lasa.notificacao.domain.Loja;
+import br.com.lasa.notificacao.service.external.response.CalendarioDeLoja;
 
 public interface CalendarioDeLojaExternalService {
 
-    Collection<InformacaoLoja> get(String loja);
+    public CalendarioDeLoja buscarCalendarioDaSemanaDaLoja(String lojaId, String responsavelLoja);
 
-    List<Horario> montarQuadroDeHorario(Collection<InformacaoLoja> informacaoLojas);
-
+    Loja montarEstrutura(CalendarioDeLoja calendarioDeLoja);
 }

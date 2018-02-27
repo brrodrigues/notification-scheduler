@@ -1,10 +1,9 @@
 package br.com.lasa.notificacao.service;
 
-import br.com.lasa.notificacao.domain.Horario;
 import br.com.lasa.notificacao.domain.Loja;
 import br.com.lasa.notificacao.repository.LojaRepository;
 import br.com.lasa.notificacao.service.external.CalendarioDeLojaExternalService;
-import br.com.lasa.notificacao.service.external.response.InformacaoLoja;
+import br.com.lasa.notificacao.service.external.response.CalendarioDeLoja;
 import br.com.lasa.notificacao.util.DateTimeFormatterUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -12,8 +11,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
 
 import java.time.ZoneId;
-import java.util.Collection;
-import java.util.List;
 
 @Component
 public class LojaServiceImpl implements LojaService {
@@ -38,36 +35,37 @@ public class LojaServiceImpl implements LojaService {
         return lojaRepository.findOne(codigoLoja);
     }
 
-    public Loja atualizar(String id, Loja loja) {
+    public Loja atualizar(String id, Loja lojaParam) {
         //Atribui o horario de abertura e fechamento para todos os dias ao atualizar
         Loja lojaId = lojaRepository.findOne(id);
-
-        lojaId = loja;
-        lojaId.setId(id);
 
         if (lojaId == null) {
             throw new IllegalArgumentException("Nao foi possivel localizar os dados da loja para serem atualizados. Verifique as informacoes enviadas para o servidor.");
         }
 
-        Collection<InformacaoLoja> informacaoLojas = calendarioDeLojaExternalService.get(id);
-        List<Horario> horarios = calendarioDeLojaExternalService.montarQuadroDeHorario(informacaoLojas);
+        CalendarioDeLoja calendarioDeLoja = calendarioDeLojaExternalService.buscarCalendarioDaSemanaDaLoja(id, lojaParam.getResponsavelGeral());
 
-        lojaId.setHorarios(horarios);
+        Loja loja = calendarioDeLojaExternalService.montarEstrutura(calendarioDeLoja);
+
+        lojaId = loja;
+        lojaId.setId(id);
+        lojaId.setHorarios(calendarioDeLoja.getHorarios());
+        lojaId.setMetadata(calendarioDeLoja.getMetadata());
 
         Loja save = lojaRepository.save(lojaId);
         return save;
     }
 
-   public Loja atualizar(Loja loja){
+   public Loja atualizar(Loja lojaParam) {
         //Atribui o horario de abertura e fechamento para todos os dias ao atualizar
-        Assert.isNull(loja, "Nao foi possivel localizar os dados da loja para serem atualizados. Verifique as informacoes enviadas para o servidor.");
+        Assert.isNull(lojaParam, "Nao foi possivel localizar os dados da loja para serem atualizados. Verifique as informacoes enviadas para o servidor.");
 
-        Collection<InformacaoLoja> informacaoLojas = calendarioDeLojaExternalService.get(loja.getId());
+        CalendarioDeLoja calendarDeLoja = calendarioDeLojaExternalService.buscarCalendarioDaSemanaDaLoja(lojaParam.getId(), lojaParam.getResponsavelGeral());
 
-        loja.setHorarios(calendarioDeLojaExternalService.montarQuadroDeHorario(informacaoLojas));
+       Loja loja = calendarioDeLojaExternalService.montarEstrutura(calendarDeLoja);
 
-        lojaRepository.delete(loja.getId());
-        Loja save = lojaRepository.save(loja);
+       lojaRepository.delete(lojaParam.getId());
+        Loja save = lojaRepository.save(lojaParam);
         return save;
    }
 

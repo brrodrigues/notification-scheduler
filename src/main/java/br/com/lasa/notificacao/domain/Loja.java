@@ -9,6 +9,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 @Data
 @Document(collection = "Cadastro_Lojas")
@@ -21,8 +22,6 @@ public class Loja {
     private String id;
     private String nomeLoja;
     private String responsavelGeral;
-    private Date horaAbertura;
-    private Date horaFechamento;
     private List<Horario> horarios;
     @Version
     private Long versao;
@@ -34,12 +33,6 @@ public class Loja {
     private Date modificadoEm;
     @LastModifiedBy
     private String modificadoPor;
+    private Map<String, Object> metadata;
 
-    public void setHoraAbertura(Date horaAbertura) {
-        this.horaAbertura = horaAbertura;
-    }
-
-    public void setHoraFechamento(Date horaFechamento) {
-        this.horaFechamento = horaFechamento;
-    }
 }

@@ -1,9 +1,6 @@
 package br.com.lasa.notificacao.util;
 
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.ZoneId;
+import java.time.*;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
 
@@ -13,6 +10,12 @@ public class DateUtils {
         return dateToConvert.toInstant()
                 .atZone(ZoneId.of("UTC") )
                 .toLocalTime().truncatedTo(ChronoUnit.MINUTES);
+    }
+
+    public static LocalDate toLocalDateViaInstant(Date dateToConvert) {
+        return dateToConvert.toInstant()
+                .atZone(ZoneId.of("UTC") )
+                .toLocalDate();
     }
 
     public static LocalTime toLocalTimeViaMilisecond(Date dateToConvert) {

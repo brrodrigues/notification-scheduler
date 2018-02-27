@@ -166,7 +166,7 @@
 						</configuration>
 					</execution>
 					<execution>
-						<id>webpack build</id>
+						<id>webpack montarEstrutura</id>
 						<goals>
 							<goal>webpack</goal>
 						</goals>

@@ -14,7 +14,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.hateoas.Link;
-import org.springframework.hateoas.mvc.ControllerLinkBuilder;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpStatusCodeException;
@@ -25,6 +24,9 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.TextStyle;
 import java.util.*;
+
+import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
+import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 
 @Service
 @Slf4j
@@ -116,7 +118,7 @@ public class EnvioNoticacaoServiceImpl implements EnvioNoticacaoService {
 
                         String conversacaoId = conversacao.getId();
 
-                        Link link = ControllerLinkBuilder.linkTo(ConversacaoCustomController.class, conversacaoId).withRel("sendMessage");
+                        Link link = linkTo(methodOn(ConversacaoCustomController.class, conversacaoId)).withRel("sendMessage");
 
                         EnvioNotificacaoRequest envioNotificacaoRequest = EnvioNotificacaoRequest.
                                 builder().
