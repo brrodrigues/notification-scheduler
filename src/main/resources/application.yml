@@ -56,6 +56,12 @@ spring:
     mongodb:
       repositories:
         enabled: true
+  jmx:
+    server: mbeanServer
+    enabled: true
 endpoints:
   cors:
-    allowed-origins: *
+    allowed-origins: '*'
+  jmx:
+    enabled: true
+
