@@ -56,5 +56,6 @@ spring:
     mongodb:
       repositories:
         enabled: true
-  mvc:
-    dispatch-options-request: true
+endpoints:
+  cors:
+    allowed-origins: *
