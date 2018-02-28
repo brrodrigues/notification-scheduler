@@ -8,12 +8,21 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.data.rest.core.config.RepositoryRestConfiguration;
 import org.springframework.data.rest.webmvc.config.RepositoryRestConfigurerAdapter;
 
+import java.util.concurrent.TimeUnit;
+
 @Configuration
-public class ExposeEntityIdRestConfiguration extends RepositoryRestConfigurerAdapter {
+public class RespositoryRestConfiguration extends RepositoryRestConfigurerAdapter {
+
+
 
     @Override
     public void configureRepositoryRestConfiguration(RepositoryRestConfiguration config) {
         config.exposeIdsFor(Recipient.class, BotUser.class, Conversation.class, Message.class);
+        config.getCorsRegistry().
+                addMapping("/**").
+                allowedOrigins("*").
+                allowedMethods("GET", "POST", "OPTIONS", "PATCH", "PUT", "HEAD").
+                maxAge(TimeUnit.SECONDS.toSeconds(1));
     }
 
 }
