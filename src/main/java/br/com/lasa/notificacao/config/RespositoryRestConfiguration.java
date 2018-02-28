@@ -18,4 +18,6 @@ public class RespositoryRestConfiguration extends RepositoryRestConfigurerAdapte
         config.exposeIdsFor(Recipient.class, BotUser.class, Conversation.class, Message.class);
     }
 
+
+
 }
