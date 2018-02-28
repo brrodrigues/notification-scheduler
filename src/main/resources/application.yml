@@ -14,7 +14,7 @@ application:
     url: ${ENDPOINT_ULTIMA_VENDA_URL:http://whml.lasa.lojaamericanas.com.br/mapa/consulta/lojas}
 management:
   context-path: /jmx
-  port: 8081
+  port: ${server.port}
   security:
     enabled: false
 info:
@@ -64,4 +64,3 @@ endpoints:
     allowed-origins: '*'
   jmx:
     enabled: true
-
