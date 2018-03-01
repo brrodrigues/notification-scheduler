@@ -145,7 +145,7 @@ public class EnvioNoticacaoServiceImpl implements EnvioNoticacaoService {
             Recipient profile = usuarioNotificacao.getProfile();
             List<Recipient> recipients = Arrays.asList(profile);
 
-            Conversacao conversacao = conversacaoService.iniciarConversa(profile, notification.getEventName());
+            Conversacao conversacao = conversacaoService.iniciarConversa(profile, usuarioNotificacao.getStoreId(), notification.getEventName());
 
             String conversacaoId = conversacao.getId();
 
@@ -205,7 +205,7 @@ public class EnvioNoticacaoServiceImpl implements EnvioNoticacaoService {
 
             LOGGER.info("Is {} between {} and {} {} ", horarioReferencia.toLocalTime(), horaAbertura.toInstant(), horaFechamento.toInstant(), oHorarioEhCompativel);
 
-            return horarioCompativel.isPresent();
+            return oHorarioEhCompativel;
         }
 
         return false;

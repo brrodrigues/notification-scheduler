@@ -7,12 +7,20 @@ import br.com.lasa.notificacao.repository.ConversacaoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 
 @Component
 public class ConversacaoService {
+
+    @Autowired
+    private LocalDateTime horarioBrasileiro;
+
+    @Autowired
+    private ZoneId zoneId;
 
     @Autowired
     private ConversacaoRepository conversacaoRepository;
@@ -26,15 +34,18 @@ public class ConversacaoService {
         return conversacaoRepository.addMessage(id,message);
     }
 
-    public Conversacao iniciarConversa(Recipient profile, String messageString){
+    public Conversacao iniciarConversa(Recipient profile, String value, String messageString){
 
         Message message = newMessage(profile.getBot().getName(), messageString);
+
+        Date horarioBrasilia = Date.from(horarioBrasileiro.atZone(zoneId).toInstant());
 
         Conversacao conversacao = Conversacao.
                 builder().
                 from(profile.getBot().getId()).
                 to(profile.getUser().getId()).
-                timestamp(new Date()).
+                ref(value).
+                timestamp(horarioBrasilia).
                 messages(Arrays.asList(message)).build();
 
         conversacaoRepository.save(conversacao);
