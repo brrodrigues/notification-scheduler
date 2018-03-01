@@ -2,10 +2,10 @@ package br.com.lasa.notificacao.service;
 
 import br.com.lasa.notificacao.domain.*;
 import br.com.lasa.notificacao.domain.lais.Recipient;
-import br.com.lasa.notificacao.repository.exception.NoDataFoundException;
 import br.com.lasa.notificacao.rest.ConversacaoCustomController;
 import br.com.lasa.notificacao.rest.request.EnvioNotificacaoRequest;
 import br.com.lasa.notificacao.service.external.ConsultaUltimaVendaService;
+import br.com.lasa.notificacao.service.external.ConsultaVendaLojaService;
 import br.com.lasa.notificacao.util.DateUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
@@ -13,11 +13,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
-import org.springframework.hateoas.Link;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.context.WebApplicationContext;
 
 import java.net.URI;
 import java.time.LocalDateTime;
@@ -25,14 +25,14 @@ import java.time.LocalTime;
 import java.time.format.TextStyle;
 import java.util.*;
 
-import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
-import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
-
 @Service
 @Slf4j
 public class EnvioNoticacaoServiceImpl implements EnvioNoticacaoService {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(EnvioNoticacaoServiceImpl.class);
+
+    @Autowired
+    private WebApplicationContext webApplicationContext;
 
     @Autowired
     private NotificacaoService notificacaoService;
@@ -47,10 +47,16 @@ public class EnvioNoticacaoServiceImpl implements EnvioNoticacaoService {
     private ConsultaUltimaVendaService consultaUltimaVendaService;
 
     @Autowired
+    private ConsultaVendaLojaService consultaVendaLojaService;
+
+    @Autowired
     ConversacaoService conversacaoService;
 
     @Autowired
     RestTemplate restTemplate;
+
+    @Autowired
+    ConversacaoCustomController controller;
 
     @Value("${application.endpoint-lais.url}")
     private String applicationEndpointLaisUrl;
@@ -69,7 +75,7 @@ public class EnvioNoticacaoServiceImpl implements EnvioNoticacaoService {
 
         String[] storeIds = notification.getStoreIds().toArray(new String[notification.getStoreIds().size()]);
 
-        Map<String,UltimaVendaLoja> mapaDeLojaPorVenda = new HashMap();
+        Map<String,Boolean> mapaDeLojaPorVenda = new HashMap();
 
         LocalDateTime horarioBrasilia = context.getBean(LocalDateTime.class);
 
@@ -91,62 +97,26 @@ public class EnvioNoticacaoServiceImpl implements EnvioNoticacaoService {
             }
 
             try {
-                UltimaVendaLoja ultimaVendaLoja =  consultaUltimaVendaService.buscarUltimaVenda(loja.getId());
-                mapaDeLojaPorVenda.put(storeId, ultimaVendaLoja);
-            } catch (NoDataFoundException e) {
-                log.info("Sale not found on store {}", storeId);
+                boolean possuiVendaNoPeriodo = consultaVendaLojaService.possuiVendaNoPeriodo(storeId, horarioBrasilia, notification.getIntervalTime());
+                mapaDeLojaPorVenda.put(storeId, possuiVendaNoPeriodo);
+            }catch (Exception ex){
+                log.warn("Nao possivel consulta a venda da loja {} (Motivo: {})", storeId, ex.getMessage());
+                log.error("Nao possivel consulta a venda da loja. ", ex);
             }
+
         }
 
         String[] storesToSendNotification = mapaDeLojaPorVenda.keySet().toArray(new String[mapaDeLojaPorVenda.keySet().size()]);
 
         try {
-            usuarioNotificacaoService.buscarUsuariosPorStatusAndLojas(true, storesToSendNotification ).stream().forEach(usuarioNotificacao -> {
-                UltimaVendaLoja ultimaVendaLoja = mapaDeLojaPorVenda.get(usuarioNotificacao.getStoreId());
-                if (ultimaVendaLoja != null) {
-
-                    LocalDateTime dataConsulta = ultimaVendaLoja.getDataConsulta();
-                    LocalDateTime dataUltimaVenda = ultimaVendaLoja.getDataUltimaConsulta();
-
-                    LocalDateTime dataUltimVendaMaisTempoDeIntervalo = dataUltimaVenda.plusMinutes(Long.valueOf(Optional.of(notification.getIntervalTime()).orElse(0)));
-                    log.info("*Comparing data between {} (current date) and {} (last store sale)", ultimaVendaLoja.getDataConsulta(), ultimaVendaLoja.getDataUltimaConsulta());
-                    if (dataUltimVendaMaisTempoDeIntervalo.isBefore(dataConsulta)) {
-                        Recipient profile = usuarioNotificacao.getProfile();
-                        List<Recipient> recipients = Arrays.asList(profile);
-
-                        Conversacao conversacao = conversacaoService.iniciarConversa(profile, notification.getEventName());
-
-                        String conversacaoId = conversacao.getId();
-
-                        Link link = linkTo(methodOn(ConversacaoCustomController.class, conversacaoId)).withRel("sendMessage");
-
-                        EnvioNotificacaoRequest envioNotificacaoRequest = EnvioNotificacaoRequest.
-                                builder().
-                                messageType(notification.getType().name()).
-                                messageLink(link.getHref()).
-                                recipients(recipients).
-                                build();
-
-                        log.info("Sending to '{}' to event '{}'", profile.getUser().getName(), notification.getEventName());
-                        long startSend = new Date().getTime();
-
-                        ResponseEntity<String> responseEntity = restTemplate.exchange(URI.create(applicationEndpointLaisUrl), HttpMethod.POST, criarRequisicao(envioNotificacaoRequest), String.class);
-                        long endSend = new Date().getTime();
-
-                        if (responseEntity.getStatusCode() == HttpStatus.OK) {
-                            log.info("Alert to  '{}' successfully sent in  {} ms.", profile.getUser().getName(), endSend - startSend);
-                        } else {
-                            log.warn("Occur problem to send alert to {} in {} ms.", profile.getUser().getName(), endSend - startSend);
-                        }
-                    }
-                }
-            });
-        } catch(Exception e){
+            usuarioNotificacaoService.buscarUsuariosPorStatusAndLojas(true, storesToSendNotification ).stream().forEach(usuario -> sendNotificationTo(usuario, notification, mapaDeLojaPorVenda.get(usuario.getStoreId())));
+        } catch(Exception e) {
             log.error("Occur exception ", e);
             //Liberando a notification para a proxima execucao
         }finally {
             notificacaoService.setScheduleFor(notification.getId(), false);
         }
+
     }
 
     private Map<String, Loja> montaEstruturaDeLoja(Loja[] storesCustom) {
@@ -169,6 +139,40 @@ public class EnvioNoticacaoServiceImpl implements EnvioNoticacaoService {
         return requestEntity ;
     }
 
+    private void sendNotificationTo(UsuarioNotificacao usuarioNotificacao, Notification notification, boolean possuiVendaNoPeriodo) {
+
+        if (!possuiVendaNoPeriodo) {
+            Recipient profile = usuarioNotificacao.getProfile();
+            List<Recipient> recipients = Arrays.asList(profile);
+
+            Conversacao conversacao = conversacaoService.iniciarConversa(profile, notification.getEventName());
+
+            String conversacaoId = conversacao.getId();
+
+            String URL = "api/conversations/" + conversacaoId + "/messages" ;
+
+            EnvioNotificacaoRequest envioNotificacaoRequest = EnvioNotificacaoRequest.
+                    builder().
+                    messageType(notification.getType().name()).
+                    messageLink(URL).
+                    recipients(recipients).
+                    build();
+
+            log.info("Sending to '{}' to event '{}'", profile.getUser().getName(), notification.getEventName());
+            long startSend = new Date().getTime();
+
+            ResponseEntity<String> responseEntity = restTemplate.exchange(URI.create(applicationEndpointLaisUrl), HttpMethod.POST, criarRequisicao(envioNotificacaoRequest), String.class);
+            long endSend = new Date().getTime();
+
+            if (responseEntity.getStatusCode() == HttpStatus.OK) {
+                log.info("Alert to  '{}' successfully sent in  {} ms.", profile.getUser().getName(), endSend - startSend);
+            } else {
+                log.warn("Occur problem to send alert to {} in {} ms.", profile.getUser().getName(), endSend - startSend);
+            }
+
+        }
+    }
+
     private boolean podeNotificar(LocalDateTime horarioReferencia, Loja loja){
 
         if ( loja != null && loja.getHorarios() != null && !loja.getHorarios().isEmpty() ) {
@@ -179,7 +183,7 @@ public class EnvioNoticacaoServiceImpl implements EnvioNoticacaoService {
             Date horaFechamento = null;
 
             for (Horario horario: loja.getHorarios()) {
-                if (diaDaSemana.equals(horario.getDia())){
+                if (diaDaSemana.equalsIgnoreCase(horario.getDia())){
                     horaAbertura = horario.getAbertura();
                     horaFechamento = horario.getFechamento();
                     break;
@@ -192,15 +196,16 @@ public class EnvioNoticacaoServiceImpl implements EnvioNoticacaoService {
             LocalTime horarioAbertura = DateUtils.toLocalTimeViaInstant(horaAbertura);
             LocalTime horarioFechamento = DateUtils.toLocalTimeViaInstant(horaFechamento);
 
-            LOGGER.info("Is {} between {} and {} ", horarioReferencia.toLocalTime(), horaAbertura.toInstant(), horaFechamento.toInstant());
+            Optional<Horario> horarioCompativel = loja.getHorarios().
+                    stream().
+                    filter(horario -> !Objects.isNull(horario.getDia()) && horario.getDia().equalsIgnoreCase(diaDaSemana) && horarioReferencia.toLocalTime().isAfter(horarioAbertura) && horarioReferencia.toLocalTime().isBefore(horarioFechamento)).
+                    findFirst();
 
-            for (Horario horario : loja.getHorarios()) {
-                if (!Objects.isNull(horario.getDia()) &&
-                        horario.getDia().equals(diaDaSemana) &&
-                        horarioReferencia.toLocalTime().isAfter(horarioAbertura) && horarioReferencia.toLocalTime().isBefore(horarioFechamento)) {
-                    return true;
-                }
-            }
+            boolean oHorarioEhCompativel = horarioCompativel.isPresent();
+
+            LOGGER.info("Is {} between {} and {} {} ", horarioReferencia.toLocalTime(), horaAbertura.toInstant(), horaFechamento.toInstant(), oHorarioEhCompativel);
+
+            return horarioCompativel.isPresent();
         }
 
         return false;

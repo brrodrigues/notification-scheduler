@@ -11,8 +11,6 @@ import org.springframework.data.rest.webmvc.config.RepositoryRestConfigurerAdapt
 @Configuration
 public class RespositoryRestConfiguration extends RepositoryRestConfigurerAdapter {
 
-
-
     @Override
     public void configureRepositoryRestConfiguration(RepositoryRestConfiguration config) {
         config.exposeIdsFor(Recipient.class, BotUser.class, Conversation.class, Message.class);

@@ -25,10 +25,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.EnableAspectJAutoProxy;
-import org.springframework.context.annotation.Primary;
-import org.springframework.context.annotation.Scope;
+import org.springframework.context.annotation.*;
 import org.springframework.core.annotation.Order;
 import org.springframework.data.domain.AuditorAware;
 import org.springframework.data.mongodb.config.EnableMongoAuditing;
@@ -243,14 +240,12 @@ public class SistemaDeNotificaoPushApplication {
 	}
 
 	@Bean
-	@Scope("prototype")
-	LocalDateTime getHorario() {
+	@Scope(proxyMode = ScopedProxyMode.INTERFACES, value = "prototype")
+	LocalDateTime brazilianDate() {
 		LocalDateTime horario = LocalDateTime.now(brazilZone());
 		return horario;
 	}
 
-	@Autowired
-	private ObjectMapper objectMapper;
 
 	@Value("${STORES:}")
 	private String storesString;

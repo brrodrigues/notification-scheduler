@@ -17,6 +17,10 @@ public class ConversacaoService {
     @Autowired
     private ConversacaoRepository conversacaoRepository;
 
+    public Conversacao save(Conversacao conversacao) {
+        return conversacaoRepository.save(conversacao);
+    }
+
     public Conversacao enviarMensagem(String id, Message message){
         message.setTimestamp(new Date());
         return conversacaoRepository.addMessage(id,message);

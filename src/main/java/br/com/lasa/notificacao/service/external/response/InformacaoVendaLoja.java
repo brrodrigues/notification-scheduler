@@ -27,7 +27,7 @@ public class InformacaoVendaLoja {
     private String horarioFechamento;
     @JsonProperty(value = "diferenca")
     private String diferenca;
-    @JsonProperty(value = "ultima_atualizacao")
+    @JsonProperty(value = "ultima_atualicao")
     private String ultimaAtualizacao;
     @JsonProperty(value = "tipo_pdv")
     private String tipoPDV;

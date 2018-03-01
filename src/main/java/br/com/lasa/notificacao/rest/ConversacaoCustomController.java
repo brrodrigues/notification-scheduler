@@ -22,7 +22,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @BasePathAwareController
-@RequestMapping("conversations/{id}/messages")
+@RequestMapping("conversations")
 public class ConversacaoCustomController implements ResourceProcessor<PersistentEntityResource> {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(ConversacaoCustomController.class);
@@ -30,8 +30,20 @@ public class ConversacaoCustomController implements ResourceProcessor<Persistent
     @Autowired
     private ConversacaoService conversacaoService;
 
+    @PostMapping( consumes = MediaType.APPLICATION_JSON_VALUE, produces = {MediaTypes.HAL_JSON_VALUE})
+    public ResponseEntity<PersistentEntityResource> saveMessage(@RequestBody Conversacao conversacao, PersistentEntityResourceAssembler persistentEntityResourceAssembler){
+        conversacaoService.save(conversacao);
+
+        Link sendMessage = ControllerLinkBuilder.linkTo(ControllerLinkBuilder.methodOn(ConversacaoCustomController.class).listMessages(conversacao.getId(), persistentEntityResourceAssembler)).withRel("sendMessage");
+        Resource resource = new Resource(conversacao);
+        resource.add(sendMessage);
+        PersistentEntityResource persistentEntityResource = persistentEntityResourceAssembler.toResource(resource);
+
+        return ResponseEntity.ok(persistentEntityResource);
+    }
+
     @CrossOrigin( origins = "*")
-    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = {MediaTypes.HAL_JSON_VALUE})
+    @PostMapping( value = "/{id}/messages", consumes = MediaType.APPLICATION_JSON_VALUE, produces = {MediaTypes.HAL_JSON_VALUE})
     public ResponseEntity<PersistentEntityResource> saveMessage(@PathVariable(value = "id") String id, @RequestBody Resource<Message> resource, PersistentEntityResourceAssembler persistentEntityResourceAssembler){
         LOGGER.info("adding new message to convesation {}", id);
 
@@ -64,7 +76,7 @@ public class ConversacaoCustomController implements ResourceProcessor<Persistent
     }
 
     @CrossOrigin( origins = "*")
-    @GetMapping( consumes = MediaType.APPLICATION_JSON_VALUE, produces = {MediaTypes.HAL_JSON_VALUE} )
+    @GetMapping( value = "/{id}/messages", consumes = MediaType.APPLICATION_JSON_VALUE, produces = {MediaTypes.HAL_JSON_VALUE} )
     @ResponseBody
     public ResponseEntity listMessages(@PathVariable(value = "id") String id, PersistentEntityResourceAssembler persistentEntityResourceAssembler) {
         LOGGER.info("Listing messages to convesation {}", id);
