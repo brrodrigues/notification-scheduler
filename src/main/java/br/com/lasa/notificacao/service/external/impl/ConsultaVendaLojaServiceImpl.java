@@ -61,7 +61,7 @@ public class ConsultaVendaLojaServiceImpl implements ConsultaVendaLojaService {
             ResponseEntity<List<InformacaoVendaLoja>> informacaoVendaLoja = template.exchange(url, HttpMethod.GET, httpEntity, new ParameterizedTypeReference<List<InformacaoVendaLoja>>() {});
 
             if (LOGGER.isDebugEnabled()) {
-                LOGGER.debug(">>> return call url {}. {}", url, informacaoVendaLoja.toString());
+                LOGGER.debug(">>> return url {}. {}", url, informacaoVendaLoja.toString());
             }
 
             List<InformacaoVendaLoja> lojas = informacaoVendaLoja.getBody();
@@ -95,7 +95,7 @@ public class ConsultaVendaLojaServiceImpl implements ConsultaVendaLojaService {
 
         LocalTime ultimoVendaComPeriodoAdicionado = ultimaVenda.plusMinutes(periodoEmMinuto);
 
-        boolean isBefore = ultimoVendaComPeriodoAdicionado.isAfter(horarioAtual);
+        boolean isBefore = ultimoVendaComPeriodoAdicionado.isBefore(horarioAtual);
 
         LOGGER.info(" comparando se {} é menor que {} = {}", ultimoVendaComPeriodoAdicionado, horarioAtual, isBefore);
 

@@ -139,9 +139,9 @@ public class EnvioNoticacaoServiceImpl implements EnvioNoticacaoService {
         return requestEntity ;
     }
 
-    private void sendNotificationTo(UsuarioNotificacao usuarioNotificacao, Notification notification, boolean possuiVendaNoPeriodo) {
+    private void sendNotificationTo(UsuarioNotificacao usuarioNotificacao, Notification notification, boolean enviarNotificacaoPorFaltaDeVenda) {
 
-        if (!possuiVendaNoPeriodo) {
+        if (enviarNotificacaoPorFaltaDeVenda) {
             Recipient profile = usuarioNotificacao.getProfile();
             List<Recipient> recipients = Arrays.asList(profile);
 
