@@ -241,7 +241,7 @@ public class SistemaDeNotificaoPushApplication {
 
 	@Bean
 	@Scope(proxyMode = ScopedProxyMode.INTERFACES, value = "prototype")
-	LocalDateTime brazilianDate() {
+	LocalDateTime localDateTime() {
 		LocalDateTime horario = LocalDateTime.now(brazilZone());
 		return horario;
 	}

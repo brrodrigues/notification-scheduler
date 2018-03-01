@@ -17,7 +17,7 @@ import java.util.Date;
 public class ConversacaoService {
 
     @Autowired
-    private LocalDateTime horarioBrasileiro;
+    private LocalDateTime localDateTime;
 
     @Autowired
     private ZoneId zoneId;
@@ -38,7 +38,7 @@ public class ConversacaoService {
 
         Message message = newMessage(profile.getBot().getName(), messageString);
 
-        Date horarioBrasilia = Date.from(horarioBrasileiro.atZone(zoneId).toInstant());
+        Date horarioBrasilia = Date.from(localDateTime.atZone(zoneId).toInstant());
 
         Conversacao conversacao = Conversacao.
                 builder().
