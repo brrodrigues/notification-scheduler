@@ -15,7 +15,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.context.WebApplicationContext;
@@ -173,12 +172,13 @@ public class EnvioNoticacaoServiceImpl implements EnvioNoticacaoService {
                 } else {
                     log.warn("Occur problem to send alert to {} in {} ms.", profile.getUser().getName(), endSend - startSend);
                 }
-            }catch (HttpClientErrorException ex) {
-                LOGGER.warn("ERR201803011533 :: Nao consegui enviar a notificacao para LAIS {}", ex.getStatusCode());
+            }catch (HttpStatusCodeException ex) {
+                LOGGER.warn("ERR201803011533 :: Nao consegui enviar a notificacao para LAIS {}. {}", ex.getStatusCode(), ex.getMessage());
                 LOGGER.error("ERR201803011533 :: Nao consegui enviar a notificacao para LAIS", ex);
                 conversacaoService.enviarMensagem(conversacaoId, "Sistema", "Desculpe, nao consegui enviar a notificação para LAIS por falhar de comunicacao.");
             }catch (Exception ex) {
                 LOGGER.error("ERR201803011534 :: Falha grave", ex);
+                conversacaoService.enviarMensagem(conversacaoId, "Sistema", "Desculpe, nao consegui enviar a notificação para LAIS por falhar de comunicacao.");
             }
 
         }
