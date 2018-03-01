@@ -10,7 +10,6 @@ import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 
@@ -50,7 +49,7 @@ public class ConversacaoService {
                 ref(value).
                 notificationName(notificationName).
                 timestamp(horarioBrasilia).
-                messages(Arrays.asList(message)).build();
+                build();
 
         conversacaoRepository.save(conversacao);
 
