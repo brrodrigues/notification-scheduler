@@ -11,4 +11,5 @@ public class AppConstants {
 
     public static final String BRAZILIAN_ZONE = "BrazilianZone";
     public static final String UTC_ZONE = "ZoneUTC";
+    public static final String BRAZILIAN_DATETIME = "brazilianDateTime";
 }

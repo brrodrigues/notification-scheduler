@@ -5,6 +5,7 @@ import br.com.lasa.notificacao.domain.Message;
 import br.com.lasa.notificacao.domain.lais.Recipient;
 import br.com.lasa.notificacao.repository.ConversacaoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
@@ -17,7 +18,7 @@ import java.util.Date;
 public class ConversacaoService {
 
     @Autowired
-    private LocalDateTime localDateTime;
+    private ApplicationContext context;
 
     @Autowired
     private ZoneId zoneId;
@@ -37,6 +38,8 @@ public class ConversacaoService {
     public Conversacao iniciarConversa(Recipient profile, String value, String messageString){
 
         Message message = newMessage(profile.getBot().getName(), messageString);
+
+        LocalDateTime localDateTime = context.getBean(LocalDateTime.class);
 
         Date horarioBrasilia = Date.from(localDateTime.atZone(zoneId).toInstant());
 

@@ -246,25 +246,6 @@ public class SistemaDeNotificaoPushApplication {
 		return horario;
 	}
 
-
-	@Value("${STORES:}")
-	private String storesString;
-
-	@Bean(name = AppConstants.STORES)
-	Loja[] stores() {
-
-		Loja[] lojas = null;
-
-		if ( !Objects.isNull(storesString) && !storesString.isEmpty()){
-			try {
-				lojas = jacksonObjectMapper().readValue(storesString, Loja[].class);
-			} catch (IOException e) {
-				log.error("It was not possible to create a store list. The application will reject the json store.", e);
-			}
-		}
-		return lojas;
-	}
-
 	/**
 	@Bean(name = AppConstants.FLASH_DATASOURCE_PROPERTIES)
 	@ConfigurationProperties("spring.datasource")
