@@ -19,11 +19,12 @@ public class DateTimeFormatterUtils {
      * @return
      */
     public LocalTime toTime(String time) {
-        if (LOGGER.isDebugEnabled()){
-            LOGGER.debug(" Converting {} to format HH:mm:ss", time);
-        }
 
         LocalTime parse = LocalTime.parse(time, DateTimeFormatter.ofPattern("HH:mm:ss"));
+
+        if (LOGGER.isDebugEnabled()){
+            LOGGER.debug(" Converting {} to format HH:mm:ss {}", time, parse);
+        }
 
         return parse;
     }
@@ -34,11 +35,12 @@ public class DateTimeFormatterUtils {
      * @return
      */
     public LocalDate toDate(String yyyyMMdd) {
-        if (LOGGER.isDebugEnabled()){
-            LOGGER.debug(" Converting {} to date format", yyyyMMdd);
-        }
 
         LocalDate parse = LocalDate.parse(yyyyMMdd, DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+
+        if (LOGGER.isDebugEnabled()){
+            LOGGER.debug(" Converting {} to date format ", yyyyMMdd);
+        }
 
         return parse;
     }

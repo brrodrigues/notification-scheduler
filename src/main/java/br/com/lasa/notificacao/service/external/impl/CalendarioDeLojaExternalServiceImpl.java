@@ -219,9 +219,9 @@ public class CalendarioDeLojaExternalServiceImpl implements CalendarioDeLojaExte
         Calendar instance = Calendar.getInstance(context.getBean(TimeZone.class));
         instance.set(Calendar.DAY_OF_WEEK, diaSemana + 1);
 
-        LocalDateTime dataReferenteAoDiaSemana = LocalDateTime.of(instance.getTime().toInstant().atZone(zoneId).toLocalDate(), horarioAbertura);
+        LocalDateTime dataReferenteAoDiaSemana = LocalDateTime.of(instance.getTime().toInstant().atZone(zoneIdUTC).toLocalDate(), horarioAbertura);
 
-        Date dataFinalAbertura = Date.from(dataReferenteAoDiaSemana.atZone(zoneId).toInstant());
+        Date dataFinalAbertura = Date.from(dataReferenteAoDiaSemana.atZone(zoneIdUTC).toInstant());
 
         return dataFinalAbertura;
 
