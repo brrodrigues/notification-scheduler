@@ -35,9 +35,9 @@ public class ConversacaoService {
         return conversacaoRepository.addMessage(id,message);
     }
 
-    public Conversacao iniciarConversa(Recipient profile, String value, String messageString){
+    public Conversacao iniciarConversa(Recipient profile, String value, String notificationName){
 
-        Message message = newMessage(profile.getBot().getName(), messageString);
+        Message message = newMessage(profile.getBot().getName(), notificationName);
 
         LocalDateTime localDateTime = context.getBean(LocalDateTime.class);
 
@@ -48,6 +48,7 @@ public class ConversacaoService {
                 from(profile.getBot().getId()).
                 to(profile.getUser().getId()).
                 ref(value).
+                notificationName(notificationName).
                 timestamp(horarioBrasilia).
                 messages(Arrays.asList(message)).build();
 
