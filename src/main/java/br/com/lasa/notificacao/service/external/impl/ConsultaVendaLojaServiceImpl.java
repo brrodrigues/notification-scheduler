@@ -78,11 +78,12 @@ public class ConsultaVendaLojaServiceImpl implements ConsultaVendaLojaService {
 
     }
 
+
     @Override
-    public boolean possuiVendaNoPeriodo(String loja, LocalDateTime dataHoraReferencia, Integer periodoEmMinuto) {
+    public boolean notificarLojaPorVendaForaDoPeriodo(String loja, LocalDateTime dataHoraReferencia, Integer periodoEmMinuto) {
 
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug(">>> possuiVendaNoPeriodo. Parametros {} {}", loja, periodoEmMinuto);
+            LOGGER.debug(">>> notificarLojaPorVendaForaDoPeriodo. Parametros {} {}", loja, periodoEmMinuto);
         }
 
         InformacaoVendaLoja informacaoVendaLoja = getForApi(loja);
@@ -97,7 +98,7 @@ public class ConsultaVendaLojaServiceImpl implements ConsultaVendaLojaService {
 
         boolean isBefore = ultimoVendaComPeriodoAdicionado.isBefore(horarioAtual);
 
-        LOGGER.info(" comparando se {} é menor que {} = {}", ultimoVendaComPeriodoAdicionado, horarioAtual, isBefore);
+        LOGGER.info("O ultimo horario de venda ({}) é menor que a horario atual {} ? = {}", ultimoVendaComPeriodoAdicionado, horarioAtual, isBefore);
 
         return isBefore;
 

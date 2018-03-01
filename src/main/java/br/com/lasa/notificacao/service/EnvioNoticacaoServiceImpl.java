@@ -97,7 +97,7 @@ public class EnvioNoticacaoServiceImpl implements EnvioNoticacaoService {
             }
 
             try {
-                boolean possuiVendaNoPeriodo = consultaVendaLojaService.possuiVendaNoPeriodo(storeId, horarioBrasilia, notification.getIntervalTime());
+                boolean possuiVendaNoPeriodo = consultaVendaLojaService.notificarLojaPorVendaForaDoPeriodo(storeId, horarioBrasilia, notification.getIntervalTime());
                 mapaDeLojaPorVenda.put(storeId, possuiVendaNoPeriodo);
             }catch (Exception ex){
                 log.warn("Nao possivel consulta a venda da loja {} (Motivo: {})", storeId, ex.getMessage());
