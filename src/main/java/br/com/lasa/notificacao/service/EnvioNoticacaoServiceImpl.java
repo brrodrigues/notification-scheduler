@@ -173,7 +173,7 @@ public class EnvioNoticacaoServiceImpl implements EnvioNoticacaoService {
                     log.warn("Occur problem to send alert to {} in {} ms.", profile.getUser().getName(), endSend - startSend);
                 }
             }catch (HttpStatusCodeException ex) {
-                LOGGER.warn("ERR201803011533 :: Nao conseguimos enviar a notificacao para LAIS {}. {}", ex.getStatusCode(), ex.getMessage());
+                LOGGER.warn("ERR201803011533 :: Nao conseguimos enviar a notificacao para LAIS (Status Code {}) - Message {}", ex.getStatusCode(), ex.getMessage());
                 conversacaoService.enviarMensagem(conversacaoId, "Sistema", "Desculpe, nao consegui enviar a notificação para LAIS por falhar de comunicacao.");
             }catch (Exception ex) {
                 LOGGER.error("ERR201803011534 :: Falha grave", ex);

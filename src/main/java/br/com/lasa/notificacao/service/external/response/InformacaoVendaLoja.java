@@ -137,4 +137,5 @@ public class InformacaoVendaLoja {
     public void setHorarioLocal(String horarioLocal) {
         this.horarioLocal = horarioLocal;
     }
+
 }

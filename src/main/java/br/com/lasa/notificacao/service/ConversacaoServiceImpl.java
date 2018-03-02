@@ -73,6 +73,6 @@ public class ConversacaoServiceImpl implements ConversacaoService {
 
     @Override
     public Collection<Conversacao> getConversacoes(String id){
-        return conversacaoRepository.findAllById(id);
+        return conversacaoRepository.findAllByIdOrderByTimestampDesc(id);
     }
 }

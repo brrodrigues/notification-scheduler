@@ -14,7 +14,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
-import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDateTime;
@@ -69,12 +69,14 @@ public class ConsultaVendaLojaServiceImpl implements ConsultaVendaLojaService {
             if (!loja.isEmpty())
                 return lojas.get(0);
 
-        }catch ( HttpClientErrorException ex) {
-            LOGGER.warn("Nao foi possivel consultar a venda da loja {}. Return message {} (Status Code {})", loja, ex.getMessage(), ex.getStatusCode());
-            LOGGER.error("Nao foi possivel consultar a venda da loja", ex);
+        }catch ( HttpStatusCodeException ex) {
+            LOGGER.warn("ERR201803011749 :: Nao foi possivel consultar a venda da loja {}. Return message {} (Status Code {})", loja, ex.getMessage(), ex.getStatusCode());
+            //LOGGER.error("Nao foi possivel consultar a venda da loja", ex);
+        }catch ( Exception ex) {
+            LOGGER.error("ERR201803011749 :: Nao mapeado. Loja {}. Message {} Localized Message {}", loja, ex.getMessage(), ex.getLocalizedMessage());
         }
 
-        return null;
+        return new InformacaoVendaLoja();
 
     }
 

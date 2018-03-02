@@ -19,7 +19,7 @@ public interface ConversacaoRepository extends MongoRepository<Conversacao, Stri
     public List<Conversacao> findAllByRef(@Param("param") String refParam);
 
     @RestResource(path = "/findAllById", exported = false)
-    public List<Conversacao> findAllById( String id);
+    public List<Conversacao> findAllByIdOrderByTimestampDesc( String id);
 
     @Override
     @RestResource(exported = false)
