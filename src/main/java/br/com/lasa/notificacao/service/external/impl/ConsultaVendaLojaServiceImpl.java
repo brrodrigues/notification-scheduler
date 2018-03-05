@@ -38,8 +38,7 @@ public class ConsultaVendaLojaServiceImpl implements ConsultaVendaLojaService {
     @Autowired @Qualifier(AppConstants.BRAZILIAN_LOCALE)
     public void setFormatter(Locale locale){
         dateTimeFormatter = DateTimeFormatter.ofPattern("HH:mm:ss", locale);
-
-    };
+    }
 
     @Autowired
     private ZoneId zoneId;
@@ -71,7 +70,7 @@ public class ConsultaVendaLojaServiceImpl implements ConsultaVendaLojaService {
 
         }catch ( HttpStatusCodeException ex) {
             LOGGER.warn("ERR201803011749 :: Nao foi possivel consultar a venda da loja {}. Return message {} (Status Code {})", loja, ex.getMessage(), ex.getStatusCode());
-            //LOGGER.error("Nao foi possivel consultar a venda da loja", ex);
+            LOGGER.error("Nao foi possivel consultar a venda da loja", ex);
         }catch ( Exception ex) {
             LOGGER.error("ERR201803011749 :: Nao mapeado. Loja {}. Message {} Localized Message {}", loja, ex.getMessage(), ex.getLocalizedMessage());
         }
@@ -90,17 +89,15 @@ public class ConsultaVendaLojaServiceImpl implements ConsultaVendaLojaService {
 
         InformacaoVendaLoja informacaoVendaLoja = getForApi(loja);
 
-        Assert.notNull(informacaoVendaLoja.getUltimaAtualizacao(), "Nao foi encontrado a ultima venda da loja" + loja + " para validar o envio de notificacao");
+        Assert.notNull(informacaoVendaLoja.getDiferenca(), "Nao foi encontrado a ultima venda da loja " + loja + " para validar o envio de notificacao. ");
 
-        LocalTime ultimaVenda = dataHoraReferencia.toLocalTime().parse(informacaoVendaLoja.getUltimaAtualizacao(), dateTimeFormatter);
+        LocalTime ultimaVenda = LocalTime.parse(informacaoVendaLoja.getDiferenca(), dateTimeFormatter);
+
+        boolean isBefore = ultimaVenda.getMinute() < periodoEmMinuto;
 
         LocalTime horarioAtual = dataHoraReferencia.toLocalTime().truncatedTo(ChronoUnit.MINUTES);
 
-        LocalTime ultimoVendaComPeriodoAdicionado = ultimaVenda.plusMinutes(periodoEmMinuto);
-
-        boolean isBefore = ultimoVendaComPeriodoAdicionado.isBefore(horarioAtual);
-
-        LOGGER.info("O ultimo horario de venda ({}) é menor que a horario atual {} ? = {}", ultimoVendaComPeriodoAdicionado, horarioAtual, isBefore);
+        LOGGER.info("A loja {} possui venda no periodo {} min ? {} (Diferenca entre {} e {} foi de {}) ", loja, periodoEmMinuto, isBefore, horarioAtual, informacaoVendaLoja.getUltimaAtualizacao(), informacaoVendaLoja.getDiferenca());
 
         return isBefore;
 
