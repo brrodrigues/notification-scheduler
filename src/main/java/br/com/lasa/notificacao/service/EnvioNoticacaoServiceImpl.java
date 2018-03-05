@@ -4,7 +4,6 @@ import br.com.lasa.notificacao.domain.*;
 import br.com.lasa.notificacao.domain.lais.Recipient;
 import br.com.lasa.notificacao.rest.ConversacaoCustomController;
 import br.com.lasa.notificacao.rest.request.EnvioNotificacaoRequest;
-import br.com.lasa.notificacao.service.external.ConsultaUltimaVendaService;
 import br.com.lasa.notificacao.service.external.ConsultaVendaLojaService;
 import br.com.lasa.notificacao.util.DateUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -42,9 +41,6 @@ public class EnvioNoticacaoServiceImpl implements EnvioNoticacaoService {
 
     @Autowired
     private UsuarioNotificacaoService usuarioNotificacaoService;
-
-    @Autowired
-    private ConsultaUltimaVendaService consultaUltimaVendaService;
 
     @Autowired
     private ConsultaVendaLojaService consultaVendaLojaService;
@@ -99,7 +95,8 @@ public class EnvioNoticacaoServiceImpl implements EnvioNoticacaoService {
             try {
                 boolean possuiVendaNoPeriodo = consultaVendaLojaService.notificarLojaPorVendaForaDoPeriodo(storeId, horarioBrasilia, notification.getIntervalTime());
                 mapaDeLojaPorVenda.put(storeId, possuiVendaNoPeriodo);
-            }catch (Exception ex){
+            }catch (Exception ex) {
+                mapaDeLojaPorVenda.put(storeId, true);//Caso ocorra algum erro (servico ao consulta a venda da loja.
                 log.warn("Nao possivel consulta a venda da loja {} (Motivo: {})", storeId, ex.getMessage());
                 log.error("Nao possivel consulta a venda da loja. ", ex);
             }
@@ -117,18 +114,6 @@ public class EnvioNoticacaoServiceImpl implements EnvioNoticacaoService {
             notificacaoService.setScheduleFor(notification.getId(), false);
         }
 
-    }
-
-    private Map<String, Loja> montaEstruturaDeLoja(Loja[] storesCustom) {
-        Map<String, Loja> map = new HashMap<>();
-
-        if ( storesCustom != null && storesCustom.length > 0) {
-            for (Loja loja: storesCustom) {
-                map.put(loja.getId(), loja);
-            }
-        }
-
-        return map;
     }
 
     private HttpEntity<EnvioNotificacaoRequest> criarRequisicao(EnvioNotificacaoRequest requestObject){
@@ -154,6 +139,7 @@ public class EnvioNoticacaoServiceImpl implements EnvioNoticacaoService {
             EnvioNotificacaoRequest envioNotificacaoRequest = EnvioNotificacaoRequest.
                     builder().
                     messageType(notification.getType().name()).
+                    metadata(Collections.singletonMap("intervalo", notification.getIntervalTime())).
                     messageLink(URL).
                     recipients(recipients).
                     build();
@@ -173,10 +159,11 @@ public class EnvioNoticacaoServiceImpl implements EnvioNoticacaoService {
                     log.warn("Occur problem to send alert to {} in {} ms.", profile.getUser().getName(), endSend - startSend);
                 }
             }catch (HttpStatusCodeException ex) {
-                LOGGER.warn("ERR201803011533 :: Nao conseguimos enviar a notificacao para LAIS (Status Code {}) - Message {}", ex.getStatusCode(), ex.getMessage());
+                LOGGER.error("ERR201803011533 :: Nao conseguimos enviar a notificacao para LAIS com a conversa [ID={}] (Status Code {}) - Message {}", conversacaoId, ex.getStatusCode(), ex.getMessage());
                 conversacaoService.enviarMensagem(conversacaoId, "Sistema", "Desculpe, nao consegui enviar a notificação para LAIS por falhar de comunicacao.");
             }catch (Exception ex) {
-                LOGGER.error("ERR201803011534 :: Falha grave", ex);
+                LOGGER.error("ERR201803011534 :: Falha grave ao enviar a notificacao para LAIS com a conversa [ID={}]. {}", conversacaoId, ex.getMessage());
+                LOGGER.error("ERR201803011534 :: Falha grave ao enviar a notificacao para LAIS com a conversa [ID={}]. {}", conversacaoId, ex.getMessage());
                 conversacaoService.enviarMensagem(conversacaoId, "Sistema", "Desculpe, nao consegui enviar a notificação para LAIS por falhar de comunicacao.");
             }
 

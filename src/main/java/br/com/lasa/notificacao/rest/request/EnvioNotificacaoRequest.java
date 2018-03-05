@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 import java.util.Collection;
+import java.util.Map;
 
 @Data
 @Builder
@@ -16,6 +17,7 @@ import java.util.Collection;
 public class EnvioNotificacaoRequest implements Serializable {
 
     private String messageType;
+    private Map<String, Object> metadata;
     private String messageLink;
     private Collection<Recipient> recipients ;
 
