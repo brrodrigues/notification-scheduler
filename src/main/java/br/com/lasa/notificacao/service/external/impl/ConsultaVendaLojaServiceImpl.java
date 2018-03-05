@@ -93,13 +93,13 @@ public class ConsultaVendaLojaServiceImpl implements ConsultaVendaLojaService {
 
         LocalTime ultimaVenda = LocalTime.parse(informacaoVendaLoja.getDiferenca(), dateTimeFormatter);
 
-        boolean isBefore = ultimaVenda.getMinute() < periodoEmMinuto;
+        boolean notificar = (ultimaVenda.getMinute() < periodoEmMinuto);
 
         LocalTime horarioAtual = dataHoraReferencia.toLocalTime().truncatedTo(ChronoUnit.MINUTES);
 
-        LOGGER.info("A loja {} possui venda no periodo {} min ? {} (Diferenca entre {} e {} foi de {}) ", loja, periodoEmMinuto, isBefore, horarioAtual, informacaoVendaLoja.getUltimaAtualizacao(), informacaoVendaLoja.getDiferenca());
+        LOGGER.info("A loja {} possui venda no periodo {} min ? {} (Diferenca entre {} e {} foi de {}) ", loja, periodoEmMinuto, notificar, horarioAtual, informacaoVendaLoja.getUltimaAtualizacao(), informacaoVendaLoja.getDiferenca());
 
-        return isBefore;
+        return !notificar;
 
     }
 
