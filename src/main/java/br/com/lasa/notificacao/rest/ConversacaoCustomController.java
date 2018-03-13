@@ -1,12 +1,13 @@
 package br.com.lasa.notificacao.rest;
 
 import br.com.lasa.notificacao.constants.HttpHeaderConstants;
-import br.com.lasa.notificacao.domain.Conversacao;
-import br.com.lasa.notificacao.domain.Message;
+import br.com.lasa.notificacao.domain.document.Conversacao;
+import br.com.lasa.notificacao.domain.document.Message;
 import br.com.lasa.notificacao.service.ConversacaoService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.rest.webmvc.BasePathAwareController;
 import org.springframework.data.rest.webmvc.PersistentEntityResource;
 import org.springframework.data.rest.webmvc.PersistentEntityResourceAssembler;
@@ -18,8 +19,13 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.*;
 import java.util.stream.Collectors;
+
+
 
 @BasePathAwareController
 @RequestMapping("conversations")
@@ -28,9 +34,14 @@ public class ConversacaoCustomController implements ResourceProcessor<Persistent
     private final static Logger LOGGER = LoggerFactory.getLogger(ConversacaoCustomController.class);
 
     @Autowired
+    @Qualifier(value = "brazilZone")
+    private ZoneId zoneId;
+
+
+    @Autowired
     private ConversacaoService conversacaoService;
 
-    @PostMapping( consumes = MediaType.APPLICATION_JSON_VALUE, produces = {MediaTypes.HAL_JSON_VALUE})
+    @PostMapping( consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_JSON_UTF8_VALUE} , produces = {MediaTypes.HAL_JSON_VALUE})
     public ResponseEntity<PersistentEntityResource> saveMessage(@RequestBody Conversacao conversacao, PersistentEntityResourceAssembler persistentEntityResourceAssembler){
         conversacaoService.save(conversacao);
 
@@ -42,8 +53,9 @@ public class ConversacaoCustomController implements ResourceProcessor<Persistent
         return ResponseEntity.ok(persistentEntityResource);
     }
 
-    @CrossOrigin( origins = "*")
-    @PostMapping( value = "/{id}/messages", consumes = MediaType.APPLICATION_JSON_VALUE, produces = {MediaTypes.HAL_JSON_VALUE})
+
+    /*@CrossOrigin( origins = "*")
+    @PostMapping( value = "/{id}/messages", consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_JSON_UTF8_VALUE} , produces = {MediaTypes.HAL_JSON_VALUE})
     public ResponseEntity<PersistentEntityResource> saveMessage(@PathVariable(value = "id") String id, @RequestBody Resource<Message> resource, PersistentEntityResourceAssembler persistentEntityResourceAssembler){
         LOGGER.info("adding new message to convesation {}", id);
 
@@ -70,6 +82,51 @@ public class ConversacaoCustomController implements ResourceProcessor<Persistent
         content.setTimestamp(new Date());
 
         Conversacao conversacao = conversacaoService.enviarMensagem(id, resource.getContent());
+
+        return ResponseEntity.ok(persistentEntityResourceAssembler.toResource(conversacao));
+
+    }*/
+
+    @CrossOrigin( origins = "*")
+    @PostMapping( value = "/{id}/messages", consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_JSON_UTF8_VALUE} , produces = {MediaTypes.HAL_JSON_VALUE})
+    public ResponseEntity<PersistentEntityResource> saveMessage(@PathVariable(value = "id") String id, @RequestBody Resource<Message> resource, PersistentEntityResourceAssembler persistentEntityResourceAssembler){
+        LOGGER.info("adding new message to convesation {}", id);
+
+        LocalDateTime localDateTime = LocalDateTime.now(zoneId);
+
+        Message content = resource.getContent();
+
+        if (id == null) {
+            HttpHeaders responseHeaders = new HttpHeaders();
+            responseHeaders.set(HttpHeaderConstants.REASON, "The message does not to be save without ID.");
+            return new ResponseEntity<>(
+                    persistentEntityResourceAssembler.toResource(content),
+                    responseHeaders,
+                    HttpStatus.NO_CONTENT);
+        }
+
+        if (content == null) {
+            HttpHeaders responseHeaders = new HttpHeaders();
+            responseHeaders.set(HttpHeaderConstants.REASON, "The message does not to be null");
+            return new ResponseEntity<>(
+                    persistentEntityResourceAssembler.toResource(content),
+                    responseHeaders,
+                    HttpStatus.NO_CONTENT);
+        }
+
+        LocalDate localDate = localDateTime.toLocalDate();
+
+        Date date = Date.from(localDate.atStartOfDay(zoneId).toInstant());
+
+        content.setTimestamp(date);
+
+        Conversacao conversacao = conversacaoService.enviarMensagem(id, resource.getContent());
+
+        if (conversacao == null){
+            HttpHeaders responseHeaders = new HttpHeaders();
+            responseHeaders.set(HttpHeaderConstants.REASON, "The conversation ID does not exists");
+            return ResponseEntity.notFound().headers(responseHeaders).build();
+        }
 
         return ResponseEntity.ok(persistentEntityResourceAssembler.toResource(conversacao));
 

@@ -1,7 +1,7 @@
 package br.com.lasa.notificacao.repository;
 
-import br.com.lasa.notificacao.domain.Conversacao;
-import br.com.lasa.notificacao.domain.Message;
+import br.com.lasa.notificacao.domain.document.Conversacao;
+import br.com.lasa.notificacao.domain.document.Message;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.FindAndModifyOptions;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -28,4 +28,5 @@ public class ConversacaoRepositoryImpl implements ConversacaoRepositoryCustom {
         return conversacao;
 
     }
+    
 }

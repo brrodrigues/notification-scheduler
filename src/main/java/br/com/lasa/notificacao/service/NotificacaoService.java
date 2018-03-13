@@ -1,7 +1,7 @@
 package br.com.lasa.notificacao.service;
 
 
-import br.com.lasa.notificacao.domain.Notification;
+import br.com.lasa.notificacao.domain.document.Notification;
 import org.bson.types.ObjectId;
 
 import java.time.LocalTime;

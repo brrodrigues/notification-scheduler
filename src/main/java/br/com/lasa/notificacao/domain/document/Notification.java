@@ -1,5 +1,6 @@
-package br.com.lasa.notificacao.domain;
+package br.com.lasa.notificacao.domain.document;
 
+import br.com.lasa.notificacao.domain.document.enumaration.Behavior;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;

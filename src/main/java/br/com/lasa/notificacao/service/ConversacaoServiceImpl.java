@@ -1,7 +1,7 @@
 package br.com.lasa.notificacao.service;
 
-import br.com.lasa.notificacao.domain.Conversacao;
-import br.com.lasa.notificacao.domain.Message;
+import br.com.lasa.notificacao.domain.document.Conversacao;
+import br.com.lasa.notificacao.domain.document.Message;
 import br.com.lasa.notificacao.domain.lais.Recipient;
 import br.com.lasa.notificacao.repository.ConversacaoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -74,5 +74,10 @@ public class ConversacaoServiceImpl implements ConversacaoService {
     @Override
     public Collection<Conversacao> getConversacoes(String id){
         return conversacaoRepository.findAllByIdOrderByTimestampDesc(id);
+    }
+
+    @Override
+    public boolean exists(String s) {
+        return conversacaoRepository.exists(s);
     }
 }

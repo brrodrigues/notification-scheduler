@@ -1,4 +1,4 @@
-package br.com.lasa.notificacao.domain;
+package br.com.lasa.notificacao.domain.document;
 
 import br.com.lasa.notificacao.domain.lais.Recipient;
 import lombok.AllArgsConstructor;

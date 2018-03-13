@@ -1,6 +1,6 @@
 package br.com.lasa.notificacao.service;
 
-import br.com.lasa.notificacao.domain.UsuarioNotificacao;
+import br.com.lasa.notificacao.domain.document.UsuarioNotificacao;
 import br.com.lasa.notificacao.repository.UsuarioNotificacaoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

@@ -1,7 +1,7 @@
 package br.com.lasa.notificacao.rest.assembler;
 
-import br.com.lasa.notificacao.domain.Loja;
-import br.com.lasa.notificacao.repository.LojaRepository;
+import br.com.lasa.notificacao.domain.document.Loja;
+import br.com.lasa.notificacao.repository.LojaRepositoryCustom;
 import br.com.lasa.notificacao.rest.resource.LojaResource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.rest.webmvc.support.RepositoryEntityLinks;
@@ -18,7 +18,7 @@ public class LojaResourcesAssembler extends ResourceAssemblerSupport<Loja, LojaR
     RepositoryEntityLinks repositoryEntityLinks;
 
     public LojaResourcesAssembler() {
-        super(LojaRepository.class, LojaResource.class);
+        super(LojaRepositoryCustom.class, LojaResource.class);
     }
 
     @Override

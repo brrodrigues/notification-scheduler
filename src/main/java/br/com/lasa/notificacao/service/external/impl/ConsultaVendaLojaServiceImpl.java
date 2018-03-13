@@ -97,7 +97,7 @@ public class ConsultaVendaLojaServiceImpl implements ConsultaVendaLojaService {
 
         LocalTime horarioAtual = dataHoraReferencia.toLocalTime().truncatedTo(ChronoUnit.MINUTES);
 
-        LOGGER.info("A loja {} possui venda no periodo {} min ? {} (Diferenca entre {} e {} foi de {}) ", loja, periodoEmMinuto, notificar, horarioAtual, informacaoVendaLoja.getUltimaAtualizacao(), informacaoVendaLoja.getDiferenca());
+        LOGGER.info("Notificar A loja {} possui venda no periodo {} min ? {} (Diferenca entre {} e {} foi de {}) ", loja, periodoEmMinuto, notificar, horarioAtual, informacaoVendaLoja.getUltimaAtualizacao(), informacaoVendaLoja.getDiferenca());
 
         return !notificar;
 

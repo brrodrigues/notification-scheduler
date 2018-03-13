@@ -1,8 +1,8 @@
 package br.com.lasa.notificacao.repository;
 
-import br.com.lasa.notificacao.domain.Behavior;
-import br.com.lasa.notificacao.domain.Loja;
-import br.com.lasa.notificacao.domain.Notification;
+import br.com.lasa.notificacao.domain.document.enumaration.Behavior;
+import br.com.lasa.notificacao.domain.document.Loja;
+import br.com.lasa.notificacao.domain.document.Notification;
 import br.com.lasa.notificacao.util.AppConstants;
 import br.com.lasa.notificacao.util.MongoDBUtil;
 import com.mongodb.*;
@@ -22,7 +22,6 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.format.TextStyle;
-import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.Locale;
@@ -57,8 +56,6 @@ public class NotificacaoRepositoryImpl implements NotificacaoRepositoryCustom {
 
         Date dataFrom = Date.from(dataTime.atZone(zoneId).toInstant());
 
-        String dataTimeString = dataTime.truncatedTo(ChronoUnit.MINUTES).toString();
-
         String displayName = dataTime.getDayOfWeek().getDisplayName(TextStyle.SHORT, brazilianLocale).toUpperCase();
 
         StringBuilder $project2 = new StringBuilder("{ $project : { storeIds: 1, eventName: 1, type: 1, intervalTime: 1, storeId: 1, loja: 1, dataReferencia : { $literal : '").append(simpleDateFormat.format(dataFrom)).append("'} , abertura: { $dateToString : { format : '%H:%M' , date : { $add : [ '$loja.horarios.abertura' , { $multiply : [ '$intervalTime' , 1000 , 60]}]}}}, fechamento : { $dateToString : { format : '%H:%M' , date : { $subtract : [ '$loja.horarios.fechamento' , { $multiply : [ '$intervalTime' , 1000 , 60]}]}}}}}");
@@ -92,9 +89,7 @@ public class NotificacaoRepositoryImpl implements NotificacaoRepositoryCustom {
         log.info("Update {} documents ", updated);
 
         return updated;
-
     }
-
 
     @Override
     public int setScheduleAndUuiAndHostnameForMinute(int minute, boolean scheduled, String uuid, String hostname, int limit) {

@@ -1,7 +1,7 @@
 package br.com.lasa.notificacao.service;
 
-import br.com.lasa.notificacao.domain.Conversacao;
-import br.com.lasa.notificacao.domain.Message;
+import br.com.lasa.notificacao.domain.document.Conversacao;
+import br.com.lasa.notificacao.domain.document.Message;
 import br.com.lasa.notificacao.domain.lais.Recipient;
 
 import java.util.Collection;
@@ -17,4 +17,6 @@ public interface ConversacaoService {
     Conversacao iniciarConversa(Recipient profile, String value, String notificationName);
 
     Collection<Conversacao> getConversacoes(String id);
+
+    boolean exists(String s);
 }

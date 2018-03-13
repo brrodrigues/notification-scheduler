@@ -1,5 +1,6 @@
 package br.com.lasa.notificacao.domain;
 
+import br.com.lasa.notificacao.domain.document.enumaration.Behavior;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

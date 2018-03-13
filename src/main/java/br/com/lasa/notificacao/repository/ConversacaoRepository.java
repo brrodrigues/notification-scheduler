@@ -1,8 +1,8 @@
 package br.com.lasa.notificacao.repository;
 
-import br.com.lasa.notificacao.domain.Conversacao;
+import br.com.lasa.notificacao.domain.document.Conversacao;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.repository.MongoRepository;
-import org.springframework.data.mongodb.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.data.rest.core.annotation.RepositoryRestResource;
 import org.springframework.data.rest.core.annotation.RestResource;
@@ -12,14 +12,14 @@ import java.util.List;
 
 @CrossOrigin(origins = "*")
 @RepositoryRestResource(path = "/conversations", itemResourceRel = "conversations", collectionResourceRel = "conversations")
-public interface ConversacaoRepository extends MongoRepository<Conversacao, String >, ConversacaoRepositoryCustom {
+public interface ConversacaoRepository extends MongoRepository<Conversacao, String >, ConversacaoRepositoryCustom{
 
-    @Query("{ref : ?0}")
+    //@Query("{ref : ?0}")
     @RestResource(path = "/findAllByRef", exported = true)
-    public List<Conversacao> findAllByRef(@Param("param") String refParam);
+    public List<Conversacao> findAllByRefOrderByTimestampDesc(@Param(value = "param") String refParam, Pageable pageable);
 
     @RestResource(path = "/findAllById", exported = false)
-    public List<Conversacao> findAllByIdOrderByTimestampDesc( String id);
+    public List<Conversacao> findAllByIdOrderByTimestampDesc(String id);
 
     @Override
     @RestResource(exported = false)

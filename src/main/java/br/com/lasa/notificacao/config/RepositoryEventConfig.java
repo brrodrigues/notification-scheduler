@@ -11,4 +11,5 @@ public class RepositoryEventConfig {
     NotificaoBeforeSaveNotificacaoRepositoryListener personEventHandler() {
         return new NotificaoBeforeSaveNotificacaoRepositoryListener();
     }
+
 }

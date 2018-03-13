@@ -1,6 +1,6 @@
 package br.com.lasa.notificacao.service.external.response;
 
-import br.com.lasa.notificacao.domain.Horario;
+import br.com.lasa.notificacao.domain.document.Horario;
 import lombok.Data;
 import lombok.ToString;
 

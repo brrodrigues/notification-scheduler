@@ -5,16 +5,13 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.Date;
-
-@NoArgsConstructor
 @Builder
-@AllArgsConstructor
 @Data
-public class Message {
+@AllArgsConstructor
+@NoArgsConstructor
+public class Distrito {
 
-    private Date timestamp;
-    private String author;
-    private String message;
+    private String id;
+    private String link;
 
 }

@@ -1,7 +1,7 @@
 package br.com.lasa.notificacao.service;
 
-import br.com.lasa.notificacao.domain.Loja;
-import br.com.lasa.notificacao.domain.UsuarioNotificacao;
+import br.com.lasa.notificacao.domain.document.Loja;
+import br.com.lasa.notificacao.domain.document.UsuarioNotificacao;
 import br.com.lasa.notificacao.domain.lais.BotUser;
 import br.com.lasa.notificacao.domain.lais.Recipient;
 import br.com.lasa.notificacao.repository.LojaRepository;
@@ -35,7 +35,7 @@ public class CadastroUsuarioServiceImpl implements CadastroUsuarioService {
     private String userCreatedMessage;
 
     @Override
-    public String criarCadastro(final CadastroRequest request) {
+    public String criarCadastro(final CadastroRequest request) throws Exception {
 
         Assert.notNull(request, "There is no parameters to create the user. Check parameters sent.");
         Assert.notNull(request.getAddress(), "Attribute address was not found or is null. Check parameters sent.");

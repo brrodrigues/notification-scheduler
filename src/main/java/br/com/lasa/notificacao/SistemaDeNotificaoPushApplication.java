@@ -1,8 +1,8 @@
 package br.com.lasa.notificacao;
 
+import br.com.lasa.logging.LoggingRequestInterceptor;
 import br.com.lasa.notificacao.audit.AppAuditor;
-import br.com.lasa.notificacao.domain.Loja;
-import br.com.lasa.notificacao.domain.UsuarioNotificacao;
+import br.com.lasa.notificacao.domain.document.UsuarioNotificacao;
 import br.com.lasa.notificacao.domain.lais.BotUser;
 import br.com.lasa.notificacao.domain.lais.Conversation;
 import br.com.lasa.notificacao.domain.lais.Recipient;
@@ -12,16 +12,12 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
-import lombok.Builder;
-import lombok.Data;
-import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.conn.ssl.NoopHostnameVerifier;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -38,7 +34,6 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.web.client.RestTemplate;
 
 import javax.sql.DataSource;
-import java.io.IOException;
 import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -51,17 +46,14 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.function.BiConsumer;
 
 @Slf4j
 @EnableScheduling
 @EnableMongoAuditing
-@SpringBootApplication
-@EnableAspectJAutoProxy(proxyTargetClass=true)
+@SpringBootApplication(scanBasePackages = "br.com.lasa")
+@EnableAspectJAutoProxy
 public class SistemaDeNotificaoPushApplication {
 
 	public static void main(String[] args) {
@@ -90,7 +82,10 @@ public class SistemaDeNotificaoPushApplication {
 	}
 	*/
 
-
+	@Bean
+	LoggingRequestInterceptor loggingRequestInterceptor(){
+		return new LoggingRequestInterceptor();
+	}
 
 	@Bean(destroyMethod="shutdown")
 	@Order(1)
@@ -121,6 +116,7 @@ public class SistemaDeNotificaoPushApplication {
 		// TODO desabilitar timestamp passa a usar uma notação
 		// ISO8061-compilant, acho que pode ser um bom formato pode ser definido outro formato também, talvez com o timezone mais simples usando a letra Z
 		mapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
+
 		// habilitar loose/non-standard format
 		// to allow C/C++ style comments in JSON (non-standard, disabled by
 		// default)
@@ -176,7 +172,6 @@ public class SistemaDeNotificaoPushApplication {
 		//new Recipient("mid.$cAAA7URkk_Xxmi7uHeVgWnY_Fi0fm", "facebook", BotUser.builder().id("1696672097072999").name("Jônatas Ricardo").montarEstrutura(), BotUser.builder().id("107349120032554").name("LAIS-SAC-HML").montarEstrutura(), Conversacao.builder().isGroup(false).id("1696672097072999-107349120032554").montarEstrutura(), "https://facebook.botframework.com/")
 
 		Recipient recipient = new Recipient("mid.$cAAA7URkk_Xxmi7uHeVgWnY_Fi0fm", "facebook", BotUser.builder().id("1696672097072999").name("Jônatas Ricardo").build(), BotUser.builder().id("107349120032554").name("LAIS-SAC-HML").build(), Conversation.builder().isGroup(false).id("1696672097072999-107349120032554").build(), "https://facebook.botframework.com/");
-
 		return new UsuarioNotificacao(recipient.getUser().getId(), "Bruno Rodrigues","L0001","", recipient, true, null);
 	}
 
@@ -207,7 +202,9 @@ public class SistemaDeNotificaoPushApplication {
 		HttpComponentsClientHttpRequestFactory requestFactory = new HttpComponentsClientHttpRequestFactory();
 		requestFactory.setHttpClient(httpClient);
 
-		return new RestTemplate(requestFactory);
+		RestTemplate restTemplate = new RestTemplate(requestFactory);
+		restTemplate.setInterceptors(Arrays.asList());
+		return restTemplate;
 	}
 
 	@Bean(name = AppConstants.APP_URL)

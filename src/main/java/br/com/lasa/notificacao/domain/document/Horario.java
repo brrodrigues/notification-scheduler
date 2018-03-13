@@ -1,4 +1,4 @@
-package br.com.lasa.notificacao.domain;
+package br.com.lasa.notificacao.domain.document;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -21,7 +21,6 @@ public class Horario {
     //@JsonFormat(pattern = "yyyyMMdd'T'hh:mm:ss.SSS", timezone = "UTC")
     @DateTimeFormat(pattern = "yyyyMMdd'T'hh:mm:ss.SSS", iso = DateTimeFormat.ISO.DATE_TIME)
     private Date fechamento;
-
 
     public String getDia() {
         return dia;

@@ -1,6 +1,6 @@
 package br.com.lasa.notificacao.service;
 
-import br.com.lasa.notificacao.domain.UsuarioNotificacao;
+import br.com.lasa.notificacao.domain.document.UsuarioNotificacao;
 
 import java.util.List;
 

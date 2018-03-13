@@ -1,6 +1,6 @@
 package br.com.lasa.notificacao.service;
 
-import br.com.lasa.notificacao.domain.Notification;
+import br.com.lasa.notificacao.domain.document.Notification;
 import org.springframework.web.client.HttpStatusCodeException;
 
 public interface EnvioNoticacaoService {

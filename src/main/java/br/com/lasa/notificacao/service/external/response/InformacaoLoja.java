@@ -1,45 +1,36 @@
 package br.com.lasa.notificacao.service.external.response;
 
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import java.util.Collection;
+
+
+@JsonAutoDetect(creatorVisibility = JsonAutoDetect.Visibility.PUBLIC_ONLY )
 public class InformacaoLoja {
 
     private Integer loja;
     private String centro;
-    @JsonProperty(value = "nome_loja")
+
     private String nomeLoja;
-    @JsonProperty(value = "nome_comb")
+
     private String nomeCombinado;
     private String regiao;
-    @JsonProperty(value = "id_distrito")
+    private String descricaoRegiao;
     private String distrito;
-    @JsonProperty(value = "desc_distrito")
     private String descricaoDistrito;
-    @JsonProperty(value = "hora_abertura")
-    private String horaAbertura;
-    @JsonProperty(value = "hora_fechamento")
-    private String horaFechamento;
-    @JsonProperty(value = "dia_semana")
-    private Integer diaSemana;
-    @JsonProperty(value = "dia_ext_semana")
-    private String diaExtensoSemana;
-    private Integer situacao;
-    private String status;
-    @JsonProperty(value = "nome_tipo")
+    private Collection<HorarioDiario> horarios;
     private String nomeTipo;
-    @JsonProperty(value = "sem_horario_verao")
     private Integer semHorarioVerao;
-    @JsonProperty(value = "com_horario_verao")
     private Integer comHorarioVerao;
-    @JsonProperty(value = "tipo_pdv")
     private String tipoPDV;
-    @JsonProperty(value = "cod_estado")
     private String uf;
+    private String cidade;
     private String bairro;
     private String cep;
     private String endereco;
-    @JsonProperty(value = "horario_local")
+    private String quantidadeLojaCidade;
     private String horarioLocal;
 
     public Integer getLoja() {
@@ -62,6 +53,7 @@ public class InformacaoLoja {
         return nomeLoja;
     }
 
+    @JsonProperty(value = "nome_loja")
     public void setNomeLoja(String nomeLoja) {
         this.nomeLoja = nomeLoja;
     }
@@ -70,6 +62,7 @@ public class InformacaoLoja {
         return nomeCombinado;
     }
 
+    @JsonProperty(value = "nome_comb")
     public void setNomeCombinado(String nomeCombinado) {
         this.nomeCombinado = nomeCombinado;
     }
@@ -82,10 +75,20 @@ public class InformacaoLoja {
         this.regiao = regiao;
     }
 
+    public String getDescricaoRegiao() {
+        return descricaoRegiao;
+    }
+
+    @JsonProperty(value = "nome_regiao")
+    public void setDescricaoRegiao(String descricaoRegiao) {
+        this.descricaoRegiao = descricaoRegiao;
+    }
+
     public String getDistrito() {
         return distrito;
     }
 
+    @JsonProperty(value = "id_distrito")
     public void setDistrito(String distrito) {
         this.distrito = distrito;
     }
@@ -94,62 +97,25 @@ public class InformacaoLoja {
         return descricaoDistrito;
     }
 
+    @JsonProperty(value = "desc_distrito")
     public void setDescricaoDistrito(String descricaoDistrito) {
         this.descricaoDistrito = descricaoDistrito;
     }
 
-    public String getHoraAbertura() {
-        return horaAbertura;
+    public Collection<HorarioDiario> getHorarios() {
+        return horarios;
     }
 
-    public void setHoraAbertura(String horaAbertura) {
-        this.horaAbertura = horaAbertura;
-    }
-
-    public String getHoraFechamento() {
-        return horaFechamento;
-    }
-
-    public void setHoraFechamento(String horaFechamento) {
-        this.horaFechamento = horaFechamento;
-    }
-
-    public Integer getDiaSemana() {
-        return diaSemana;
-    }
-
-    public void setDiaSemana(Integer diaSemana) {
-        this.diaSemana = diaSemana;
-    }
-
-    public String getDiaExtensoSemana() {
-        return diaExtensoSemana;
-    }
-
-    public void setDiaExtensoSemana(String diaExtensoSemana) {
-        this.diaExtensoSemana = diaExtensoSemana;
-    }
-
-    public Integer getSituacao() {
-        return situacao;
-    }
-
-    public void setSituacao(Integer situacao) {
-        this.situacao = situacao;
-    }
-
-    public String getStatus() {
-        return status;
-    }
-
-    public void setStatus(String status) {
-        this.status = status;
+    @JsonProperty(value = "dia_semana")
+    public void setHorarios(Collection<HorarioDiario> horarios) {
+        this.horarios = horarios;
     }
 
     public String getNomeTipo() {
         return nomeTipo;
     }
 
+    @JsonProperty(value = "nome_tipo")
     public void setNomeTipo(String nomeTipo) {
         this.nomeTipo = nomeTipo;
     }
@@ -158,6 +124,7 @@ public class InformacaoLoja {
         return semHorarioVerao;
     }
 
+    @JsonProperty(value = "sem_horario_verao")
     public void setSemHorarioVerao(Integer semHorarioVerao) {
         this.semHorarioVerao = semHorarioVerao;
     }
@@ -166,6 +133,7 @@ public class InformacaoLoja {
         return comHorarioVerao;
     }
 
+    @JsonProperty(value = "com_horario_verao")
     public void setComHorarioVerao(Integer comHorarioVerao) {
         this.comHorarioVerao = comHorarioVerao;
     }
@@ -174,6 +142,7 @@ public class InformacaoLoja {
         return tipoPDV;
     }
 
+    @JsonProperty(value = "tipo_pdv")
     public void setTipoPDV(String tipoPDV) {
         this.tipoPDV = tipoPDV;
     }
@@ -182,8 +151,17 @@ public class InformacaoLoja {
         return uf;
     }
 
+    @JsonProperty(value = "cod_estado")
     public void setUf(String uf) {
         this.uf = uf;
+    }
+
+    public String getCidade() {
+        return cidade;
+    }
+
+    public void setCidade(String cidade) {
+        this.cidade = cidade;
     }
 
     public String getBairro() {
@@ -214,6 +192,16 @@ public class InformacaoLoja {
         return horarioLocal;
     }
 
+    public String getQuantidadeLojaCidade() {
+        return quantidadeLojaCidade;
+    }
+
+    @JsonProperty( value = "quant_loja_cidade")
+    public void setQuantidadeLojaCidade(String quantidadeLojaCidade) {
+        this.quantidadeLojaCidade = quantidadeLojaCidade;
+    }
+
+    @JsonProperty(value = "horario_local")
     public void setHorarioLocal(String horarioLocal) {
         this.horarioLocal = horarioLocal;
     }

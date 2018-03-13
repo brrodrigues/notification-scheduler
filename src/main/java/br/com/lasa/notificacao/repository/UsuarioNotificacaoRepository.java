@@ -1,6 +1,6 @@
 package br.com.lasa.notificacao.repository;
 
-import br.com.lasa.notificacao.domain.UsuarioNotificacao;
+import br.com.lasa.notificacao.domain.document.UsuarioNotificacao;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.data.mongodb.repository.Query;
 import org.springframework.data.repository.query.Param;

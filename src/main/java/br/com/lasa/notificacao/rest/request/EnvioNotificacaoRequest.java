@@ -17,6 +17,7 @@ import java.util.Map;
 public class EnvioNotificacaoRequest implements Serializable {
 
     private String messageType;
+    private Boolean skipRules;
     private Map<String, Object> metadata;
     private String messageLink;
     private Collection<Recipient> recipients ;

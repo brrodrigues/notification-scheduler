@@ -35,7 +35,7 @@ public class CadastrarUsuarioController {
     private CadastroUsuarioService cadastroUsuarioService;
 
     @PostMapping
-    public ResponseEntity<String> send(@RequestBody CadastroRequest request) {
+    public ResponseEntity<String> send(@RequestBody CadastroRequest request) throws Exception {
         log.info("received :: {}", request);
 
         if (Objects.isNull(request)) {
@@ -48,7 +48,10 @@ public class CadastrarUsuarioController {
             return ResponseEntity.badRequest().contentType(MediaType.APPLICATION_JSON).body("O atributo address nao foi encontrado ou esta nulo");
         }
 
-        String message = cadastroUsuarioService.criarCadastro(request);
+        String message = null;
+
+        message = cadastroUsuarioService.criarCadastro(request);
+
 
         return ResponseEntity.ok(message);
     }

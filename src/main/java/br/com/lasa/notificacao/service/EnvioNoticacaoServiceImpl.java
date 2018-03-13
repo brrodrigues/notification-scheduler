@@ -1,6 +1,6 @@
 package br.com.lasa.notificacao.service;
 
-import br.com.lasa.notificacao.domain.*;
+import br.com.lasa.notificacao.domain.document.*;
 import br.com.lasa.notificacao.domain.lais.Recipient;
 import br.com.lasa.notificacao.rest.ConversacaoCustomController;
 import br.com.lasa.notificacao.rest.request.EnvioNotificacaoRequest;
@@ -139,7 +139,8 @@ public class EnvioNoticacaoServiceImpl implements EnvioNoticacaoService {
             EnvioNotificacaoRequest envioNotificacaoRequest = EnvioNotificacaoRequest.
                     builder().
                     messageType(notification.getType().name()).
-                    metadata(Collections.singletonMap("intervalo", notification.getIntervalTime())).
+                    skipRules(true).
+                    //metadata(Collections.singletonMap("intervalo", notification.getIntervalTime())).
                     messageLink(URL).
                     recipients(recipients).
                     build();
@@ -158,11 +159,10 @@ public class EnvioNoticacaoServiceImpl implements EnvioNoticacaoService {
                 } else {
                     log.warn("Occur problem to send alert to {} in {} ms.", profile.getUser().getName(), endSend - startSend);
                 }
-            }catch (HttpStatusCodeException ex) {
+            } catch (HttpStatusCodeException ex) {
                 LOGGER.error("ERR201803011533 :: Nao conseguimos enviar a notificacao para LAIS com a conversa [ID={}] (Status Code {}) - Message {}", conversacaoId, ex.getStatusCode(), ex.getMessage());
                 conversacaoService.enviarMensagem(conversacaoId, "Sistema", "Desculpe, nao consegui enviar a notificação para LAIS por falhar de comunicacao.");
             }catch (Exception ex) {
-                LOGGER.error("ERR201803011534 :: Falha grave ao enviar a notificacao para LAIS com a conversa [ID={}]. {}", conversacaoId, ex.getMessage());
                 LOGGER.error("ERR201803011534 :: Falha grave ao enviar a notificacao para LAIS com a conversa [ID={}]. {}", conversacaoId, ex.getMessage());
                 conversacaoService.enviarMensagem(conversacaoId, "Sistema", "Desculpe, nao consegui enviar a notificação para LAIS por falhar de comunicacao.");
             }

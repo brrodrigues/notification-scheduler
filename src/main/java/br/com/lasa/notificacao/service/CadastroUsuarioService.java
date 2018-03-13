@@ -6,6 +6,6 @@ import org.springframework.transaction.annotation.Transactional;
 public interface CadastroUsuarioService {
 
     @Transactional
-    String criarCadastro(CadastroRequest request);
+    String criarCadastro(CadastroRequest request) throws Exception;
 
 }

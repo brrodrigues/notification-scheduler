@@ -1,6 +1,6 @@
 package br.com.lasa.notificacao.service;
 
-import br.com.lasa.notificacao.domain.Notification;
+import br.com.lasa.notificacao.domain.document.Notification;
 import br.com.lasa.notificacao.repository.NotificacaoRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.bson.types.ObjectId;

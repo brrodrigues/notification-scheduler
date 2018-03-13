@@ -1,6 +1,6 @@
 package br.com.lasa.notificacao.config;
 
-import br.com.lasa.notificacao.domain.Message;
+import br.com.lasa.notificacao.domain.document.Message;
 import br.com.lasa.notificacao.domain.lais.BotUser;
 import br.com.lasa.notificacao.domain.lais.Conversation;
 import br.com.lasa.notificacao.domain.lais.Recipient;

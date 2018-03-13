@@ -2,6 +2,6 @@ package br.com.lasa.notificacao.constants;
 
 public class HttpHeaderConstants {
 
-    public final static String REASON = "REASON";
+    public final static String REASON = "reason";
 
 }
