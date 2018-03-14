@@ -1,17 +1,20 @@
 package br.com.lasa.notificacao.service;
 
 import br.com.lasa.notificacao.domain.document.Loja;
-import br.com.lasa.notificacao.repository.LojaRepository;
 import br.com.lasa.notificacao.domain.service.RegiaoDistrito;
 import br.com.lasa.notificacao.domain.service.RegiaoDistritoCidade;
 import br.com.lasa.notificacao.domain.service.RegiaoDistritoCidadeLoja;
+import br.com.lasa.notificacao.repository.LojaRepository;
 import br.com.lasa.notificacao.service.external.CalendarioDeLojaExternalService;
 import br.com.lasa.notificacao.service.external.response.CalendarioDeLoja;
+import br.com.lasa.notificacao.service.external.response.InformacaoLoja;
 import br.com.lasa.notificacao.util.DateTimeFormatterUtils;
 import br.com.lasa.notificacao.util.JsonMap;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.data.domain.Example;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
 
@@ -41,7 +44,7 @@ public class LojaServiceImpl implements LojaService {
 
     private static Map<String, Object> mapearInformacaoLoja(Loja loja) {
         Map<String, Object> maps = new HashMap<>();
-        maps.put("numero", loja.getId());
+            maps.put("numero", loja.getId());
         maps.put("nome", loja.getNomeLoja());
         Object tipoLoja = JsonMap.searchFromXPath(loja.getMetadata(), "$.adicional.nome_tipo");
         maps.put("tipoLoja", tipoLoja);
@@ -94,7 +97,7 @@ public class LojaServiceImpl implements LojaService {
      * @return
     */
     @Override
-    public RegiaoDistrito buscarLojaPorRegiao(String regiaoId, String tipoLoja) {
+    public List<RegiaoDistrito> buscarLojaPorRegiao(String regiaoId, String tipoLoja) {
 
         Assert.notNull(regiaoId, "Informe o numero");
 
@@ -106,24 +109,31 @@ public class LojaServiceImpl implements LojaService {
 
         final List<Loja> allByRegiao = lojaRepository.findAll(example);
 
+        List<RegiaoDistrito> regiaoDistritos = new ArrayList<>();
+
         if (allByRegiao != null && !allByRegiao.isEmpty()) {
 
-            Supplier<Stream<Loja>> stream = () -> Stream.of(allByRegiao.toArray(new Loja[allByRegiao.size()]));
+            //Agrupa as lojas por regiac
+            Map<String, List<Loja>> regiao = allByRegiao.stream().collect(Collectors.groupingBy(o -> String.valueOf(((InformacaoLoja) o.getMetadata().get("adicional")).getRegiao())));
 
-            List<Map<String, Object>> lojas      = getLojas(stream.get());
-            Collection<String> distritoList = getListFromJsonPath(stream.get(), "$.metadata.adicional.id_distrito");
-            String nomeRegiao             = getValue(stream.get(), "$.metadata.adicional.nome_regiao");
-            String idRegiao             = getValue(stream.get(), "$.metadata.adicional.regiao");
-            RegiaoDistrito regiaoDistrito = RegiaoDistrito.builder().idRegiao(idRegiao).nomeRegiao(nomeRegiao).distritos(distritoList).lojas(lojas).build();
+            regiao.forEach((s, lojas) -> {
+                Supplier<Stream<Loja>> stream = () -> Stream.of(lojas.toArray(new Loja[lojas.size()]));
+                List<Map<String, Object>> lojaMap  = getLojas(stream.get());
+                Collection<String> distritoList    = getListFromJsonPath(stream.get(), "$.metadata.adicional.id_distrito");
+                String nomeRegiao                  = getValue(stream.get(), "$.metadata.adicional.nome_regiao");
+                String idRegiao                    = getValue(stream.get(), "$.metadata.adicional.regiao");
+                RegiaoDistrito regiaoDistrito = RegiaoDistrito.builder().idRegiao(idRegiao).nomeRegiao(nomeRegiao).distritos(distritoList).lojas(lojaMap).build();
+                regiaoDistritos.add(regiaoDistrito);
+            });
 
-            return regiaoDistrito;
         }
 
-        return new RegiaoDistrito();
+        return regiaoDistritos;
     }
 
 
 
+    @Override
     public RegiaoDistritoCidade buscarLojaPorRegiaoEDistrito(String regiaoId, String distritoId, String tipoLoja) {
 
         Assert.notNull(regiaoId, "Nao foi localizado o codigo da regiao para consultar a relacao de lojas");
@@ -134,6 +144,8 @@ public class LojaServiceImpl implements LojaService {
         Loja lojaExample = Loja.builder().metadata(metadata).build();
 
         Example<Loja> example = Example.of(lojaExample);
+
+        final List<Loja> allByRegiao = lojaRepository.findAll(example);
 
         final List<Loja> allByRegiaoAndDistrito = lojaRepository.findAll(example);
 
@@ -254,5 +266,13 @@ public class LojaServiceImpl implements LojaService {
         return nomeRegiao;
     }
 
+    @Override
+    public Page<Loja> findAll(Pageable pageable) {
+        return lojaRepository.findAll(pageable);
+    }
 
+    @Override
+    public void carregarDadosLoja() {
+
+    }
 }

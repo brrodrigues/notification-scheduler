@@ -27,6 +27,7 @@ public class Notification {
     private ObjectId id;
     private String eventName;
     private Behavior type;
+
     @JsonFormat(pattern = "dd/MM/yyyy HH:mm:ss", shape = JsonFormat.Shape.STRING, timezone = "America/Sao_Paulo")
     private Date scheduleTime;
     @JsonFormat(pattern = "dd/MM/yyyy HH:mm:ss", shape = JsonFormat.Shape.STRING, timezone = "America/Sao_Paulo")
@@ -36,6 +37,9 @@ public class Notification {
     private Integer intervalTime = 0;
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private boolean scheduled;
+    @JsonFormat(pattern = "dd/MM/yyyy HH:mm:ss", shape = JsonFormat.Shape.STRING, timezone = "America/Sao_Paulo")
+    private Date triggerTime;
+    private Boolean enabled = true;
     private String hostname;
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private String uuid;

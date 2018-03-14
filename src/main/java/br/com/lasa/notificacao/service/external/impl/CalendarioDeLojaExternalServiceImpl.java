@@ -29,6 +29,8 @@ import org.springframework.web.client.RestTemplate;
 import java.time.*;
 import java.time.format.TextStyle;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.stream.Collectors;
 
 @Component
@@ -63,6 +65,30 @@ public class CalendarioDeLojaExternalServiceImpl implements CalendarioDeLojaExte
     @Qualifier(AppConstants.BRAZILIAN_LOCALE)
     private Locale brazilianLocale;
 
+    @Override
+    public List<CalendarioDeLoja> buscarCalendarioDaSemanaDeTodasLoja() {
+
+        LOGGER.info("Buscando calendario de todas as loja da semana atual");
+        List<InformacaoLoja> informacaoLojaList = getInformacaoLojas();
+
+        Assert.notNull(informacaoLojaList, "Nao foi localizado lojas para buscar o calendario de loja da semana");
+
+        ConcurrentMap<InformacaoLoja, Collection<InformacaoFeriadoLoja>> map = new ConcurrentHashMap();
+
+        for (InformacaoLoja informacaoLoja : informacaoLojaList) {
+            Integer numeroLoja = informacaoLoja.getLoja();
+            Collection<InformacaoFeriadoLoja> feriados = getInformacaoFeriadoLoja(String.valueOf(numeroLoja));
+            map.put(informacaoLoja, feriados);
+        }
+
+        List<CalendarioDeLoja> calendarios = map.entrySet().
+                stream().
+                map(this::transformToCalendarioDeLoja).
+                collect(Collectors.toList());
+
+        return calendarios;
+    }
+
     /**
      * Metodo que monta todas a estrutura de horario da loja, localizando, inclusive os feriados, caso exista.
      * @param lojaId Identificador do numero da Loja
@@ -76,6 +102,13 @@ public class CalendarioDeLojaExternalServiceImpl implements CalendarioDeLojaExte
 
         LOGGER.info("Buscando calendario de feriado da loja {}", lojaId);
         Collection<InformacaoFeriadoLoja> informacaoFeriadoLojaList = getInformacaoFeriadoLoja(lojaId);
+
+        CalendarioDeLoja calendarioDeLoja = montarCalendarioLoja(lojaId, responsavelLoja, informacaoLojaList, informacaoFeriadoLojaList);
+
+        return calendarioDeLoja;
+    }
+
+    private CalendarioDeLoja montarCalendarioLoja(String lojaId, String responsavelLoja, InformacaoLoja informacaoLojaList, Collection<InformacaoFeriadoLoja> informacaoFeriadoLojaList) {
 
         LOGGER.info("Montando quadro de horario para padronizar a saide de informacoes...");
         List<Horario> horarios = montarQuadroDeHorario(informacaoLojaList);
@@ -95,7 +128,6 @@ public class CalendarioDeLojaExternalServiceImpl implements CalendarioDeLojaExte
         calendarioDeLoja.setLojaId(lojaId);
         calendarioDeLoja.setNomeResponsavel(responsavelLoja);
         calendarioDeLoja.setMetadata(metadata);
-
         return calendarioDeLoja;
     }
 
@@ -146,6 +178,27 @@ public class CalendarioDeLojaExternalServiceImpl implements CalendarioDeLojaExte
         }
 
         InformacaoLoja body = new InformacaoLoja();
+
+        if (exchange.getStatusCode() == HttpStatus.OK){
+            body = exchange.getBody();
+        }
+
+        return body;
+    }
+
+    private List<InformacaoLoja> getInformacaoLojas(){
+        HttpEntity entity = HttpEntity.EMPTY;
+        String url = calendarioLojaUrl + "/todas";
+        ResponseEntity<List<InformacaoLoja>> exchange = ResponseEntity.notFound().build();
+        try {
+            exchange = template.exchange(url, HttpMethod.GET, entity, new ParameterizedTypeReference<List<InformacaoLoja>>(){});
+        }catch (HttpClientErrorException ex){
+            LOGGER.error("ERR123 :: Erro ao consultar o calendario de loja da loja ", ex);
+            LOGGER.warn("ERR123  :: Nao foi possui acessar a URL {} para o calendario de loja {}", feriadoLojaUrl, "todas", ex.getStatusCode() );
+            return Arrays.asList();
+        }
+
+        List<InformacaoLoja> body = new ArrayList<>();
 
         if (exchange.getStatusCode() == HttpStatus.OK){
             body = exchange.getBody();
@@ -240,4 +293,12 @@ public class CalendarioDeLojaExternalServiceImpl implements CalendarioDeLojaExte
         return horarios;
     }
 
+    private CalendarioDeLoja transformToCalendarioDeLoja(Map.Entry<InformacaoLoja, Collection<InformacaoFeriadoLoja>> informacaoLojaCollectionEntry) {
+        InformacaoLoja key = informacaoLojaCollectionEntry.getKey();
+
+        LOGGER.info("Montando quadro de horario para padronizar a saide de informacoes...");
+        CalendarioDeLoja calendarioDeLoja = montarCalendarioLoja(key.getNomeLoja(), "", key, informacaoLojaCollectionEntry.getValue());
+
+        return calendarioDeLoja;
+    }
 }

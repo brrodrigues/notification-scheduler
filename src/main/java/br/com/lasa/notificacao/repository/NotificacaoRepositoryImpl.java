@@ -58,7 +58,7 @@ public class NotificacaoRepositoryImpl implements NotificacaoRepositoryCustom {
 
         String displayName = dataTime.getDayOfWeek().getDisplayName(TextStyle.SHORT, brazilianLocale).toUpperCase();
 
-        StringBuilder $project2 = new StringBuilder("{ $project : { storeIds: 1, eventName: 1, type: 1, intervalTime: 1, storeId: 1, loja: 1, dataReferencia : { $literal : '").append(simpleDateFormat.format(dataFrom)).append("'} , abertura: { $dateToString : { format : '%H:%M' , date : { $add : [ '$loja.horarios.abertura' , { $multiply : [ '$intervalTime' , 1000 , 60]}]}}}, fechamento : { $dateToString : { format : '%H:%M' , date : { $subtract : [ '$loja.horarios.fechamento' , { $multiply : [ '$intervalTime' , 1000 , 60]}]}}}}}");
+        StringBuilder $project2 = new StringBuilder("{ $project : { storeIds: 1, eventName: 1, type: 1, intervalTime: 1, storeId: 1, loja: 1, 'triggeredByTime' : { $eq : [ {'$dateToString' : { 'format' : '%Y%m%d%H%M' , 'date' :  '$triggerTime' }} , {'$literal' : {'").append(simpleDateFormat.format(dataFrom)).append("'} ]}, abertura: { $dateToString : { format : '%H:%M' , date : { $add : [ '$loja.horarios.abertura' , { $multiply : [ '$intervalTime' , 1000 , 60]}]}}}, fechamento : { $dateToString : { format : '%H:%M' , date : { $subtract : [ '$loja.horarios.fechamento' , { $multiply : [ '$intervalTime' , 1000 , 60]}]}}}}}");
 
         Cursor aggregate = mongoTemplate.getCollection(collectionName).aggregate(
                 Arrays.asList(
@@ -69,7 +69,7 @@ public class NotificacaoRepositoryImpl implements NotificacaoRepositoryCustom {
                         MongoDBUtil.toDBObject("{ $unwind: '$loja.horarios'}"),
                         MongoDBUtil.toDBObject( String.format("{ $match: { 'loja.horarios.dia' : '%s' }}", displayName)),
                         MongoDBUtil.toDBObject( $project2.toString()),
-                        MongoDBUtil.toDBObject( String.format("{ $match : { $or : [ {$and : [ {'abertura' : { $eq : '%s' } } , { type: {$eq : 'SPECIFIC_TIME_BEFORE' }}  ] }, {$and : [ {'fechamento' : { $eq : '%s' } } , { type: {$eq : 'SPECIFIC_TIME_AFTER' }} ]}]}}", minute.toString(), minute.toString()))),
+                        MongoDBUtil.toDBObject( String.format("{ $match : { $or : [ {$and : [ {'abertura' : { $eq : '%s' } } , { type: {$eq : 'SPECIFIC_TIME_BEFORE' }}  ] }, {$and : [ {'fechamento' : { $eq : '%s' } } , { type: {$eq : 'SPECIFIC_TIME_AFTER' }}, { 'triggeredByTime' : { '$eq' : true}} ]}]}}", minute.toString(), minute.toString()))),
                 AggregationOptions.builder().outputMode(AggregationOptions.OutputMode.CURSOR).allowDiskUse(true).build());
 
         int updated = 0;
