@@ -13,8 +13,6 @@ public interface NotificacaoService {
 
     List<Notification> buscarNotificacaoNaoProgramada(LocalDateTime scheduleTime);
 
-    List<Notification> buscarNotificacaoNaoProgramada(int minute);
-
     void releaseAllByHostname(String hostAddress);
 
     void setScheduleFor(ObjectId id, boolean schedule);

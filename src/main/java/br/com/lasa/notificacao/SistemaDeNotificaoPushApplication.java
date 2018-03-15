@@ -1,6 +1,5 @@
 package br.com.lasa.notificacao;
 
-import br.com.lasa.logging.LoggingRequestInterceptor;
 import br.com.lasa.notificacao.audit.AppAuditor;
 import br.com.lasa.notificacao.domain.document.UsuarioNotificacao;
 import br.com.lasa.notificacao.domain.lais.BotUser;
@@ -26,6 +25,7 @@ import org.springframework.core.annotation.Order;
 import org.springframework.data.domain.AuditorAware;
 import org.springframework.data.mongodb.config.EnableMongoAuditing;
 import org.springframework.http.MediaType;
+import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -81,11 +81,6 @@ public class SistemaDeNotificaoPushApplication {
 		});
 	}
 	*/
-
-	@Bean
-	LoggingRequestInterceptor loggingRequestInterceptor(){
-		return new LoggingRequestInterceptor();
-	}
 
 	@Bean(destroyMethod="shutdown")
 	@Order(1)
@@ -182,7 +177,7 @@ public class SistemaDeNotificaoPushApplication {
 	}
 
 	@Bean
-	RestTemplate restTemplate() throws KeyStoreException, NoSuchAlgorithmException, KeyManagementException {
+	RestTemplate restTemplate(@Autowired ClientHttpRequestInterceptor clientHttpRequestInterceptor) throws KeyStoreException, NoSuchAlgorithmException, KeyManagementException {
 
 		/*
 		TrustStrategy acceptingTrustStrategy = (X509Certificate[] chain, String authType) -> true;
@@ -203,7 +198,7 @@ public class SistemaDeNotificaoPushApplication {
 		requestFactory.setHttpClient(httpClient);
 
 		RestTemplate restTemplate = new RestTemplate(requestFactory);
-		restTemplate.setInterceptors(Arrays.asList());
+		//restTemplate.setInterceptors(Arrays.asList(clientHttpRequestInterceptor));
 		return restTemplate;
 	}
 

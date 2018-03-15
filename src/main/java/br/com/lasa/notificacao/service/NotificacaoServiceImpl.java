@@ -54,22 +54,6 @@ public class NotificacaoServiceImpl implements NotificacaoService {
     }
 
     @Override
-    @Transactional
-    public List<Notification> buscarNotificacaoNaoProgramada(int minute) {
-        log.info("Finding events no scheduling by specifiedScheduleTime");
-        String uuid = UUID.randomUUID().toString();
-        String hostAddress = null;
-        try {
-            hostAddress = InetAddress.getLocalHost().getHostAddress();
-        } catch (UnknownHostException e) {
-            e.printStackTrace();
-        }
-
-        notificacaoRepository.setScheduleAndUuiAndHostnameForMinute(minute,true, uuid , hostAddress, 2);
-        return notificacaoRepository.findAllByUuid(uuid);
-    }
-
-    @Override
     public void releaseAllByHostname(String hostAddress) {
         notificacaoRepository.releaseNotificacaoByHostname(hostAddress);
     }

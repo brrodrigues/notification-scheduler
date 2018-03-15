@@ -60,12 +60,13 @@ public class NotificacaoRepositoryImpl implements NotificacaoRepositoryCustom {
         StringBuilder $project = new StringBuilder("{ $project : {").
                 append(" storeIds: 1").
                 append(", eventName: 1").
+                append(", scheduledTime: 1").
                 append(", type: 1").
                 append(", intervalTime: 1").
                 append(", storeId: 1").
                 append(", loja: 1 ").
                 append(", triggerByIntervalTime : { $or : [ {$cond : { if: { $eq: [ '$intervalTime', 1] }, then: true, else: false }}, {$eq   : [ {mod : [ {$literal: ").append(minute.getMinute()).append("} , {$cond: { if: {$eq: ['$intervalTime', 0]}, then: -1, else: '$intervalTime' }}]}, 0 ]}]}").
-                append(", triggeredByTime : { $eq : [ { $dateToString : { 'format' : '%Y%m%d%H%M' , 'date' :  '$triggerTime' }} , { $literal : '").append(yyyyMMddHHmm).append("' } ]}").
+                append(", triggeredByTime : { $eq : [ { $dateToString : { 'format' : '%Y%m%d%H%M' , 'date' :  '$scheduledTime' }} , { $literal : '").append(yyyyMMddHHmm).append("' } ]}").
                 append(", abertura   : { $dateToString : { format : '%H:%M' , date : { $add : [ '$loja.horarios.abertura' , { $multiply : [ '$intervalTime' , 1000 , 60]}]}}}").
                 append(", fechamento : { $dateToString : { format : '%H:%M' , date : { $subtract : [ '$loja.horarios.fechamento' , { $multiply : [ '$intervalTime' , 1000 , 60]}]}}}}}");
 
@@ -74,7 +75,7 @@ public class NotificacaoRepositoryImpl implements NotificacaoRepositoryCustom {
                         //MongoDBUtil.toDBObject("{ $match : { type : { $not : { $eq : 'INTERVAL_TIME'}}}}"),
                         MongoDBUtil.toDBObject("{ $unwind: '$storeIds'}"),
                         MongoDBUtil.toDBObject( String.format("{ $lookup : { from : '%s' , localField: 'storeIds', foreignField: '_id' , as : 'storeInfo'}}", lojaCollectionName)),
-                        MongoDBUtil.toDBObject("{ $project : { storeIds: 1, eventName : 1, type : 1, intervalTime : 1, storeId : 1,  loja : { $arrayElemAt: [ '$storeInfo', 0 ] } } }"),
+                        MongoDBUtil.toDBObject("{ $project : { scheduledTime: 1, storeIds: 1, eventName : 1, type : 1, intervalTime : 1, storeId : 1,  loja : { $arrayElemAt: [ '$storeInfo', 0 ] } } }"),
                         MongoDBUtil.toDBObject("{ $unwind: '$loja.horarios'}"),
                         MongoDBUtil.toDBObject( String.format("{ $match: { 'loja.horarios.dia' : '%s' }}", displayName)),
                         MongoDBUtil.toDBObject( $project.toString()),
@@ -180,7 +181,7 @@ public class NotificacaoRepositoryImpl implements NotificacaoRepositoryCustom {
         BasicDBObject multiplyDBObject = new BasicDBObject();
         multiplyDBObject.put("$multiply", Arrays.asList("$intervalTime", 1000, 60)); // Transforma o minuto para milisegundo
         BasicDBObject subtractDBObject = new BasicDBObject();
-        subtractDBObject.put("$subtract", Arrays.asList("$scheduleTime", multiplyDBObject)); //Adiciona dentro de funcao $subtract
+        subtractDBObject.put("$subtract", Arrays.asList("$scheduledTime", multiplyDBObject)); //Adiciona dentro de funcao $subtract
         BasicDBObject dateToStringValue = new BasicDBObject();
         dateToStringValue.put("format", "%H:%M");
         dateToStringValue.put("date", subtractDBObject);

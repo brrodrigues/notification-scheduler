@@ -18,6 +18,14 @@ public class RegiaoDistritoCidade {
     private String idDistrito;
     private String nomeDistrito;
     private List<Map<String,Object>> lojas;
-    private Collection<String> cidades;
+    private Collection<Cidade> cidades;
 
+    @ToString
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class Cidade {
+        String id;
+    }
+    
 }

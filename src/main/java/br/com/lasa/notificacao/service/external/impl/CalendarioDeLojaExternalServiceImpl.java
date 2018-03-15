@@ -165,7 +165,7 @@ public class CalendarioDeLojaExternalServiceImpl implements CalendarioDeLojaExte
         return lojas;
     }
 
-    private InformacaoLoja getInformacaoLoja(String lojaId){
+    private InformacaoLoja getInformacaoLoja(String lojaId) {
         HttpEntity entity = HttpEntity.EMPTY;
         String url = calendarioLojaUrl + "/" + lojaId;
         ResponseEntity<InformacaoLoja> exchange = ResponseEntity.notFound().build();
@@ -175,7 +175,10 @@ public class CalendarioDeLojaExternalServiceImpl implements CalendarioDeLojaExte
             LOGGER.error("ERR123 :: Erro ao consultar o calendario de loja da loja ", ex);
             LOGGER.warn("ERR123  :: Nao foi possui acessar a URL {} para o calendario de loja {}", feriadoLojaUrl, lojaId, ex.getStatusCode() );
             return new InformacaoLoja();
-        }
+        }/*catch (Exception ex){
+            LOGGER.error("ERR123 :: Erro ao consultar o calendario de loja da loja ", ex);
+            throw ex;
+        }*/
 
         InformacaoLoja body = new InformacaoLoja();
 

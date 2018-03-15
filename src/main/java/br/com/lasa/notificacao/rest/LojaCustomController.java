@@ -5,7 +5,8 @@ import br.com.lasa.notificacao.domain.document.Loja;
 import br.com.lasa.notificacao.domain.service.RegiaoDistrito;
 import br.com.lasa.notificacao.domain.service.RegiaoDistritoCidade;
 import br.com.lasa.notificacao.domain.service.RegiaoDistritoCidadeLoja;
-import br.com.lasa.notificacao.rest.resource.*;
+import br.com.lasa.notificacao.rest.resource.ChildrenContent;
+import br.com.lasa.notificacao.rest.resource.ParentContent;
 import br.com.lasa.notificacao.service.LojaService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -69,11 +70,11 @@ public class LojaCustomController {
 
         List<RegiaoDistrito> lojaRegiaoDistritoList = lojaService.buscarLojaPorRegiao(codigoRegiao, tipoLoja);
 
-        List<LojaRegiaoResource> parents = new ArrayList<>();
+        List<Resource> parents = new ArrayList<>();
 
         for (RegiaoDistrito lojaRegiao : lojaRegiaoDistritoList ) {
 
-            Collection<String> distritoList = lojaRegiao.getDistritos();
+            List<RegiaoDistrito.Distrito> distritoList = lojaRegiao.getDistritos();
 
             if (Objects.isNull(distritoList) || distritoList.isEmpty()) {
                 return ResponseEntity.notFound().header(HttpHeaderConstants.REASON, "Nao foi encontrado nenhum distrito com os criterios especificados na consulta").build();
@@ -81,17 +82,17 @@ public class LojaCustomController {
 
             Link linkSelf = getRegiaoBaseLink(codigoRegiao).withSelfRel();
 
-            Set<ChildrenContent> children = distritoList.stream().map(distritoId -> castRegiaoToChildren(codigoRegiao, distritoId)).collect(Collectors.toSet());
+            Set<ChildrenContent> children = distritoList.stream().map(distrito -> castRegiaoToChildren(codigoRegiao, distrito)).collect(Collectors.toSet());
 
             ParentContent content = ParentContent.builder().
-                    selfId(lojaRegiao.getNomeRegiao()).
-                    selfName(lojaRegiao.getIdRegiao()).
+                    selfId(lojaRegiao.getIdRegiao()).
                     selfType("Regiões").
+                    selfName(lojaRegiao.getNomeRegiao()).
                     children(children).
                     lojas(lojaRegiao.getLojas()).
                     build();
 
-            LojaRegiaoResource resource = new LojaRegiaoResource(content, linkSelf);
+            Resource resource = new Resource(content, linkSelf);
 
             parents.add(resource);
         }
@@ -103,56 +104,73 @@ public class LojaCustomController {
     @RequestMapping (value = "lojas/{regiaoId}/regioes/{distritoId}/distritos", method= RequestMethod.GET, produces = "application/hal+json")
     public ResponseEntity<Resource> findAllByRegiaoDistrito(@PathVariable("regiaoId") String regiaoId, @PathVariable("distritoId") String distritoId,  @RequestParam(value = "tipoLoja", required = false) String tipoLoja) {
 
-        RegiaoDistritoCidade lojaRegiaoDistritoList = lojaService.buscarLojaPorRegiaoEDistrito(regiaoId, distritoId, tipoLoja);
+        List<RegiaoDistritoCidade> lojaRegiaoDistritoList = lojaService.buscarLojaPorRegiaoEDistrito(regiaoId, distritoId, tipoLoja);
 
-        Collection<String> cidadeList = lojaRegiaoDistritoList.getCidades();
+        List<Resource> parents = new ArrayList<>();
 
-        if (Objects.isNull(cidadeList) || cidadeList.isEmpty()){
-            return ResponseEntity.notFound().header(HttpHeaderConstants.REASON, "Nao foi encontrado nenhum cidade com os criterios especificados na consulta").build();
+        for (RegiaoDistritoCidade distritoCidade :
+                lojaRegiaoDistritoList) {
+
+            Collection<RegiaoDistritoCidade.Cidade> cidadeList = distritoCidade.getCidades();
+
+            if (Objects.isNull(cidadeList) || cidadeList.isEmpty()){
+                return ResponseEntity.notFound().header(HttpHeaderConstants.REASON, "Nao foi encontrado nenhum cidade com os criterios especificados na consulta").build();
+            }
+
+            Link linkSelf       = getDistritoBaseLink(distritoCidade.getIdRegiao(), distritoCidade.getIdDistrito()).withSelfRel();
+
+            Set<ChildrenContent> children = cidadeList.stream().map(cidade -> castCidadeToChildren(distritoCidade.getIdRegiao(), distritoCidade.getIdDistrito(), cidade )).collect(Collectors.toSet());
+
+            ParentContent content = ParentContent.builder().
+                    selfId(distritoCidade.getIdDistrito()).
+                    selfName(distritoCidade.getNomeDistrito()).
+                    selfType("Distritos").
+                    children(children).
+                    lojas(distritoCidade.getLojas()).
+                    build();
+
+            Resource resource = new Resource(content, linkSelf);
+
+            parents.add(resource);
         }
 
-        Link linkSelf       = getDistritoBaseLink(regiaoId, distritoId).withSelfRel();
-
-        Set<ChildrenContent> children = cidadeList.stream().map(cidade -> castDistritoToChildren(regiaoId, distritoId, cidade )).collect(Collectors.toSet());
-
-        ParentContent content = ParentContent.builder().
-                selfId(lojaRegiaoDistritoList.getNomeRegiao()).
-                selfName(lojaRegiaoDistritoList.getIdRegiao()).
-                selfType("Distritos").
-                children(children).
-                lojas(lojaRegiaoDistritoList.getLojas()).
-                build();
-
-        Resource resource = new Resource(content, linkSelf);
-
-        return new ResponseEntity(resource, HttpStatus.OK);
+        return new ResponseEntity(parents, HttpStatus.OK);
     }
 
     @CrossOrigin(origins = "*")
     @RequestMapping (value = "lojas/{regiaoId}/regioes/{distritoId}/distritos/{cidadeNome}/cidades", method= RequestMethod.GET, produces = "application/hal+json")
     public ResponseEntity<Resource> findAllByRegiaoDistritoECidade(@PathVariable("regiaoId") String regiaoId, @PathVariable("distritoId") String distritoId,  @PathVariable("cidadeNome") String cidadeNome, @RequestParam(value = "tipoLoja", required = false) String tipoLoja) {
 
-        RegiaoDistritoCidadeLoja lojaRegiaoDistritoCidade = lojaService.buscarLojaPorRegiaoEDistritoECidade(regiaoId, distritoId, cidadeNome, tipoLoja);
+        List<RegiaoDistritoCidadeLoja> lojaRegiaoDistritoCidadeList = lojaService.buscarLojaPorRegiaoEDistritoECidade(regiaoId, distritoId, cidadeNome, tipoLoja);
 
-        List<Map<String, Object>> lojaList = lojaRegiaoDistritoCidade.getLojas();
+        List<Resource> parents = new ArrayList<>();
 
-        if (Objects.isNull(lojaList) || lojaList.isEmpty()){
-            return ResponseEntity.notFound().header("reason", "Nao foi encontrado nenhuma loja com os criterios especificados na consulta").build();
-        }
 
-        Link linkSelf       = getCidadeBaseLink(regiaoId, distritoId, cidadeNome).withSelfRel();
+        for (RegiaoDistritoCidadeLoja distritoCidadeLoja:
+                lojaRegiaoDistritoCidadeList) {
 
-        ParentContent content = ParentContent.builder().
-                selfId(lojaRegiaoDistritoCidade.getNomeRegiao()).
-                selfName(lojaRegiaoDistritoCidade.getIdRegiao()).
+            List<Map<String, Object>> lojaList = distritoCidadeLoja.getLojas();
+
+            if (Objects.isNull(lojaList) || lojaList.isEmpty()){
+                return ResponseEntity.notFound().header("reason", "Nao foi encontrado nenhuma loja com os criterios especificados na consulta").build();
+            }
+
+            Link linkSelf = getCidadeBaseLink(regiaoId, distritoId, cidadeNome).withSelfRel();
+
+            ParentContent content = ParentContent.builder().
+                selfName(distritoCidadeLoja.getCidade()).
+                selfId(distritoCidadeLoja.getCidade()).
                 selfType("Cidades").
                 children(Collections.EMPTY_SET).
                 lojas(lojaList).
                 build();
 
-        Resource resource = new Resource(content, linkSelf);
+            Resource resource = new Resource(content, linkSelf);
 
-        return new ResponseEntity(resource, HttpStatus.OK);
+            parents.add(resource);
+        }
+
+        return new ResponseEntity(parents, HttpStatus.OK);
     }
 
     private ControllerLinkBuilder getBaseLink(){
@@ -171,19 +189,20 @@ public class LojaCustomController {
         return getRegiaoBaseLink(regiao).slash(distrito).slash("distritos").slash(cidade).slash("cidades");
     }
 
-    private ChildrenContent castRegiaoToChildren(String regiao, String distrito) {
-        Link distritoLink = getDistritoBaseLink(regiao, distrito).withRel("link");
+    private ChildrenContent castRegiaoToChildren(String regiao, RegiaoDistrito.Distrito distrito) {
+        Link distritoLink = getDistritoBaseLink(regiao, distrito.getId()).withRel("link");
         Map<String, Object> map = new HashMap<>();
-        map.put("id", distrito);
+        map.put("id", distrito.getId());
+        map.put("name", distrito.getName());
         map.put("link", distritoLink);
         ChildrenContent childrenContent = ChildrenContent.builder().childName("Distritos").childData(Arrays.asList(map)).build();
         return childrenContent;
     }
 
-    private ChildrenContent castDistritoToChildren(String regiao, String distrito, String cidade) {
-        Link distritoLink = getCidadeBaseLink(regiao, distrito, cidade).withRel("link");
+    private ChildrenContent castCidadeToChildren(String regiao, String distrito, RegiaoDistritoCidade.Cidade cidade) {
+        Link distritoLink = getCidadeBaseLink(regiao, distrito, cidade.getId()).withRel("link");
         Map<String, Object> map = new HashMap<>();
-        map.put("id", distrito);
+        map.put("id", cidade.getId());
         map.put("link", distritoLink);
         ChildrenContent childrenContent = ChildrenContent.builder().childName("Cidades").childData(Arrays.asList(map)).build();
         return childrenContent;

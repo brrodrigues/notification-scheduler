@@ -19,9 +19,9 @@ public interface LojaService {
 
     List<RegiaoDistrito> buscarLojaPorRegiao(String regiaoId, String tipoLoja);
 
-    RegiaoDistritoCidade buscarLojaPorRegiaoEDistrito(String regiaoId, String distritoId, String tipoLoja);
+    List<RegiaoDistritoCidade> buscarLojaPorRegiaoEDistrito(String regiaoId, String distritoId, String tipoLoja);
 
-    RegiaoDistritoCidadeLoja buscarLojaPorRegiaoEDistritoECidade(String regiaoId, String distritoId, String cidadeId, String tipoLoja);
+    List<RegiaoDistritoCidadeLoja> buscarLojaPorRegiaoEDistritoECidade(String regiaoId, String distritoId, String cidadeId, String tipoLoja);
 
     Page<Loja> findAll(Pageable pageable);
 
