@@ -1,8 +1,8 @@
 package br.com.lasa.notificacao.repository;
 
-import br.com.lasa.notificacao.domain.document.enumaration.Behavior;
 import br.com.lasa.notificacao.domain.document.Loja;
 import br.com.lasa.notificacao.domain.document.Notification;
+import br.com.lasa.notificacao.domain.document.enumaration.Behavior;
 import br.com.lasa.notificacao.util.AppConstants;
 import br.com.lasa.notificacao.util.MongoDBUtil;
 import com.mongodb.*;
@@ -19,11 +19,10 @@ import org.springframework.data.mongodb.core.query.Update;
 
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.time.format.TextStyle;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.Locale;
 import java.util.Optional;
 
@@ -47,29 +46,39 @@ public class NotificacaoRepositoryImpl implements NotificacaoRepositoryCustom {
     Locale brazilianLocale;
 
     @Override
-    public int setScheduleAndUuiAndHostnameForSpecificScheduleTime(LocalTime minute, boolean scheduled, String uuid, String hostname, int limit){
+    public int setScheduleAndUuiAndHostnameForSpecificScheduleTime(LocalDateTime minute, boolean scheduled, String uuid, String hostname, int limit){
 
         String collectionName = mongoTemplate.getCollectionName(Notification.class);
         String lojaCollectionName = mongoTemplate.getCollectionName(Loja.class);
 
-        LocalDateTime dataTime = context.getBean(LocalDateTime.class);
+        String displayName = minute.getDayOfWeek().getDisplayName(TextStyle.SHORT, brazilianLocale).toUpperCase();
 
-        Date dataFrom = Date.from(dataTime.atZone(zoneId).toInstant());
+        String yyyyMMddHHmm = minute.format(DateTimeFormatter.ofPattern("yyyyMMddHHmm"));
 
-        String displayName = dataTime.getDayOfWeek().getDisplayName(TextStyle.SHORT, brazilianLocale).toUpperCase();
+        String HHmm = minute.format(DateTimeFormatter.ofPattern("HH:mm"));
 
-        StringBuilder $project2 = new StringBuilder("{ $project : { storeIds: 1, eventName: 1, type: 1, intervalTime: 1, storeId: 1, loja: 1, 'triggeredByTime' : { $eq : [ {'$dateToString' : { 'format' : '%Y%m%d%H%M' , 'date' :  '$triggerTime' }} , {'$literal' : {'").append(simpleDateFormat.format(dataFrom)).append("'} ]}, abertura: { $dateToString : { format : '%H:%M' , date : { $add : [ '$loja.horarios.abertura' , { $multiply : [ '$intervalTime' , 1000 , 60]}]}}}, fechamento : { $dateToString : { format : '%H:%M' , date : { $subtract : [ '$loja.horarios.fechamento' , { $multiply : [ '$intervalTime' , 1000 , 60]}]}}}}}");
+        StringBuilder $project = new StringBuilder("{ $project : {").
+                append(" storeIds: 1").
+                append(", eventName: 1").
+                append(", type: 1").
+                append(", intervalTime: 1").
+                append(", storeId: 1").
+                append(", loja: 1 ").
+                append(", triggerByIntervalTime : { $or : [ {$cond : { if: { $eq: [ '$intervalTime', 1] }, then: true, else: false }}, {$eq   : [ {mod : [ {$literal: ").append(minute.getMinute()).append("} , {$cond: { if: {$eq: ['$intervalTime', 0]}, then: -1, else: '$intervalTime' }}]}, 0 ]}]}").
+                append(", triggeredByTime : { $eq : [ { $dateToString : { 'format' : '%Y%m%d%H%M' , 'date' :  '$triggerTime' }} , { $literal : '").append(yyyyMMddHHmm).append("' } ]}").
+                append(", abertura   : { $dateToString : { format : '%H:%M' , date : { $add : [ '$loja.horarios.abertura' , { $multiply : [ '$intervalTime' , 1000 , 60]}]}}}").
+                append(", fechamento : { $dateToString : { format : '%H:%M' , date : { $subtract : [ '$loja.horarios.fechamento' , { $multiply : [ '$intervalTime' , 1000 , 60]}]}}}}}");
 
         Cursor aggregate = mongoTemplate.getCollection(collectionName).aggregate(
                 Arrays.asList(
-                        MongoDBUtil.toDBObject("{ $match : { type : { $not : { $eq : 'INTERVAL_TIME'}}}}"),
+                        //MongoDBUtil.toDBObject("{ $match : { type : { $not : { $eq : 'INTERVAL_TIME'}}}}"),
                         MongoDBUtil.toDBObject("{ $unwind: '$storeIds'}"),
                         MongoDBUtil.toDBObject( String.format("{ $lookup : { from : '%s' , localField: 'storeIds', foreignField: '_id' , as : 'storeInfo'}}", lojaCollectionName)),
                         MongoDBUtil.toDBObject("{ $project : { storeIds: 1, eventName : 1, type : 1, intervalTime : 1, storeId : 1,  loja : { $arrayElemAt: [ '$storeInfo', 0 ] } } }"),
                         MongoDBUtil.toDBObject("{ $unwind: '$loja.horarios'}"),
                         MongoDBUtil.toDBObject( String.format("{ $match: { 'loja.horarios.dia' : '%s' }}", displayName)),
-                        MongoDBUtil.toDBObject( $project2.toString()),
-                        MongoDBUtil.toDBObject( String.format("{ $match : { $or : [ {$and : [ {'abertura' : { $eq : '%s' } } , { type: {$eq : 'SPECIFIC_TIME_BEFORE' }}  ] }, {$and : [ {'fechamento' : { $eq : '%s' } } , { type: {$eq : 'SPECIFIC_TIME_AFTER' }}, { 'triggeredByTime' : { '$eq' : true}} ]}]}}", minute.toString(), minute.toString()))),
+                        MongoDBUtil.toDBObject( $project.toString()),
+                        MongoDBUtil.toDBObject( String.format("{ $match : { $or : [ {$and : [ {'abertura' : { $eq : '%s' } } , { type: {$eq : 'SPECIFIC_TIME_BEFORE' }}  ] }, {$and : [ {'fechamento' : { $eq : '%s' } } , { type: {$eq : 'SPECIFIC_TIME_AFTER' }}]}, { $and : [ { triggeredByTime : { $eq : true}}, { type : { $eq : 'PONTUAL'}  }]} , { $and : [ { triggerByIntervalTime : { $eq : true}}, { intervalTime : { $ne : 0}}]} ]}}", HHmm, HHmm))),
                 AggregationOptions.builder().outputMode(AggregationOptions.OutputMode.CURSOR).allowDiskUse(true).build());
 
         int updated = 0;

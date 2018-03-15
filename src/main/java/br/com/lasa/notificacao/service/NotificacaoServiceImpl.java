@@ -11,7 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.time.LocalTime;
+import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.UUID;
@@ -37,7 +37,7 @@ public class NotificacaoServiceImpl implements NotificacaoService {
 
     @Override
     @Transactional
-    public List<Notification> buscarNotificacaoNaoProgramada(LocalTime scheduleTime) {
+    public List<Notification> buscarNotificacaoNaoProgramada(LocalDateTime scheduleTime) {
         log.info("Finding events no scheduling");
         String uuid = UUID.randomUUID().toString();
         String hostAddress = null;

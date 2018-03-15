@@ -2,11 +2,11 @@ package br.com.lasa.notificacao.repository;
 
 import org.bson.types.ObjectId;
 
-import java.time.LocalTime;
+import java.time.LocalDateTime;
 
 public interface NotificacaoRepositoryCustom {
 
-    int setScheduleAndUuiAndHostnameForSpecificScheduleTime(LocalTime minute, boolean scheduled, String uuid, String hostname, int limit);
+    int setScheduleAndUuiAndHostnameForSpecificScheduleTime(LocalDateTime minute, boolean scheduled, String uuid, String hostname, int limit);
 
     int setScheduleAndUuiAndHostnameForMinute(int minute, boolean schedule, String uuid, String hostname, int limit);
 

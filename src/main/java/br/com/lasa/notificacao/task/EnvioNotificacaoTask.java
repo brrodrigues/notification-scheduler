@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Scope;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.stereotype.Component;
 
@@ -29,24 +30,14 @@ public class EnvioNotificacaoTask extends ThreadPoolTaskScheduler {
         log.info("scheduled cron!!!");
     }
 
-    //@Scheduled( cron = "0/60 * * * * *" )
-    public void bloquearIntervalo() {
-        log.info("*********Finding notification schedule pending at the moment*********");
-        LocalDateTime brazilianDateTime = context.getBean(LocalDateTime.class);
-        int minute = brazilianDateTime.toLocalTime().getMinute();
-        log.info("Brazilian current minute {}", minute);
-        CompletableFuture.runAsync(() -> notificacaoService.buscarNotificacaoNaoProgramada(minute).stream().forEach(EnvioNotificacaoTask.this::enviar)).exceptionally(this::showException);
-        log.info("**********************Finish scheduling timer************************");
-    }
-
-    //@Scheduled( cron = "0/60 * * * * *" )
+    @Scheduled( cron = "0/60 * * * * *" )
     public void bloquearIntervaloPontual() {
         log.info("*********Finding pontual notification schedule pending at the moment*********");
 
         LocalDateTime brazilianDateTime = context.getBean(LocalDateTime.class);
 
         log.info(" Brazilian current time {} ", brazilianDateTime);
-        CompletableFuture.runAsync(() -> notificacaoService.buscarNotificacaoNaoProgramada(brazilianDateTime.toLocalTime()).stream().forEach(EnvioNotificacaoTask.this::enviar)).exceptionally(this::showException);
+        CompletableFuture.runAsync(() -> notificacaoService.buscarNotificacaoNaoProgramada(brazilianDateTime).stream().forEach(EnvioNotificacaoTask.this::enviar)).exceptionally(this::showException);
         log.info("**********************Finish scheduling timer************************");
     }
 

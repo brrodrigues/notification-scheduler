@@ -140,8 +140,8 @@ public class EnvioNoticacaoServiceImpl implements EnvioNoticacaoService {
                     builder().
                     messageType(notification.getType().name()).
                     skipRules(true).
-                    //metadata(Collections.singletonMap("intervalo", notification.getIntervalTime())).
                     messageLink(URL).
+                    metadata(Collections.singletonMap("message",notification.getMessage())).
                     recipients(recipients).
                     build();
 
