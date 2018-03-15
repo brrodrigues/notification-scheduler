@@ -28,8 +28,8 @@ public class Notification {
     private String eventName;
     private Behavior type;
     private String message;
-    @JsonFormat(pattern = "dd/MM/yyyy HH:mm:ss", shape = JsonFormat.Shape.STRING, timezone = "America/Sao_Paulo")
-    private Date scheduleTime;
+    @JsonFormat(pattern = "dd/MM/yyyy HH:mm:ss", shape = JsonFormat.Shape.STRING)
+    private Date scheduledTime;
     @JsonFormat(pattern = "dd/MM/yyyy HH:mm:ss", shape = JsonFormat.Shape.STRING, timezone = "America/Sao_Paulo")
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private Date createDate;
@@ -47,7 +47,7 @@ public class Notification {
 
     public Notification(String eventName, Date specificTime, Set<String> storeIds, Behavior behavior) {
         this.createDate = new Date();
-        this.scheduleTime = specificTime;
+        this.scheduledTime = specificTime;
         this.eventName = eventName;
         this.storeIds = storeIds;
         this.type = behavior;
