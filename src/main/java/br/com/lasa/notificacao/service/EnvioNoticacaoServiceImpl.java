@@ -1,6 +1,7 @@
 package br.com.lasa.notificacao.service;
 
 import br.com.lasa.notificacao.domain.document.*;
+import br.com.lasa.notificacao.domain.document.enumaration.Behavior;
 import br.com.lasa.notificacao.domain.lais.Recipient;
 import br.com.lasa.notificacao.rest.ConversacaoCustomController;
 import br.com.lasa.notificacao.rest.request.EnvioNotificacaoRequest;
@@ -88,13 +89,18 @@ public class EnvioNoticacaoServiceImpl implements EnvioNoticacaoService {
                 continue;
             }
 
-            if (!podeNotificar(horarioBrasilia, loja)) {
+            if (!podeNotificar(horarioBrasilia, loja) && !notification.getType().equals(Behavior.PONTUAL) ) {
                 continue;
             }
 
             try {
-                boolean possuiVendaNoPeriodo = consultaVendaLojaService.notificarLojaPorVendaForaDoPeriodo(storeId, horarioBrasilia, notification.getIntervalTime());
-                mapaDeLojaPorVenda.put(storeId, possuiVendaNoPeriodo);
+                boolean podeNotificar = consultaVendaLojaService.notificarLojaPorVendaForaDoPeriodo(storeId, horarioBrasilia, notification.getIntervalTime());
+
+                if (notification.getType().equals(Behavior.PONTUAL)){ //Este tipo de notificacao sera notificada sempre
+                    podeNotificar = true;
+                }
+
+                mapaDeLojaPorVenda.put(storeId, podeNotificar);
             }catch (Exception ex) {
                 mapaDeLojaPorVenda.put(storeId, true);//Caso ocorra algum erro (servico ao consulta a venda da loja.
                 log.warn("Nao possivel consulta a venda da loja {} (Motivo: {})", storeId, ex.getMessage());
@@ -136,12 +142,17 @@ public class EnvioNoticacaoServiceImpl implements EnvioNoticacaoService {
 
             String URL = "api/conversations/" + conversacaoId + "/messages" ;
 
+            String message = notification.getType().name();
+
+            if (notification.getType().equals(Behavior.PONTUAL)){
+                message = notification.getMessage();
+            }
+
             EnvioNotificacaoRequest envioNotificacaoRequest = EnvioNotificacaoRequest.
                     builder().
-                    messageType(notification.getType().name()).
+                    messageType(message).
                     skipRules(true).
                     messageLink(URL).
-                    metadata(Collections.singletonMap("message",notification.getMessage())).
                     recipients(recipients).
                     build();
 
