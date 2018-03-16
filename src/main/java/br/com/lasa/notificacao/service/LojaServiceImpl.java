@@ -21,7 +21,6 @@ import org.springframework.util.Assert;
 import java.time.ZoneId;
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Component
 public class LojaServiceImpl implements LojaService {
@@ -50,23 +49,11 @@ public class LojaServiceImpl implements LojaService {
         return maps;
     }
 
-    private static RegiaoDistritoCidade.Cidade mapearNomeCidade(Loja loja) {
+    private RegiaoDistritoCidade.Cidade mapearNomeCidade(InformacaoLoja informacaoLoja) {
+        RegiaoDistritoCidade.Cidade cidade = new RegiaoDistritoCidade.Cidade();
+        cidade.setId(informacaoLoja.getCidade());
+        return cidade;
 
-        ;
-
-        if (loja.getMetadata().containsKey("adicional")) {
-            Object adicional = loja.getMetadata().get("adicional");
-
-            if (adicional instanceof InformacaoLoja){
-                InformacaoLoja informacaoLoja = (InformacaoLoja) adicional;
-
-                RegiaoDistritoCidade.Cidade cidade = new RegiaoDistritoCidade.Cidade();
-                cidade.setId(informacaoLoja.getCidade());
-                return cidade;
-            }
-        }
-
-        return new RegiaoDistritoCidade.Cidade();
     }
 
     @Override
@@ -132,9 +119,11 @@ public class LojaServiceImpl implements LojaService {
         if (allByRegiao != null && !allByRegiao.isEmpty()) {
 
             //Agrupa as lojas por regiao
-            Map<String, List<Loja>> regiaoMap = allByRegiao.stream().collect(Collectors.groupingBy(o -> String.valueOf(((InformacaoLoja) o.getMetadata().get("adicional")).getRegiao())));
+            Map<String, List<Loja>> regiaoMap = allByRegiao.
+                    stream().
+                    collect(Collectors.groupingBy(o -> String.valueOf(((InformacaoLoja) o.getMetadata().get("adicional")).getRegiao())));
 
-            regiaoMap.forEach((regiao, lojas) -> {
+            regiaoMap.forEach( (regiao, lojas) -> {
                 InformacaoLoja informacaoLoja = extractInformacaoLoja(lojas.get(0));
                 List<Map<String, Object>> lojaMap       = getLojas(lojas);
                 List<RegiaoDistrito.Distrito> distritoList  = getDistritos(lojas);
@@ -147,26 +136,7 @@ public class LojaServiceImpl implements LojaService {
         return regiaoDistritos;
     }
 
-    private InformacaoLoja extractInformacaoLoja(Loja loja) {
-        if (loja.getMetadata().containsKey("adicional")) {
-            Object informacaoLoja = loja.getMetadata().get("adicional");
 
-            if (informacaoLoja instanceof InformacaoLoja){
-                return ((InformacaoLoja) informacaoLoja);
-            }
-        }
-        return new InformacaoLoja();
-    }
-
-    private List<RegiaoDistrito.Distrito> getDistritos(List<Loja> lojas) {
-        Set<RegiaoDistrito.Distrito> collect = lojas.stream().map(this::extractInformacaoLoja).map(informacaoLoja -> {
-            RegiaoDistrito.Distrito distrito = new RegiaoDistrito.Distrito();
-            distrito.setId(informacaoLoja.getDistrito());
-            distrito.setName(informacaoLoja.getDescricaoDistrito());
-            return distrito;
-        }).collect(Collectors.toSet());
-        return new ArrayList<>(collect);
-    }
 
     @Override
     public List<RegiaoDistritoCidade> buscarLojaPorRegiaoEDistrito(String regiaoId, String distritoId, String tipoLoja) {
@@ -187,45 +157,42 @@ public class LojaServiceImpl implements LojaService {
         if (allByRegiao != null && !allByRegiao.isEmpty()) {
 
             //Agrupa as lojas por regiao
-            Map<String, List<Loja>> cidadeMap = allByRegiao.stream().collect(Collectors.groupingBy(o -> String.valueOf(((InformacaoLoja) o.getMetadata().get("adicional")).getDistrito())));
+            Map<String, List<Loja>> distritoList = allByRegiao.stream().collect(Collectors.groupingBy(o -> String.valueOf(((InformacaoLoja) o.getMetadata().get("adicional")).getDistrito())));
 
-            cidadeMap.forEach((distrito, lojas) -> {
+            distritoList.forEach((distrito, lojas) -> {
 
-                lojas.forEach(loja -> {
+                List<RegiaoDistritoCidade.Cidade> cidadeList = lojas.stream().
+                        filter(loja -> ((InformacaoLoja) loja.getMetadata().get("adicional")).getDistrito().equalsIgnoreCase(distrito)).
+                        map(this::extractInformacaoLoja).map(this::mapearNomeCidade).collect(Collectors.toList());
 
-                    List<Map<String, Object>> lojaMap = getLojas(lojas);
+                List<Map<String, Object>> lojasMap  = getLojas(lojas);
 
-                    if (loja.getMetadata().get("adicional") instanceof InformacaoLoja){
+                Loja loja = lojas.get(0);
+
+                if (loja.getMetadata().get("adicional") instanceof InformacaoLoja) {
 
                         InformacaoLoja informacaoAdicional = (InformacaoLoja) loja.getMetadata().get("adicional");
                         String idDistrito   = informacaoAdicional.getDistrito();
                         String nomeDistrito = informacaoAdicional.getDescricaoDistrito();
                         String nomeRegiao   = informacaoAdicional.getDescricaoRegiao();
                         String idRegiao     = informacaoAdicional.getRegiao();
-                        List<Map<String, Object>> lojasMap  = getLojas(lojas);
-                        List<RegiaoDistritoCidade.Cidade> cidadeList  = getCidades(lojas);
 
-                        RegiaoDistritoCidade regiaoDistritoCidade = RegiaoDistritoCidade.builder().
+                        RegiaoDistritoCidade cidade = RegiaoDistritoCidade.builder().
                                 idRegiao(idRegiao).
-                                idDistrito(idDistrito).
                                 nomeRegiao(nomeRegiao).
+                                idDistrito(idDistrito).
                                 nomeDistrito(nomeDistrito).
                                 lojas(lojasMap).
                                 cidades(cidadeList).
                                 build();
 
-                        regiaoDistritos.add(regiaoDistritoCidade);
-                    }
-                });
+                    regiaoDistritos.add(cidade);
+                }
 
             });
         }
 
         return regiaoDistritos;
-    }
-
-    private List<RegiaoDistritoCidade.Cidade> getCidades(List<Loja> lojas) {
-        return lojas.stream().map(LojaServiceImpl::mapearNomeCidade).collect(Collectors.toList());
     }
 
     private Map<String, Object> getMetadataByParam(String tipoLoja, String regiaoId) {
@@ -317,29 +284,25 @@ public class LojaServiceImpl implements LojaService {
         return lojaStream.stream().map(LojaServiceImpl::mapearInformacaoLoja).collect(Collectors.toList());
     }
 
-    private Collection<String> getListFromJsonPath(Stream<Loja> lojas, String jsonPath) {
-        List<String> collect = lojas.map(loja -> (String) JsonMap.searchFromXPath(loja, jsonPath)).collect(Collectors.toList());
-        return collect;
+    private InformacaoLoja extractInformacaoLoja(Loja loja) {
+        if (loja.getMetadata().containsKey("adicional")) {
+            Object informacaoLoja = loja.getMetadata().get("adicional");
+
+            if (informacaoLoja instanceof InformacaoLoja){
+                return ((InformacaoLoja) informacaoLoja);
+            }
+        }
+        return new InformacaoLoja();
     }
 
-    /**
-     * Retorna o nome da regiao
-     * @param stream Lista de Lojas
-     * @param jsonPath Expressao em Json para localizar o retorno da informacao
-     * @return
-     */
-    private String getValue(Stream<Loja> stream, String jsonPath){
-        String nomeRegiao = "";
-
-        Optional<Loja> primeiraLoja = stream.findFirst();
-        if (primeiraLoja.isPresent()){
-
-            Loja loja = primeiraLoja.get();
-
-            nomeRegiao = (String) JsonMap.searchFromXPath(loja, jsonPath);
-
-        }
-        return nomeRegiao;
+    private List<RegiaoDistrito.Distrito> getDistritos(List<Loja> lojas) {
+        Set<RegiaoDistrito.Distrito> collect = lojas.stream().map(this::extractInformacaoLoja).map(informacaoLoja -> {
+            RegiaoDistrito.Distrito distrito = new RegiaoDistrito.Distrito();
+            distrito.setId(informacaoLoja.getDistrito());
+            distrito.setName(informacaoLoja.getDescricaoDistrito());
+            return distrito;
+        }).collect(Collectors.toSet());
+        return new ArrayList<>(collect);
     }
 
     @Override
