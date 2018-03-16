@@ -145,7 +145,6 @@ public class LojaCustomController {
 
         List<Resource> parents = new ArrayList<>();
 
-
         for (RegiaoDistritoCidadeLoja distritoCidadeLoja:
                 lojaRegiaoDistritoCidadeList) {
 
@@ -203,6 +202,7 @@ public class LojaCustomController {
         Link distritoLink = getCidadeBaseLink(regiao, distrito, cidade.getId()).withRel("link");
         Map<String, Object> map = new HashMap<>();
         map.put("id", cidade.getId());
+        map.put("name", cidade.getId());
         map.put("link", distritoLink);
         ChildrenContent childrenContent = ChildrenContent.builder().childName("Cidades").childData(Arrays.asList(map)).build();
         return childrenContent;

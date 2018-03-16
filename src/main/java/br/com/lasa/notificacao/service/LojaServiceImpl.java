@@ -162,7 +162,7 @@ public class LojaServiceImpl implements LojaService {
         Set<RegiaoDistrito.Distrito> collect = lojas.stream().map(this::extractInformacaoLoja).map(informacaoLoja -> {
             RegiaoDistrito.Distrito distrito = new RegiaoDistrito.Distrito();
             distrito.setId(informacaoLoja.getDistrito());
-            distrito.setId(informacaoLoja.getDescricaoDistrito());
+            distrito.setName(informacaoLoja.getDescricaoDistrito());
             return distrito;
         }).collect(Collectors.toSet());
         return new ArrayList<>(collect);
@@ -217,8 +217,6 @@ public class LojaServiceImpl implements LojaService {
                         regiaoDistritos.add(regiaoDistritoCidade);
                     }
                 });
-
-
 
             });
         }
