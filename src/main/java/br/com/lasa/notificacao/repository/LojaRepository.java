@@ -10,4 +10,6 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 public interface LojaRepository extends MongoRepository<Loja, String>, LojaRepositoryCustom {
 
 
+
+
 }

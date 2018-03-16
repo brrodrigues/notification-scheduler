@@ -13,6 +13,8 @@ public interface LojaService {
 
     Loja buscarLojaPorCodigo(String codigoLoja);
 
+    List<String> listarTipoLojas();
+
     Loja atualizar(String id, Loja loja);
 
     Loja atualizar(Loja loja);

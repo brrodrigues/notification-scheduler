@@ -7,12 +7,14 @@ import br.com.lasa.notificacao.domain.service.RegiaoDistritoCidade;
 import br.com.lasa.notificacao.domain.service.RegiaoDistritoCidadeLoja;
 import br.com.lasa.notificacao.rest.resource.ChildrenContent;
 import br.com.lasa.notificacao.rest.resource.ParentContent;
+import br.com.lasa.notificacao.rest.resource.TipoLojaResource;
 import br.com.lasa.notificacao.service.LojaService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.rest.webmvc.BasePathAwareController;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.Resource;
+import org.springframework.hateoas.Resources;
 import org.springframework.hateoas.mvc.ControllerLinkBuilder;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -53,6 +55,19 @@ public class LojaCustomController {
 
         return new ResponseEntity(atualizar, HttpStatus.OK);
     }
+
+    @CrossOrigin(origins = "*")
+    @RequestMapping( value = "lojas/search/findAllTipoLojas", method= RequestMethod.GET, produces = "application/hal+json")
+    public ResponseEntity<Resources> findAllTipoLoja (){
+
+        List<String> tipoLojas = lojaService.listarTipoLojas();
+
+        TipoLojaResource resource = new TipoLojaResource(tipoLojas);
+
+        Resources resources = new Resources(Arrays.asList(resource));
+
+        return ResponseEntity.ok(resources);
+    };
 
     @CrossOrigin(origins = "*")
     @RequestMapping (value = "lojas/{id}", method= RequestMethod.PATCH, produces = "application/hal+json")

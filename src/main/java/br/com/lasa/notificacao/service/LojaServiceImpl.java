@@ -61,6 +61,11 @@ public class LojaServiceImpl implements LojaService {
         return lojaRepository.findOne(codigoLoja);
     }
 
+    @Override
+    public List<String> listarTipoLojas() {
+        return lojaRepository.findAllTipoLoja();
+    }
+
     public Loja atualizar(String id, Loja lojaParam) {
         //Atribui o horario de abertura e fechamento para todos os dias ao atualizar
         Loja lojaId = lojaRepository.findOne(id);

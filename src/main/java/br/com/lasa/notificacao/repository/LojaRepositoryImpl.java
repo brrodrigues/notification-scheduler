@@ -51,6 +51,16 @@ public class LojaRepositoryImpl implements LojaRepositoryCustom {
     }
 
     @Override
+    public List<String> findAllTipoLoja() {
+
+        Query query = new Query();
+        String collectionName = mongoTemplate.getCollectionName(Loja.class);
+        List<String> tipoLojas = mongoTemplate.getCollection(collectionName).distinct("metadata.adicional.nomeTipo");
+
+        return tipoLojas;
+    }
+
+    @Override
     public List<Loja> findAllByRegiaoAndDistrito(String regiaoId, String distritoId) {
         Query query = new Query();
         String collectionName = mongoTemplate.getCollectionName(Loja.class);
