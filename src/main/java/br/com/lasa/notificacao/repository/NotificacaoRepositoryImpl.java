@@ -66,7 +66,7 @@ public class NotificacaoRepositoryImpl implements NotificacaoRepositoryCustom {
                 append(", storeId: 1").
                 append(", loja: 1 ").
                 append(", triggerByIntervalTime : { $or : [ {$cond : { if: { $eq: [ '$intervalTime', 1] }, then: true, else: false }}, {$eq   : [ {mod : [ {$literal: ").append(minute.getMinute()).append("} , {$cond: { if: {$eq: ['$intervalTime', 0]}, then: -1, else: '$intervalTime' }}]}, 0 ]}]}").
-                append(", triggeredByTime : { $eq : [ { $dateToString : { 'format' : '%Y%m%d%H%M' , 'date' :  '$scheduledTime' }} , { $literal : '").append(yyyyMMddHHmm).append("' } ]}").
+                append(", triggerByScheduledTime : { $eq : [ { $dateToString : { 'format' : '%Y%m%d%H%M' , 'date' :  '$scheduledTime' }} , { $literal : '").append(yyyyMMddHHmm).append("' } ]}").
                 append(", abertura   : { $dateToString : { format : '%H:%M' , date : { $add : [ '$loja.horarios.abertura' , { $multiply : [ '$intervalTime' , 1000 , 60]}]}}}").
                 append(", fechamento : { $dateToString : { format : '%H:%M' , date : { $subtract : [ '$loja.horarios.fechamento' , { $multiply : [ '$intervalTime' , 1000 , 60]}]}}}}}");
 
@@ -79,7 +79,7 @@ public class NotificacaoRepositoryImpl implements NotificacaoRepositoryCustom {
                         MongoDBUtil.toDBObject("{ $unwind: '$loja.horarios'}"),
                         MongoDBUtil.toDBObject( String.format("{ $match: { 'loja.horarios.dia' : '%s' }}", displayName)),
                         MongoDBUtil.toDBObject( $project.toString()),
-                        MongoDBUtil.toDBObject( String.format("{ $match : { $or : [ {$and : [ {'abertura' : { $eq : '%s' } } , { type: {$eq : 'SPECIFIC_TIME_BEFORE' }}  ] }, {$and : [ {'fechamento' : { $eq : '%s' } } , { type: {$eq : 'SPECIFIC_TIME_AFTER' }}]}, { $and : [ { triggeredByTime : { $eq : true}}, { type : { $eq : 'PONTUAL'}  }]} , { $and : [ { triggerByIntervalTime : { $eq : true}}, { intervalTime : { $ne : 0}}]} ]}}", HHmm, HHmm))),
+                        MongoDBUtil.toDBObject( String.format("{ $match : { $or : [ {$and : [ {'abertura' : { $eq : '%s' } } , { type: {$eq : 'SPECIFIC_TIME_BEFORE' }}  ] }, {$and : [ {'fechamento' : { $eq : '%s' } } , { type: {$eq : 'SPECIFIC_TIME_AFTER' }}]}, { $and : [ { triggerByScheduledTime : { $eq : true}}, { type : { $eq : 'PONTUAL'}  }]} , { $and : [ { triggerByIntervalTime : { $eq : true}}, { intervalTime : { $ne : 0}}]} ]}}", HHmm, HHmm))),
                 AggregationOptions.builder().outputMode(AggregationOptions.OutputMode.CURSOR).allowDiskUse(true).build());
 
         int updated = 0;
