@@ -133,7 +133,7 @@ public class ConversacaoCustomController implements ResourceProcessor<Persistent
     }
 
     @CrossOrigin( origins = "*")
-    @GetMapping( value = "/{id}/messages", consumes = MediaType.APPLICATION_JSON_VALUE, produces = {MediaTypes.HAL_JSON_VALUE} )
+    @GetMapping( value = "/{id}/messages", consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_JSON_UTF8_VALUE, MediaType.ALL_VALUE, MediaType.TEXT_HTML_VALUE}, produces = {MediaTypes.HAL_JSON_VALUE} )
     @ResponseBody
     public ResponseEntity listMessages(@PathVariable(value = "id") String id, PersistentEntityResourceAssembler persistentEntityResourceAssembler) {
         LOGGER.info("Listing messages to convesation {}", id);
