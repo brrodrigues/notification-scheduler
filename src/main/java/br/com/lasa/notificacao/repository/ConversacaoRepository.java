@@ -1,7 +1,6 @@
 package br.com.lasa.notificacao.repository;
 
 import br.com.lasa.notificacao.domain.document.Conversacao;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.data.repository.query.Param;
 import org.springframework.data.rest.core.annotation.RepositoryRestResource;
@@ -16,7 +15,7 @@ public interface ConversacaoRepository extends MongoRepository<Conversacao, Stri
 
     //@Query("{ref : ?0}")
     @RestResource(path = "/findAllByRef", exported = true)
-    public List<Conversacao> findAllByRefOrderByTimestampDesc(@Param(value = "param") String refParam, Pageable pageable);
+    public List<Conversacao> findAllByRefOrderByTimestampDesc(@Param(value = "param") String refParam);
 
     @RestResource(path = "/findAllById", exported = false)
     public List<Conversacao> findAllByIdOrderByTimestampDesc(String id);
