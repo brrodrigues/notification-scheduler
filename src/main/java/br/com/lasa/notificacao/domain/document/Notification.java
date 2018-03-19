@@ -28,7 +28,6 @@ public class Notification {
     private String eventName;
     private Behavior type;
     private String message;
-    @JsonFormat(pattern = "dd/MM/yyyy HH:mm:ss", shape = JsonFormat.Shape.STRING)
     private Date scheduledTime;
     @JsonFormat(pattern = "dd/MM/yyyy HH:mm:ss", shape = JsonFormat.Shape.STRING, timezone = "America/Sao_Paulo")
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
