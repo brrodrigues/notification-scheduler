@@ -52,10 +52,10 @@ public class CadastroUsuarioServiceImpl implements CadastroUsuarioService {
 
         //try {
             log.debug("Chamando API de raio X da loja...");
-            CalendarioDeLoja calendarioDeLoja = calendarioDeLojaExternalService.buscarCalendarioDaSemanaDaLoja(lojaGgl, nomeGgl);
+            CalendarioDeLoja calendarioDeLoja = calendarioDeLojaExternalService.buscarCalendarioFeriadoDaSemanaDaLoja(lojaGgl, nomeGgl);
 
             log.debug("Montando a estrutura da loja {} para persistir...", lojaGgl);
-            Loja loja = calendarioDeLojaExternalService.montarEstrutura(calendarioDeLoja);
+            Loja loja = calendarioDeLojaExternalService.toLoja(calendarioDeLoja);
 
             log.debug("Valindando se existe {} ...", lojaGgl);
             if (lojaRepository.exists(loja.getId())) {
@@ -76,7 +76,6 @@ public class CadastroUsuarioServiceImpl implements CadastroUsuarioService {
                 storeId(lojaGgl).
                 loginRede(request.getLoginRede()).
                 build();
-
 
         UsuarioNotificacao byProfileBotId = usuarioNotificacaoRepository.findByProfileBotId(user.getId());
 

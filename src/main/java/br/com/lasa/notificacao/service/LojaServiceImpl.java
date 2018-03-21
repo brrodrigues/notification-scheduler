@@ -7,9 +7,12 @@ import br.com.lasa.notificacao.domain.service.RegiaoDistritoCidadeLoja;
 import br.com.lasa.notificacao.repository.LojaRepository;
 import br.com.lasa.notificacao.service.external.CalendarioDeLojaExternalService;
 import br.com.lasa.notificacao.service.external.response.CalendarioDeLoja;
+import br.com.lasa.notificacao.service.external.response.InformacaoFeriadoLoja;
 import br.com.lasa.notificacao.service.external.response.InformacaoLoja;
 import br.com.lasa.notificacao.util.DateTimeFormatterUtils;
 import br.com.lasa.notificacao.util.JsonMap;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.data.domain.Example;
@@ -20,10 +23,13 @@ import org.springframework.util.Assert;
 
 import java.time.ZoneId;
 import java.util.*;
+import java.util.concurrent.ForkJoinPool;
 import java.util.stream.Collectors;
 
 @Component
 public class LojaServiceImpl implements LojaService {
+
+    private final Logger LOGGER = LoggerFactory.getLogger(LojaServiceImpl.class);
 
     @Autowired
     private LojaRepository lojaRepository;
@@ -74,9 +80,9 @@ public class LojaServiceImpl implements LojaService {
             throw new IllegalArgumentException("Nao foi possivel localizar os dados da loja para serem atualizados. Verifique as informacoes enviadas para o servidor.");
         }
 
-        CalendarioDeLoja calendarioDeLoja = calendarioDeLojaExternalService.buscarCalendarioDaSemanaDaLoja(id, lojaParam.getResponsavelGeral());
+        CalendarioDeLoja calendarioDeLoja = calendarioDeLojaExternalService.buscarCalendarioFeriadoDaSemanaDaLoja(id, lojaParam.getResponsavelGeral());
 
-        Loja loja = calendarioDeLojaExternalService.montarEstrutura(calendarioDeLoja);
+        Loja loja = calendarioDeLojaExternalService.toLoja(calendarioDeLoja);
 
         lojaId = loja;
         lojaId.setId(id);
@@ -91,9 +97,9 @@ public class LojaServiceImpl implements LojaService {
         //Atribui o horario de abertura e fechamento para todos os dias ao atualizar
         Assert.isNull(lojaParam, "Nao foi possivel localizar os dados da loja para serem atualizados. Verifique as informacoes enviadas para o servidor.");
 
-        CalendarioDeLoja calendarDeLoja = calendarioDeLojaExternalService.buscarCalendarioDaSemanaDaLoja(lojaParam.getId(), lojaParam.getResponsavelGeral());
+        CalendarioDeLoja calendarDeLoja = calendarioDeLojaExternalService.buscarCalendarioFeriadoDaSemanaDaLoja(lojaParam.getId(), lojaParam.getResponsavelGeral());
 
-       Loja loja = calendarioDeLojaExternalService.montarEstrutura(calendarDeLoja);
+       Loja loja = calendarioDeLojaExternalService.toLoja(calendarDeLoja);
 
        lojaRepository.delete(lojaParam.getId());
         Loja save = lojaRepository.save(lojaParam);
@@ -317,6 +323,33 @@ public class LojaServiceImpl implements LojaService {
 
     @Override
     public void carregarDadosLoja() {
+        long start = System.currentTimeMillis();
 
+
+        final ForkJoinPool forkJoinPool = new ForkJoinPool(20);
+
+        forkJoinPool.submit(() -> this.calendarioDeLojaExternalService.buscarCalendarioDaSemanaDeTodasLoja().
+            parallelStream().
+            map(this::applyMap).
+            map(calendarioDeLojaExternalService::toLoja).forEach(this::save));
+
+        LOGGER.info("Processo de carga de lojas executado em {} ms.", System.currentTimeMillis() - start);
     }
+
+    private Loja save(Loja loja) {
+        lojaRepository.delete(loja);
+        lojaRepository.save(loja);
+        return loja;
+    }
+
+    private CalendarioDeLoja applyMap(InformacaoLoja informacaoLoja) {
+
+        Collection<InformacaoFeriadoLoja> informacaoFeriadoLoja = calendarioDeLojaExternalService.buscarCalendarioFeriadoDaSemanaDaLoja(informacaoLoja);
+
+        LOGGER.info("tranformando calendario de loja");
+        CalendarioDeLoja calendarioDeLoja = calendarioDeLojaExternalService.montarCalendario(informacaoLoja, informacaoFeriadoLoja);
+
+        return calendarioDeLoja;
+    }
+
 }

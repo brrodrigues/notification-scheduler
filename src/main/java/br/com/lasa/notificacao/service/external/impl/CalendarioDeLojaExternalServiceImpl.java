@@ -29,8 +29,6 @@ import org.springframework.web.client.RestTemplate;
 import java.time.*;
 import java.time.format.TextStyle;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 import java.util.stream.Collectors;
 
 @Component
@@ -66,27 +64,27 @@ public class CalendarioDeLojaExternalServiceImpl implements CalendarioDeLojaExte
     private Locale brazilianLocale;
 
     @Override
-    public List<CalendarioDeLoja> buscarCalendarioDaSemanaDeTodasLoja() {
+    public List<InformacaoLoja> buscarCalendarioDaSemanaDeTodasLoja() {
 
         LOGGER.info("Buscando calendario de todas as loja da semana atual");
         List<InformacaoLoja> informacaoLojaList = getInformacaoLojas();
 
         Assert.notNull(informacaoLojaList, "Nao foi localizado lojas para buscar o calendario de loja da semana");
 
-        ConcurrentMap<InformacaoLoja, Collection<InformacaoFeriadoLoja>> map = new ConcurrentHashMap();
+        //ConcurrentMap<InformacaoLoja, Collection<InformacaoFeriadoLoja>> map = new ConcurrentHashMap();
 
-        for (InformacaoLoja informacaoLoja : informacaoLojaList) {
+       /* for (InformacaoLoja informacaoLoja : informacaoLojaList) {
             Integer numeroLoja = informacaoLoja.getLoja();
             Collection<InformacaoFeriadoLoja> feriados = getInformacaoFeriadoLoja(String.valueOf(numeroLoja));
             map.put(informacaoLoja, feriados);
-        }
+        }*/
 
-        List<CalendarioDeLoja> calendarios = map.entrySet().
+        /*List<CalendarioDeLoja> calendarios = map.entrySet().
                 stream().
                 map(this::transformToCalendarioDeLoja).
-                collect(Collectors.toList());
+                collect(Collectors.toList());*/
 
-        return calendarios;
+        return informacaoLojaList;
     }
 
     /**
@@ -95,7 +93,7 @@ public class CalendarioDeLojaExternalServiceImpl implements CalendarioDeLojaExte
      * @return
      */
     @Override
-    public CalendarioDeLoja buscarCalendarioDaSemanaDaLoja(String lojaId, String responsavelLoja) {
+    public CalendarioDeLoja buscarCalendarioFeriadoDaSemanaDaLoja(String lojaId, String responsavelLoja) {
 
         LOGGER.info("Buscando calendario de loja {} da semana corrente", lojaId);
         InformacaoLoja informacaoLojaList = getInformacaoLoja(lojaId);
@@ -106,6 +104,17 @@ public class CalendarioDeLojaExternalServiceImpl implements CalendarioDeLojaExte
         CalendarioDeLoja calendarioDeLoja = montarCalendarioLoja(lojaId, responsavelLoja, informacaoLojaList, informacaoFeriadoLojaList);
 
         return calendarioDeLoja;
+    }
+
+    @Override
+    public Collection<InformacaoFeriadoLoja> buscarCalendarioFeriadoDaSemanaDaLoja(InformacaoLoja informacaoLoja) {
+
+        String lojaId = String.valueOf(informacaoLoja.getLoja());
+
+        LOGGER.info("Buscando calendario de feriado da loja {}", lojaId);
+        Collection<InformacaoFeriadoLoja> informacaoFeriadoLojaList = getInformacaoFeriadoLoja(lojaId);
+
+        return informacaoFeriadoLojaList;
     }
 
     private CalendarioDeLoja montarCalendarioLoja(String lojaId, String responsavelLoja, InformacaoLoja informacaoLojaList, Collection<InformacaoFeriadoLoja> informacaoFeriadoLojaList) {
@@ -132,7 +141,7 @@ public class CalendarioDeLojaExternalServiceImpl implements CalendarioDeLojaExte
     }
 
     @Override
-    public Loja montarEstrutura(CalendarioDeLoja calendarioDeLoja) {
+    public Loja toLoja(CalendarioDeLoja calendarioDeLoja) {
         Loja loja = Loja.builder().
                 id(calendarioDeLoja.getLojaId()).
                 responsavelGeral(calendarioDeLoja.getNomeResponsavel()).
@@ -141,6 +150,14 @@ public class CalendarioDeLojaExternalServiceImpl implements CalendarioDeLojaExte
                 metadata(calendarioDeLoja.getMetadata()).
                 build();
         return loja;
+    }
+
+    @Override
+    public CalendarioDeLoja montarCalendario(InformacaoLoja informacaoLoja, Collection<InformacaoFeriadoLoja> informacaoLojaCollectionEntry) {
+        String lojaId = String.valueOf(informacaoLoja.getLoja());
+        CalendarioDeLoja calendarioDeLoja = montarCalendarioLoja(lojaId, "", informacaoLoja, informacaoLojaCollectionEntry);
+        return calendarioDeLoja;
+
     }
 
     private Collection<InformacaoFeriadoLoja> getInformacaoFeriadoLoja(String lojaId) {
@@ -199,6 +216,9 @@ public class CalendarioDeLojaExternalServiceImpl implements CalendarioDeLojaExte
             LOGGER.error("ERR123 :: Erro ao consultar o calendario de loja da loja ", ex);
             LOGGER.warn("ERR123  :: Nao foi possui acessar a URL {} para o calendario de loja {}", feriadoLojaUrl, "todas", ex.getStatusCode() );
             return Arrays.asList();
+        }catch (Exception ex){
+            LOGGER.error("ERR125 :: Erro ao consultar o calendario de loja da loja ", ex);
+
         }
 
         List<InformacaoLoja> body = new ArrayList<>();
@@ -222,8 +242,8 @@ public class CalendarioDeLojaExternalServiceImpl implements CalendarioDeLojaExte
         String horaAbertura = horarioDiario.getHoraAbertura();
         String horaFechamento = horarioDiario.getHoraFechamento();
         if (horarioDiario.getSituacao().equalsIgnoreCase("0")) { //Quando a loja nao estiver aberta no dia, o seu horario de abertura e fechamento sera zerado
-            horaAbertura = "00:00";
-            horaFechamento = "00:00";
+            horaAbertura = "00:00:00";
+            horaFechamento = "00:00:00";
         }
 
         Date dateAbertura = atribuirNoDiaDeSemanaCorrenteOHorarioInformado(diaSemana, horaAbertura);
@@ -272,8 +292,8 @@ public class CalendarioDeLojaExternalServiceImpl implements CalendarioDeLojaExte
         String horaFechamento = horarioDiario.getHoraFechamento();
 
         if (horarioDiario.getSituacao().equalsIgnoreCase("0")) { //Quando a loja nao estiver aberta no dia, o seu horario de abertura e fechamento sera zerado
-            horaAbertura = "00:00";
-            horaFechamento = "00:00";
+            horaAbertura = "00:00:00";
+            horaFechamento = "00:00:00";
         }
 
         Date dateAbertura = atribuirNoDiaDeSemanaCorrenteOHorarioInformado(diaSemana.getValue(), horaAbertura);
@@ -296,12 +316,7 @@ public class CalendarioDeLojaExternalServiceImpl implements CalendarioDeLojaExte
         return horarios;
     }
 
-    private CalendarioDeLoja transformToCalendarioDeLoja(Map.Entry<InformacaoLoja, Collection<InformacaoFeriadoLoja>> informacaoLojaCollectionEntry) {
-        InformacaoLoja key = informacaoLojaCollectionEntry.getKey();
 
-        LOGGER.info("Montando quadro de horario para padronizar a saide de informacoes...");
-        CalendarioDeLoja calendarioDeLoja = montarCalendarioLoja(key.getNomeLoja(), "", key, informacaoLojaCollectionEntry.getValue());
 
-        return calendarioDeLoja;
-    }
+
 }

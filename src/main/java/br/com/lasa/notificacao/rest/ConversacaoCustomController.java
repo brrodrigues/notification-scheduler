@@ -28,7 +28,8 @@ import java.util.stream.Collectors;
 
 
 @BasePathAwareController
-@RequestMapping("conversations")
+@RestController
+@RequestMapping("/api/conversations")
 public class ConversacaoCustomController implements ResourceProcessor<PersistentEntityResource> {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(ConversacaoCustomController.class);
@@ -132,8 +133,8 @@ public class ConversacaoCustomController implements ResourceProcessor<Persistent
 
     }
 
-    @CrossOrigin( origins = "*")
-    @GetMapping( value = "/{id}/messages", consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_JSON_UTF8_VALUE, MediaType.ALL_VALUE, MediaType.TEXT_HTML_VALUE}, produces = {MediaTypes.HAL_JSON_VALUE} )
+    @CrossOrigin( origins = "*" )
+    @GetMapping ( value = "/{id}/messages", consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_JSON_UTF8_VALUE, MediaType.ALL_VALUE, MediaType.TEXT_HTML_VALUE}, produces = {MediaTypes.HAL_JSON_VALUE} )
     @ResponseBody
     public ResponseEntity listMessages(@PathVariable(value = "id") String id, PersistentEntityResourceAssembler persistentEntityResourceAssembler) {
         LOGGER.info("Listing messages to convesation {}", id);
@@ -159,7 +160,7 @@ public class ConversacaoCustomController implements ResourceProcessor<Persistent
             }
         }
 
-        return ResponseEntity.ok(new Resources(messages, ControllerLinkBuilder.linkTo(ConversacaoCustomController.class, id).withRel("messages")));
+        return ResponseEntity.ok(new Resources(messages, ControllerLinkBuilder.linkTo(ConversacaoCustomController.class).slash(id).slash("messages").withRel("messages")));
     }
 
     @Override
