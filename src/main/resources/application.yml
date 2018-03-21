@@ -69,4 +69,7 @@ endpoints:
     exposed-headers: REASON, message
   jmx:
     enabled: true
-
+---
+spring:
+  profiles: hml, prd
+debug: false

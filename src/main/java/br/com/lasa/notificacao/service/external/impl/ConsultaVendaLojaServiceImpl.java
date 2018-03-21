@@ -87,7 +87,7 @@ public class ConsultaVendaLojaServiceImpl implements ConsultaVendaLojaService {
             LOGGER.debug(">>> notificarLojaPorVendaForaDoPeriodo. Parametros {} {}", loja, periodoEmMinuto);
         }
 
-        InformacaoVendaLoja informacaoVendaLoja = getForApi(loja);
+        InformacaoVendaLoja informacaoVendaLoja = getForApi(loja)   ;
 
         Assert.notNull(informacaoVendaLoja.getDiferenca(), "Nao foi encontrado a ultima venda da loja " + loja + " para validar o envio de notificacao. ");
 
@@ -97,7 +97,7 @@ public class ConsultaVendaLojaServiceImpl implements ConsultaVendaLojaService {
 
         LocalTime horarioAtual = dataHoraReferencia.toLocalTime().truncatedTo(ChronoUnit.MINUTES);
 
-        LOGGER.info("Notificar A loja {} possui venda no periodo {} min ? {} (Diferenca entre {} e {} foi de {}) ", loja, periodoEmMinuto, enviarNotificar, horarioAtual, informacaoVendaLoja.getUltimaAtualizacao(), informacaoVendaLoja.getDiferenca());
+        LOGGER.info("Notificar a loja {} por nao possui venda no periodo {} min ? {} (Diferenca entre {} e {} foi de {})", loja, periodoEmMinuto, enviarNotificar, horarioAtual, informacaoVendaLoja.getUltimaAtualizacao(), informacaoVendaLoja.getDiferenca());
 
         return enviarNotificar;
 

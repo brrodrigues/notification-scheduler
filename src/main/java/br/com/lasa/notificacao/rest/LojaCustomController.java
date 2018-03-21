@@ -86,6 +86,7 @@ public class LojaCustomController {
         List<RegiaoDistrito> lojaRegiaoDistritoList = lojaService.buscarLojaPorRegiao(codigoRegiao, tipoLoja);
 
         List<Resource> parents = new ArrayList<>();
+        Set<Map<String, Object>> childData = new HashSet<>();
 
         for (RegiaoDistrito lojaRegiao : lojaRegiaoDistritoList ) {
 
@@ -95,15 +96,27 @@ public class LojaCustomController {
                 return ResponseEntity.notFound().header(HttpHeaderConstants.REASON, "Nao foi encontrado nenhum distrito com os criterios especificados na consulta").build();
             }
 
-            Link linkSelf = getRegiaoBaseLink(codigoRegiao).withSelfRel();
+            Link linkSelf = getRegiaoBaseLink(lojaRegiao.getIdRegiao()).withSelfRel();
 
-            Set<ChildrenContent> children = distritoList.stream().map(distrito -> castRegiaoToChildren(codigoRegiao, distrito)).collect(Collectors.toSet());
+            Set<Map<String, Object>> distritoMapList = distritoList.stream().map(distrito -> {
+                Link distritoLink = getDistritoBaseLink(lojaRegiao.getIdRegiao(), distrito.getId()).withRel("link");
+                Map<String, Object> map = new HashMap<>();
+                map.put("id", distrito.getId());
+                map.put("name", distrito.getName());
+                map.put("link", distritoLink);
+                return map;
+            }).collect(Collectors.toSet());
+
+
+            ChildrenContent children = ChildrenContent.builder().childName("Distritos").childData(distritoMapList).build();
+
+            Set<ChildrenContent> childrenContent = Collections.singleton(children);
 
             ParentContent content = ParentContent.builder().
                     selfId(lojaRegiao.getIdRegiao()).
                     selfType("Regiões").
                     selfName(lojaRegiao.getNomeRegiao()).
-                    children(children).
+                    children(childrenContent).
                     lojas(lojaRegiao.getLojas()).
                     build();
 
@@ -203,7 +216,7 @@ public class LojaCustomController {
         return getRegiaoBaseLink(regiao).slash(distrito).slash("distritos").slash(cidade).slash("cidades");
     }
 
-    private ChildrenContent castRegiaoToChildren(String regiao, RegiaoDistrito.Distrito distrito) {
+ /*   private ChildrenContent castRegiaoToChildren(String regiao, RegiaoDistrito.Distrito distrito) {
         Link distritoLink = getDistritoBaseLink(regiao, distrito.getId()).withRel("link");
         Map<String, Object> map = new HashMap<>();
         map.put("id", distrito.getId());
@@ -211,7 +224,7 @@ public class LojaCustomController {
         map.put("link", distritoLink);
         ChildrenContent childrenContent = ChildrenContent.builder().childName("Distritos").childData(Arrays.asList(map)).build();
         return childrenContent;
-    }
+    }*/
 
     private ChildrenContent castCidadeToChildren(String regiao, String distrito, RegiaoDistritoCidade.Cidade cidade) {
         Link distritoLink = getCidadeBaseLink(regiao, distrito, cidade.getId()).withRel("link");
@@ -219,7 +232,7 @@ public class LojaCustomController {
         map.put("id", cidade.getId());
         map.put("name", cidade.getId());
         map.put("link", distritoLink);
-        ChildrenContent childrenContent = ChildrenContent.builder().childName("Cidades").childData(Arrays.asList(map)).build();
+        ChildrenContent childrenContent = ChildrenContent.builder().childName("Cidades").childData(Collections.singleton(map)).build();
         return childrenContent;
     }
 

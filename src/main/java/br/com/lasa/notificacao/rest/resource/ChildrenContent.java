@@ -5,8 +5,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -15,6 +15,6 @@ import java.util.Map;
 public class ChildrenContent {
 
     private String childName;
-    private List<Map<String, Object>> childData;
+    private Set<Map<String, Object>> childData;
 
 }
