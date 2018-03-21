@@ -65,7 +65,7 @@ public class NotificacaoRepositoryImpl implements NotificacaoRepositoryCustom {
                 append(", intervalTime: 1").
                 append(", storeId: 1").
                 append(", loja: 1 ").
-                append(", triggerByIntervalTime : { $or : [ {$cond : { if: { $eq: [ '$intervalTime', 1] }, then: true, else: false }}, {$eq   : [ {mod : [ {$literal: ").append(minute.getMinute()).append("} , {$cond: { if: {$eq: ['$intervalTime', 0]}, then: -1, else: '$intervalTime' }}]}, 0 ]}]}").
+                append(", triggerByIntervalTime : { $or : [ {$cond : { if: { $eq: [ '$intervalTime', 1] }, then: true, else: false }}, {$eq   : [ {$mod : [ {$literal: ").append(minute.getMinute()).append("} , {$cond: { if: {$eq: ['$intervalTime', 0]}, then: -1, else: '$intervalTime' }}]}, 0 ]}]}").
                 append(", triggerByScheduledTime : { $eq : [ { $dateToString : { 'format' : '%Y%m%d%H%M' , 'date' :  '$scheduledTime' }} , { $literal : '").append(yyyyMMddHHmm).append("' } ]}").
                 append(", abertura   : { $dateToString : { format : '%H:%M' , date : { $add : [ '$loja.horarios.abertura' , { $multiply : [ '$intervalTime' , 1000 , 60]}]}}}").
                 append(", fechamento : { $dateToString : { format : '%H:%M' , date : { $subtract : [ '$loja.horarios.fechamento' , { $multiply : [ '$intervalTime' , 1000 , 60]}]}}}}}");

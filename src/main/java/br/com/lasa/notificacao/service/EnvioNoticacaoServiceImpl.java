@@ -142,17 +142,19 @@ public class EnvioNoticacaoServiceImpl implements EnvioNoticacaoService {
 
             String URL = "api/conversations/" + conversacaoId + "/messages" ;
 
-            String message = notification.getType().name();
+            String messageType = notification.getType().name();
+            String message = notification.getMessage();
 
-            if (notification.getType().equals(Behavior.PONTUAL)){
+            /*if (notification.getType().equals(Behavior.PONTUAL)) {
                 message = notification.getMessage();
-            }
+            }*/
 
             EnvioNotificacaoRequest envioNotificacaoRequest = EnvioNotificacaoRequest.
                     builder().
-                    messageType(message).
-                    skipRules(true).
+                    messageType(messageType).
+                    skipRules(false).
                     messageLink(URL).
+                    metadata(Collections.singletonMap("message", message)).
                     recipients(recipients).
                     build();
 

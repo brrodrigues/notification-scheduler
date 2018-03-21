@@ -47,7 +47,9 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.*;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ThreadPoolExecutor;
 
 @Slf4j
 @EnableScheduling
@@ -164,7 +166,7 @@ public class SistemaDeNotificaoPushApplication {
 
 	@Bean
     UsuarioNotificacao usuarioJonatasLais() {
-		//new Recipient("mid.$cAAA7URkk_Xxmi7uHeVgWnY_Fi0fm", "facebook", BotUser.builder().id("1696672097072999").name("Jônatas Ricardo").montarEstrutura(), BotUser.builder().id("107349120032554").name("LAIS-SAC-HML").montarEstrutura(), Conversacao.builder().isGroup(false).id("1696672097072999-107349120032554").montarEstrutura(), "https://facebook.botframework.com/")
+		//new Recipient("mid.$cAAA7URkk_Xxmi7uHeVgWnY_Fi0fm", "facebook", BotUser.builder().id("1696672097072999").name("Jônatas Ricardo").toLoja(), BotUser.builder().id("107349120032554").name("LAIS-SAC-HML").toLoja(), Conversacao.builder().isGroup(false).id("1696672097072999-107349120032554").toLoja(), "https://facebook.botframework.com/")
 
 		Recipient recipient = new Recipient("mid.$cAAA7URkk_Xxmi7uHeVgWnY_Fi0fm", "facebook", BotUser.builder().id("1696672097072999").name("Jônatas Ricardo").build(), BotUser.builder().id("107349120032554").name("LAIS-SAC-HML").build(), Conversation.builder().isGroup(false).id("1696672097072999-107349120032554").build(), "https://facebook.botframework.com/");
 		return new UsuarioNotificacao(recipient.getUser().getId(), "Bruno Rodrigues","L0001","", recipient, true, null);
@@ -172,7 +174,7 @@ public class SistemaDeNotificaoPushApplication {
 
 	@Bean
     UsuarioNotificacao usuarioGustavoLais() {
-		//new Recipient("mid.$cAAA7UQtt0cFmq7rohFgenWfiZhZL", "facebook", BotUser.builder().id("1652887001413594").name("Gustavo Gomes").montarEstrutura(), BotUser.builder().id("107349120032554").name("LAIS-SAC-HML").montarEstrutura(), Conversacao.builder().isGroup(false).id("1652887001413594-107349120032554").montarEstrutura(),"https://facebook.botframework.com/");
+		//new Recipient("mid.$cAAA7UQtt0cFmq7rohFgenWfiZhZL", "facebook", BotUser.builder().id("1652887001413594").name("Gustavo Gomes").toLoja(), BotUser.builder().id("107349120032554").name("LAIS-SAC-HML").toLoja(), Conversacao.builder().isGroup(false).id("1652887001413594-107349120032554").toLoja(),"https://facebook.botframework.com/");
 		return UsuarioNotificacao.builder().status(true).storeId("1").profile(new Recipient("mid.$cAAA7UQtt0cFmq7rohFgenWfiZhZL", "facebook", BotUser.builder().id("1652887001413594").name("Gustavo Gomes").build(), BotUser.builder().id("107349120032554").name("LAIS-SAC-HML").build(), Conversation.builder().isGroup(false).id("1652887001413594-107349120032554").build(),"https://facebook.botframework.com/")).build();
 	}
 
@@ -183,11 +185,11 @@ public class SistemaDeNotificaoPushApplication {
 		TrustStrategy acceptingTrustStrategy = (X509Certificate[] chain, String authType) -> true;
 		SSLContext sslContext = org.apache.http.ssl.SSLContexts.custom()
 				.loadTrustMaterial(null, acceptingTrustStrategy)
-				.montarEstrutura();
+				.toLoja();
 		SSLConnectionSocketFactory csf = new SSLConnectionSocketFactory(sslContext);
 		CloseableHttpClient httpClient = HttpClients.custom()
 				.setSSLSocketFactory(csf)
-				.montarEstrutura();
+				.toLoja();
 		HttpComponentsClientHttpRequestFactory requestFactory =
 				new HttpComponentsClientHttpRequestFactory();
 		requestFactory.setHttpClient(httpClient);
@@ -249,7 +251,7 @@ public class SistemaDeNotificaoPushApplication {
 	@Bean(name = AppConstants.FLASH_DS)
 	@ConfigurationProperties
 	DataSource flashDBDataSource(@Qualifier(AppConstants.FLASH_DATASOURCE_PROPERTIES) @Autowired DataSourceProperties properties) {
-		DataSource dataSource = properties.initializeDataSourceBuilder().montarEstrutura();
+		DataSource dataSource = properties.initializeDataSourceBuilder().toLoja();
 		log.info("Starting datasource {} with parameters {} {} ", AppConstants.FLASH_DS, properties.getUrl(), properties.getUsername());
 
 		if (dataSource != null) {
