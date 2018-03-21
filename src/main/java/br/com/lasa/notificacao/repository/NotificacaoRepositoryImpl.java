@@ -12,7 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationContext;
 import org.springframework.data.mongodb.core.MongoTemplate;
-import org.springframework.data.mongodb.core.query.BasicQuery;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
@@ -53,9 +52,9 @@ public class NotificacaoRepositoryImpl implements NotificacaoRepositoryCustom {
 
         String displayName = minute.getDayOfWeek().getDisplayName(TextStyle.SHORT, brazilianLocale).toUpperCase();
 
-        String yyyyMMddHHmm = minute.format(DateTimeFormatter.ofPattern("yyyyMMddHHmm"));
+        String yyyyMMddHHmm = minute.format(DateTimeFormatter.ofPattern("yyyyMMddHH24mm"));
 
-        String HHmm = minute.format(DateTimeFormatter.ofPattern("HH:mm"));
+        String HHmm = minute.format(DateTimeFormatter.ofPattern("HH24:mm"));
 
         StringBuilder $project = new StringBuilder("{ $project : {").
                 append(" storeIds: 1").
@@ -101,28 +100,6 @@ public class NotificacaoRepositoryImpl implements NotificacaoRepositoryCustom {
         return updated;
     }
 
-    @Override
-    public int setScheduleAndUuiAndHostnameForMinute(int minute, boolean scheduled, String uuid, String hostname, int limit) {
-
-        StringBuilder builder = new StringBuilder("{ $where : '((").append(minute).append(" % this.intervalTime == 0 && this.intervalTime != 1) || this.intervalTime == 1) && this.scheduled == ").append(false).append(" && this.type == \"INTERVAL_TIME\"' }");
-
-        Query query = new BasicQuery(builder.toString());
-        Update update = new Update().set("uuid", uuid).set("scheduled", scheduled).set("hostname", hostname);
-
-        WriteResult writeResult = mongoTemplate.updateMulti(query, update, Notification.class);
-
-        if (!Optional.ofNullable(writeResult).isPresent()) {
-            return 0;
-        }
-
-        int updated = writeResult.getN();
-
-        log.info("Update {} documents ", updated);
-
-        return updated;
-
-    }
-    
     @Override
     public int setNotificacaoFor(ObjectId objectId, boolean scheduled) {
 
