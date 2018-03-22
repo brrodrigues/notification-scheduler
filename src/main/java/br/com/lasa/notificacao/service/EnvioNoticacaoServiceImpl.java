@@ -89,14 +89,14 @@ public class EnvioNoticacaoServiceImpl implements EnvioNoticacaoService {
                 continue;
             }
 
-            if (!podeNotificar(horarioBrasilia, loja) && !notification.getType().equals(Behavior.PONTUAL) ) {
+            if ( !podeNotificar(horarioBrasilia, loja) && !notification.getType().equals(Behavior.PONTUAL)) {
                 continue;
             }
 
             try {
                 boolean podeNotificar = consultaVendaLojaService.notificarLojaPorVendaForaDoPeriodo(storeId, horarioBrasilia, notification.getIntervalTime());
 
-                if (notification.getType().equals(Behavior.PONTUAL)){ //Este tipo de notificacao sera notificada sempre
+                if (notification.getType().equals(Behavior.PONTUAL)) { //Este tipo de notificacao sera notificada sempre
                     podeNotificar = true;
                 }
 
@@ -145,16 +145,16 @@ public class EnvioNoticacaoServiceImpl implements EnvioNoticacaoService {
             String messageType = notification.getType().name();
             String message = notification.getMessage();
 
-            /*if (notification.getType().equals(Behavior.PONTUAL)) {
-                message = notification.getMessage();
-            }*/
+            Map<String, Object> metadata  = new HashMap();
+            metadata.put("message", message);
+            metadata.put("interval", notification.getIntervalTime());
 
             EnvioNotificacaoRequest envioNotificacaoRequest = EnvioNotificacaoRequest.
                     builder().
                     messageType(messageType).
                     skipRules(false).
                     messageLink(URL).
-                    metadata(Collections.singletonMap("message", message)).
+                    metadata(metadata).
                     recipients(recipients).
                     build();
 

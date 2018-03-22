@@ -8,8 +8,6 @@ public interface NotificacaoRepositoryCustom {
 
     int setScheduleAndUuiAndHostnameForSpecificScheduleTime(LocalDateTime minute, boolean scheduled, String uuid, String hostname, int limit);
 
-    int setScheduleAndUuiAndHostnameForMinute(int minute, boolean schedule, String uuid, String hostname, int limit);
-
     int setNotificacaoFor(ObjectId objectId, boolean schedule);
 
     void releaseNotificacaoByHostname(String hostname);

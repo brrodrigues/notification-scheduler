@@ -18,7 +18,7 @@ import org.springframework.util.Assert;
 import java.util.Map;
 import java.util.Objects;
 
-@Service(value = "xyz")
+@Service
 @Slf4j
 public class CadastroUsuarioServiceImpl implements CadastroUsuarioService {
 

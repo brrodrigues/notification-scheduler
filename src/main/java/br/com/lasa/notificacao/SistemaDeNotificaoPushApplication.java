@@ -28,12 +28,10 @@ import org.springframework.http.MediaType;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.web.client.RestTemplate;
 
-import javax.sql.DataSource;
 import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -45,11 +43,12 @@ import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
+import java.util.TimeZone;
 import java.util.concurrent.Executors;
-import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ThreadPoolExecutor;
 
 @Slf4j
 @EnableScheduling
@@ -104,6 +103,7 @@ public class SistemaDeNotificaoPushApplication {
 	}
 
 	@Bean
+	@Primary
 	public ObjectMapper jacksonObjectMapper() {
 		ObjectMapper mapper = new ObjectMapper();
 		// mapper.configure(JsonGenerator.Feature.ESCAPE_NON_ASCII, true);
@@ -113,6 +113,9 @@ public class SistemaDeNotificaoPushApplication {
 		// TODO desabilitar timestamp passa a usar uma notação
 		// ISO8061-compilant, acho que pode ser um bom formato pode ser definido outro formato também, talvez com o timezone mais simples usando a letra Z
 		mapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
+
+		mapper.configure(JsonParser.Feature.ALLOW_BACKSLASH_ESCAPING_ANY_CHARACTER, false);
+		mapper.configure(JsonParser.Feature.ALLOW_SINGLE_QUOTES, false);
 
 		// habilitar loose/non-standard format
 		// to allow C/C++ style comments in JSON (non-standard, disabled by
@@ -132,12 +135,10 @@ public class SistemaDeNotificaoPushApplication {
 		return mapper;
 	}
 
-
 	@Bean
 	TimeZone timeZone() {
 		return TimeZone.getTimeZone("UTC");
 	}
-
 
 	@Bean
 	public MappingJackson2HttpMessageConverter appJackson2HttpMessageConverter() {
@@ -233,8 +234,8 @@ public class SistemaDeNotificaoPushApplication {
 		return ZoneId.of("America/Sao_Paulo");
 	}
 
-	@Bean
-	@Scope(proxyMode = ScopedProxyMode.INTERFACES, value = "prototype")
+	@Bean(name = AppConstants.BRAZILIAN_DATETIME)
+	@Scope(proxyMode = ScopedProxyMode.DEFAULT, value = "prototype")
 	LocalDateTime localDateTime() {
 		LocalDateTime horario = LocalDateTime.now(brazilZone());
 		return horario;
@@ -261,10 +262,5 @@ public class SistemaDeNotificaoPushApplication {
 		return dataSource;
 	}
 	**/
-
-	@Bean(name = AppConstants.FLASH_JDBC_TEMPLATE)
-	JdbcTemplate jdbcTemplateFlash(@Autowired DataSource dataSource ){
-		return new JdbcTemplate(dataSource);
-	}
 
 }

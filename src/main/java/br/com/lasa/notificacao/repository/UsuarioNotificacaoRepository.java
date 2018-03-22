@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 import java.util.List;
 
 @CrossOrigin(origins = "*")
-@RepositoryRestResource(path = "/usuarios", itemResourceRel = "usuarios")
+@RepositoryRestResource(path = "/usuarios", itemResourceRel = "usuarios", collectionResourceRel = "")
 public interface UsuarioNotificacaoRepository extends MongoRepository<UsuarioNotificacao, String> {
 
     @RestResource(path = "/findAllByStore" )
