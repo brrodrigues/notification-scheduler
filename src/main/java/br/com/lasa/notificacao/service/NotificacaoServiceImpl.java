@@ -13,7 +13,8 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
-import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 @Service
@@ -26,18 +27,17 @@ public class NotificacaoServiceImpl implements NotificacaoService {
     @Autowired
     private EnvioNoticacaoService envioNoticacaoServiceImpl;
 
-
     @Override
-    public boolean enviarNotificacao(Notification notification) {
+    public boolean enviarNotificacao(Map.Entry<String, Set<String>> notificationMap) {
         log.debug("Sending notification...");
-        envioNoticacaoServiceImpl.notificar(notification);
+        envioNoticacaoServiceImpl.notificar(notificationMap);
         log.debug("Notification done.");
         return true;
     }
 
     @Override
     @Transactional
-    public List<Notification> buscarNotificacaoNaoProgramada(LocalDateTime scheduleTime) {
+    public Map<String, Set<String>> buscarMapaDeNotificacaoNaoProgramada(LocalDateTime scheduleTime) {
         log.info("Finding events no scheduling");
         String uuid = UUID.randomUUID().toString();
         String hostAddress = null;
@@ -49,8 +49,8 @@ public class NotificacaoServiceImpl implements NotificacaoService {
             e.printStackTrace();
         }
 
-        notificacaoRepository.setScheduleAndUuiAndHostnameForSpecificScheduleTime(scheduleTime,true, uuid , hostAddress, 2);
-        return notificacaoRepository.findAllByUuid(uuid);
+        Map<String, Set<String>> storeMap = notificacaoRepository.setScheduleAndUuiAndHostnameForSpecificScheduleTimeAndReturnNotificationMap(scheduleTime, true, uuid, hostAddress, 2);
+        return storeMap;
     }
 
     @Override
@@ -66,5 +66,10 @@ public class NotificacaoServiceImpl implements NotificacaoService {
     @Override
     public void setScheduleFor(String id, boolean schedule) {
         notificacaoRepository.setNotificacaoFor(new ObjectId(id), schedule);
+    }
+
+    @Override
+    public Notification get(String id) {
+        return notificacaoRepository.findOne(id);
     }
 }

@@ -2,10 +2,12 @@ package br.com.lasa.notificacao.repository;
 
 import br.com.lasa.notificacao.domain.document.Loja;
 import br.com.lasa.notificacao.domain.document.Notification;
-import br.com.lasa.notificacao.domain.document.enumaration.Behavior;
 import br.com.lasa.notificacao.util.AppConstants;
 import br.com.lasa.notificacao.util.MongoDBUtil;
-import com.mongodb.*;
+import com.mongodb.AggregationOptions;
+import com.mongodb.Cursor;
+import com.mongodb.DBObject;
+import com.mongodb.WriteResult;
 import lombok.extern.slf4j.Slf4j;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,9 +23,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.format.TextStyle;
-import java.util.Arrays;
-import java.util.Locale;
-import java.util.Optional;
+import java.util.*;
 
 
 @Slf4j
@@ -44,8 +44,11 @@ public class NotificacaoRepositoryImpl implements NotificacaoRepositoryCustom {
     @Qualifier(value = AppConstants.BRAZILIAN_LOCALE)
     Locale brazilianLocale;
 
+
     @Override
-    public int setScheduleAndUuiAndHostnameForSpecificScheduleTime(LocalDateTime minute, boolean scheduled, String uuid, String hostname, int limit){
+    public Map<String, Set<String>> setScheduleAndUuiAndHostnameForSpecificScheduleTimeAndReturnNotificationMap(LocalDateTime minute, boolean scheduled, String uuid, String hostname, int limit){
+
+        Map<String, Set<String>> storeToNotify = new HashMap<>();
 
         String collectionName = mongoTemplate.getCollectionName(Notification.class);
         String lojaCollectionName = mongoTemplate.getCollectionName(Loja.class);
@@ -78,8 +81,9 @@ public class NotificacaoRepositoryImpl implements NotificacaoRepositoryCustom {
                         MongoDBUtil.toDBObject("{ $unwind: '$loja.horarios'}"),
                         MongoDBUtil.toDBObject( String.format("{ $match: { 'loja.horarios.dia' : '%s' }}", displayName)),
                         MongoDBUtil.toDBObject( $project.toString()),
-                        MongoDBUtil.toDBObject( String.format("{ $match : { $or : [ {$and : [ {'abertura' : { $eq : '%s' } } , { type: {$eq : 'SPECIFIC_TIME_BEFORE' }}  ] }, {$and : [ {'fechamento' : { $eq : '%s' } } , { type: {$eq : 'SPECIFIC_TIME_AFTER' }}]}, { $and : [ { triggerByScheduledTime : { $eq : true}}, { type : { $eq : 'PONTUAL'}  }]} , { $and : [ { triggerByIntervalTime : { $eq : true}}, { 'abertura' : { '$lt' : '%s'}} , { 'fechamento' : { '$gt' : '%s'}} {type: 'INTERVAL_TIME'}, { intervalTime : { $ne : 0}}]} ]}}", HHmm, HHmm, HHmm, HHmm)),
-                        MongoDBUtil.toDBObject( "{ $group :{ _id :  '$_id' }}")),
+                        MongoDBUtil.toDBObject( String.format("{ $match : { $or : [ {$and : [ {'abertura' : { $eq : '%s' } } , { type: {$eq : 'SPECIFIC_TIME_BEFORE' }}  ] }, {$and : [ {'fechamento' : { $eq : '%s' } } , { type: {$eq : 'SPECIFIC_TIME_AFTER' }}]}, { $and : [ { triggerByScheduledTime : { $eq : true}}, { type : { $eq : 'PONTUAL'}  }]} , { $and : [ { triggerByIntervalTime : { $eq : true}}, { 'abertura' : { '$lt' : '%s'}} , { 'fechamento' : { '$gt' : '%s'}} {type: 'INTERVAL_TIME'}, { intervalTime : { $ne : 0}}]} ]}}", HHmm, HHmm, HHmm, HHmm))
+                        //MongoDBUtil.toDBObject( "{ $group :{ _id :  '$_id' }}")
+                ),
                 AggregationOptions.builder().outputMode(AggregationOptions.OutputMode.CURSOR).allowDiskUse(true).build());
 
         int updated = 0;
@@ -87,18 +91,27 @@ public class NotificacaoRepositoryImpl implements NotificacaoRepositoryCustom {
         while (aggregate.hasNext()) {
 
             DBObject dbObject = aggregate.next();
-            log.info(" Result setScheduleAndUuiAndHostnameForSpecificScheduleTime : {} " ,dbObject.toString());
+
+            ObjectId id = (ObjectId) dbObject.get("_id");
+            String storeId = (String) dbObject.get("storeIds");
+
+            storeToNotify.
+                    computeIfAbsent(id.toString(), s -> new LinkedHashSet<>()).
+                    add(storeId);
+
+            log.info(" Result setScheduleAndUuiAndHostnameForSpecificScheduleTimeAndReturnNotificationMap : {} " ,dbObject.toString());
 
             Query query = new Query(Criteria.where("_id").is(dbObject.get("_id").toString()));
             Update update = new Update().set("uuid", uuid).set("scheduled", scheduled).set("hostname", hostname);
 
             WriteResult writeResult = mongoTemplate.updateMulti(query, update, Notification.class);
             updated += writeResult.getN();
+
         }
 
         log.info("Update {} documents ", updated);
 
-        return updated;
+        return storeToNotify;
     }
 
     @Override
@@ -144,34 +157,4 @@ public class NotificacaoRepositoryImpl implements NotificacaoRepositoryCustom {
         mongoTemplate.save(notification);
     }
 
-    private BasicDBObject $match() {
-        BasicDBObject $orMatchAfter = new BasicDBObject("type", Behavior.SPECIFIC_TIME_AFTER.name());
-        BasicDBObject $orMatchBefore = new BasicDBObject("type", Behavior.SPECIFIC_TIME_BEFORE.name());
-        BasicDBObject $orMatch = new BasicDBObject("$or", Arrays.asList($orMatchBefore, $orMatchAfter) );
-        BasicDBObject $match = new BasicDBObject("$match", $orMatch );
-
-        log.info("{}", $match.toString());
-        return $match ;
-    }
-
-    private BasicDBObject $addFieldsForAggregate(String fieldName) {
-
-        BasicDBObject multiplyDBObject = new BasicDBObject();
-        multiplyDBObject.put("$multiply", Arrays.asList("$intervalTime", 1000, 60)); // Transforma o minuto para milisegundo
-        BasicDBObject subtractDBObject = new BasicDBObject();
-        subtractDBObject.put("$subtract", Arrays.asList("$scheduledTime", multiplyDBObject)); //Adiciona dentro de funcao $subtract
-        BasicDBObject dateToStringValue = new BasicDBObject();
-        dateToStringValue.put("format", "%H:%M");
-        dateToStringValue.put("date", subtractDBObject);
-
-        BasicDBObject dateToStringObject = new BasicDBObject();
-        dateToStringObject.put("$dateToString", dateToStringValue);
-        BasicDBObject newDate = new BasicDBObject();
-        newDate.put(fieldName, dateToStringObject);
-        BasicDBObject $addFields = new BasicDBObject("$addFields", newDate);
-
-        log.info("{}", $addFields);
-
-        return $addFields;
-    }
 }

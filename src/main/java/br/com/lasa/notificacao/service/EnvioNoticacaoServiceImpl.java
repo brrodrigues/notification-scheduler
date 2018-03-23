@@ -17,22 +17,20 @@ import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.web.context.WebApplicationContext;
 
 import java.net.URI;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.TextStyle;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 @Service
 @Slf4j
 public class EnvioNoticacaoServiceImpl implements EnvioNoticacaoService {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(EnvioNoticacaoServiceImpl.class);
-
-    @Autowired
-    private WebApplicationContext webApplicationContext;
 
     @Autowired
     private NotificacaoService notificacaoService;
@@ -68,16 +66,18 @@ public class EnvioNoticacaoServiceImpl implements EnvioNoticacaoService {
     private ApplicationContext context;
 
     @Override
-    public void notificar(Notification notification) throws HttpStatusCodeException {
+    public void notificar(Map.Entry<String, Set<String>> notificationMap) throws HttpStatusCodeException {
 
-        String[] storeIds = notification.getStoreIds().toArray(new String[notification.getStoreIds().size()]);
+        Notification notification = notificacaoService.get(notificationMap.getKey());
+
+        ConcurrentMap<String, Notification> maps = new ConcurrentHashMap<>();
 
         Map<String,Boolean> mapaDeLojaPorVenda = new HashMap();
 
         LocalDateTime horarioBrasilia = context.getBean(LocalDateTime.class);
 
         //Doing query at once by store
-        for ( String storeId: storeIds ) {
+        for ( String storeId: notificationMap.getValue()) {
             if (storeId == null || storeId.isEmpty()) {
                 continue;
             }
@@ -108,6 +108,8 @@ public class EnvioNoticacaoServiceImpl implements EnvioNoticacaoService {
             }
 
         }
+
+
 
         String[] storesToSendNotification = mapaDeLojaPorVenda.keySet().toArray(new String[mapaDeLojaPorVenda.keySet().size()]);
 

@@ -1,22 +1,22 @@
 package br.com.lasa.notificacao.task;
 
-import br.com.lasa.notificacao.domain.document.Notification;
 import br.com.lasa.notificacao.service.NotificacaoService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Scope;
 import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 
 @Component
 @Slf4j
 @Scope("singleton")
-public class EnvioNotificacaoTask extends ThreadPoolTaskScheduler {
+public class EnvioNotificacaoTask {
 
     @Autowired
     private NotificacaoService notificacaoService;
@@ -24,9 +24,9 @@ public class EnvioNotificacaoTask extends ThreadPoolTaskScheduler {
     @Autowired
     private ApplicationContext context;
 
-    private void enviar(Notification notification) {
+    private void enviar(Map.Entry<String, Set<String>> notificationMap) {
         log.info("Scheduling cron...");
-        notificacaoService.enviarNotificacao(notification);
+        notificacaoService.enviarNotificacao(notificationMap);
         log.info("scheduled cron!!!");
     }
 
@@ -37,8 +37,9 @@ public class EnvioNotificacaoTask extends ThreadPoolTaskScheduler {
         LocalDateTime brazilianDateTime = context.getBean(LocalDateTime.class);
 
         log.info(" Brazilian current time {} ", brazilianDateTime);
-        CompletableFuture.runAsync(() -> notificacaoService.buscarNotificacaoNaoProgramada(brazilianDateTime).stream().forEach(EnvioNotificacaoTask.this::enviar)).exceptionally(this::showException);
+        CompletableFuture.runAsync(() -> notificacaoService.buscarMapaDeNotificacaoNaoProgramada(brazilianDateTime).entrySet().stream().forEach(EnvioNotificacaoTask.this::enviar)).exceptionally(this::showException);
         log.info("**********************Finish scheduling timer************************");
+
     }
 
     private Void showException(Throwable e){
