@@ -78,7 +78,7 @@ public class NotificacaoRepositoryImpl implements NotificacaoRepositoryCustom {
                         MongoDBUtil.toDBObject("{ $unwind: '$loja.horarios'}"),
                         MongoDBUtil.toDBObject( String.format("{ $match: { 'loja.horarios.dia' : '%s' }}", displayName)),
                         MongoDBUtil.toDBObject( $project.toString()),
-                        MongoDBUtil.toDBObject( String.format("{ $match : { $or : [ {$and : [ {'abertura' : { $eq : '%s' } } , { type: {$eq : 'SPECIFIC_TIME_BEFORE' }}  ] }, {$and : [ {'fechamento' : { $eq : '%s' } } , { type: {$eq : 'SPECIFIC_TIME_AFTER' }}]}, { $and : [ { triggerByScheduledTime : { $eq : true}}, { type : { $eq : 'PONTUAL'}  }]} , { $and : [ { triggerByIntervalTime : { $eq : true}}, { 'abertura' : { '$gt' : '%s'}} , { 'fechamento' : { '$lt' : '%s'}} {type: 'INTERVAL_TIME'}, { intervalTime : { $ne : 0}}]} ]}}", HHmm, HHmm, HHmm, HHmm)),
+                        MongoDBUtil.toDBObject( String.format("{ $match : { $or : [ {$and : [ {'abertura' : { $eq : '%s' } } , { type: {$eq : 'SPECIFIC_TIME_BEFORE' }}  ] }, {$and : [ {'fechamento' : { $eq : '%s' } } , { type: {$eq : 'SPECIFIC_TIME_AFTER' }}]}, { $and : [ { triggerByScheduledTime : { $eq : true}}, { type : { $eq : 'PONTUAL'}  }]} , { $and : [ { triggerByIntervalTime : { $eq : true}}, { 'abertura' : { '$lt' : '%s'}} , { 'fechamento' : { '$gt' : '%s'}} {type: 'INTERVAL_TIME'}, { intervalTime : { $ne : 0}}]} ]}}", HHmm, HHmm, HHmm, HHmm)),
                         MongoDBUtil.toDBObject( "{ $group :{ _id :  '$_id' }}")),
                 AggregationOptions.builder().outputMode(AggregationOptions.OutputMode.CURSOR).allowDiskUse(true).build());
 
