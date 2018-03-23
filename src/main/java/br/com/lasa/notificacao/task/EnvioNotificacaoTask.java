@@ -36,7 +36,7 @@ public class EnvioNotificacaoTask {
 
         LocalDateTime brazilianDateTime = context.getBean(LocalDateTime.class);
 
-        log.info(" Brazilian current time {} ", brazilianDateTime);
+        log.info("Brazilian current time {}", brazilianDateTime);
         CompletableFuture.runAsync(() -> notificacaoService.buscarMapaDeNotificacaoNaoProgramada(brazilianDateTime).entrySet().stream().forEach(EnvioNotificacaoTask.this::enviar)).exceptionally(this::showException);
         log.info("**********************Finish scheduling timer************************");
 
