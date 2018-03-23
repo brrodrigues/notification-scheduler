@@ -14,7 +14,7 @@ public class CarregarInformacaoLojaController {
     @Autowired
     private LojaService lojaService;
 
-    @GetMapping( value = "carregar-informacao-loja", produces = "application/hal+json")
+    @GetMapping( value = "carregar-informacao-loja", produces = {"application/hal+json", })
     public ResponseEntity<String> carregar(){
 
         lojaService.carregarDadosLoja();

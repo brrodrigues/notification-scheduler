@@ -86,7 +86,6 @@ public class LojaCustomController {
         List<RegiaoDistrito> lojaRegiaoDistritoList = lojaService.buscarLojaPorRegiao(codigoRegiao, tipoLoja);
 
         List<Resource> parents = new ArrayList<>();
-        Set<Map<String, Object>> childData = new HashSet<>();
 
         for (RegiaoDistrito lojaRegiao : lojaRegiaoDistritoList ) {
 
@@ -106,7 +105,6 @@ public class LojaCustomController {
                 map.put("link", distritoLink);
                 return map;
             }).collect(Collectors.toSet());
-
 
             ChildrenContent children = ChildrenContent.builder().childName("Distritos").childData(distritoMapList).build();
 
