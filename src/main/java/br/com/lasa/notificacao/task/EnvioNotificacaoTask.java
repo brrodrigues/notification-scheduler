@@ -5,7 +5,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Scope;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
@@ -30,7 +29,7 @@ public class EnvioNotificacaoTask {
         log.info("scheduled cron!!!");
     }
 
-    @Scheduled( cron = "0/60 * * * * *" )
+    //@Scheduled( cron = "0/60 * * * * *" )
     public void bloquearIntervaloPontual() {
         log.info("*********Finding pontual notification schedule pending at the moment*********");
 

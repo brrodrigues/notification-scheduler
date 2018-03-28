@@ -87,7 +87,7 @@ public class ConsultaVendaLojaServiceImpl implements ConsultaVendaLojaService {
             LOGGER.debug(">>> notificarLojaPorVendaForaDoPeriodo. Parametros {} {}", loja, periodoEmMinuto);
         }
 
-        InformacaoVendaLoja informacaoVendaLoja = getForApi(loja)   ;
+        InformacaoVendaLoja informacaoVendaLoja = getForApi(loja);
 
         Assert.notNull(informacaoVendaLoja.getDiferenca(), "Nao foi encontrado a ultima venda da loja " + loja + " para validar o envio de notificacao. ");
 

@@ -23,11 +23,12 @@ info:
   application:
     name: @project.artifactId@
     version: @project.version@
-
 logging:
   level:
     com:
       mongodb: DEBUG
+      sun:
+        mail: TRACE
     org:
       springframework:
         boot:
@@ -61,6 +62,8 @@ spring:
   jmx:
     server: mbeanServer
     enabled: true
+
+
 endpoints:
   trace:
     sensitive: false

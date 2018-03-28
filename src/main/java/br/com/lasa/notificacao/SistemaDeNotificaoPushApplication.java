@@ -1,10 +1,6 @@
 package br.com.lasa.notificacao;
 
 import br.com.lasa.notificacao.audit.AppAuditor;
-import br.com.lasa.notificacao.domain.document.UsuarioNotificacao;
-import br.com.lasa.notificacao.domain.lais.BotUser;
-import br.com.lasa.notificacao.domain.lais.Conversation;
-import br.com.lasa.notificacao.domain.lais.Recipient;
 import br.com.lasa.notificacao.service.NotificacaoService;
 import br.com.lasa.notificacao.util.AppConstants;
 import com.fasterxml.jackson.core.JsonParser;
@@ -95,6 +91,7 @@ public class SistemaDeNotificaoPushApplication {
 		return executor;
 	}
 
+
 	@Bean
 	@Order(1)
 	public ScheduledExecutorService taskScheduler() {
@@ -163,20 +160,6 @@ public class SistemaDeNotificaoPushApplication {
 			InetAddress inetAddress = InetAddress.getLocalHost();
 			notificacaoService.releaseAllByHostname(inetAddress.getHostAddress());
 		};
-	}
-
-	@Bean
-    UsuarioNotificacao usuarioJonatasLais() {
-		//new Recipient("mid.$cAAA7URkk_Xxmi7uHeVgWnY_Fi0fm", "facebook", BotUser.builder().id("1696672097072999").name("Jônatas Ricardo").toLoja(), BotUser.builder().id("107349120032554").name("LAIS-SAC-HML").toLoja(), Conversacao.builder().isGroup(false).id("1696672097072999-107349120032554").toLoja(), "https://facebook.botframework.com/")
-
-		Recipient recipient = new Recipient("mid.$cAAA7URkk_Xxmi7uHeVgWnY_Fi0fm", "facebook", BotUser.builder().id("1696672097072999").name("Jônatas Ricardo").build(), BotUser.builder().id("107349120032554").name("LAIS-SAC-HML").build(), Conversation.builder().isGroup(false).id("1696672097072999-107349120032554").build(), "https://facebook.botframework.com/");
-		return new UsuarioNotificacao(recipient.getUser().getId(), "Bruno Rodrigues","L0001","", recipient, true, null);
-	}
-
-	@Bean
-    UsuarioNotificacao usuarioGustavoLais() {
-		//new Recipient("mid.$cAAA7UQtt0cFmq7rohFgenWfiZhZL", "facebook", BotUser.builder().id("1652887001413594").name("Gustavo Gomes").toLoja(), BotUser.builder().id("107349120032554").name("LAIS-SAC-HML").toLoja(), Conversacao.builder().isGroup(false).id("1652887001413594-107349120032554").toLoja(),"https://facebook.botframework.com/");
-		return UsuarioNotificacao.builder().status(true).storeId("1").profile(new Recipient("mid.$cAAA7UQtt0cFmq7rohFgenWfiZhZL", "facebook", BotUser.builder().id("1652887001413594").name("Gustavo Gomes").build(), BotUser.builder().id("107349120032554").name("LAIS-SAC-HML").build(), Conversation.builder().isGroup(false).id("1652887001413594-107349120032554").build(),"https://facebook.botframework.com/")).build();
 	}
 
 	@Bean
