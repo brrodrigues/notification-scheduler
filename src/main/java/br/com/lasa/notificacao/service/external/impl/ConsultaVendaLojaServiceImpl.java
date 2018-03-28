@@ -93,7 +93,7 @@ public class ConsultaVendaLojaServiceImpl implements ConsultaVendaLojaService {
 
         LocalTime ultimaVenda = LocalTime.parse(informacaoVendaLoja.getDiferenca(), dateTimeFormatter);
 
-        boolean enviarNotificar = (ultimaVenda.getMinute() > periodoEmMinuto);
+        boolean enviarNotificar = (ultimaVenda.getMinute() >= periodoEmMinuto);
 
         LocalTime horarioAtual = dataHoraReferencia.toLocalTime().truncatedTo(ChronoUnit.MINUTES);
 
