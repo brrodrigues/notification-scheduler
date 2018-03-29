@@ -34,6 +34,9 @@ public class JavaMailConfig {
     @Value("${application.mail.host}")
     private String mailHost;
 
+    @Value("${application.mail.ssl.required}")
+    private String mailSslRequired;
+
     @Bean(name = "javaMailSender")
     public JavaMailSender javaMailSender() {
         JavaMailSenderImpl mailSender = new JavaMailSenderImpl();
@@ -54,7 +57,7 @@ public class JavaMailConfig {
         props.put("mail.transport.protocol", "smtp");
         props.put("mail.smtp.starttls.enable", "true");
         props.put("mail.smtp.ssl.trust", "*");
-        props.put("mail.smtp.ssl.enable", "false");
+        props.put("mail.smtp.ssl.enable", "true");
         //props.put("mail.smtp.writetimeout", "1");
         /*try {
             mailSender.testConnection();
