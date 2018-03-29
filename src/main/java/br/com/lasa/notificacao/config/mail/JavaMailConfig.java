@@ -57,7 +57,7 @@ public class JavaMailConfig {
         props.put("mail.transport.protocol", "smtp");
         props.put("mail.smtp.starttls.enable", "true");
         props.put("mail.smtp.ssl.trust", "*");
-        props.put("mail.smtp.ssl.enable", "true");
+        props.put("mail.smtp.ssl.enable", mailSslRequired);
         //props.put("mail.smtp.writetimeout", "1");
         /*try {
             mailSender.testConnection();
