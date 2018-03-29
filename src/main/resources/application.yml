@@ -1,5 +1,12 @@
-
 application:
+  mail:
+    host: ${APPLICATION_MAIL_HOST:}
+    starttls:
+      required: ${APPLICATION_MAIL_STARTTLS_REQUIRED:}
+    auth:
+      required: ${APPLICATION_MAIL_AUTH_REQUIRED:}
+      user-name: ${APPLICATION_MAIL_AUTH_USERNAME:}
+      pass-word: ${APPLICATION_MAIL_AUTH_PASSWORD:}
   url-base:
     calendario-loja: ${APPLICATION_URL_BASE_CALENDARIO_LOJA:http://52.31.153.101/raiox_geo/api/v2/CalendarioDeLoja}
     loja-sem-venda: ${APPLICATION_URL_BASE_LOJA_SEM_VENDA:http://52.31.153.101/raiox_geo/api/lojasemvenda}
@@ -13,6 +20,7 @@ application:
     url: ${ENDPOINT_ULTIMA_VENDA_URL:https://lasa-lais-hml-sac.us-west-2.elasticbeanstalk.com/api/notification}
   endpoint-loja:
     url: ${ENDPOINT_ULTIMA_VENDA_URL:http://whml.lasa.lojaamericanas.com.br/mapa/consulta/lojas}
+
 management:
   context-path: /jmx
   security:
