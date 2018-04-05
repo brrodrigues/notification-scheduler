@@ -35,7 +35,7 @@ public class LojaCustomController {
     private LojaService lojaService;
 
     /*@CrossOrigin(origins = "*")
-    @RequestMapping( value = "lojas/{regiaoId}/regioes/{distritoId}/distritos/{cidadeNome}/cidades/{asdasd}/bruno", method= RequestMethod.GET, produces = "application/hal+json")
+    @RequestMapping( value = "lojas/{regiaoId}/regioes/{distritoId}/distritos/{cidadeNome}/cidades/{asdasd}/bruno", httpMethod= RequestMethod.GET, produces = "application/hal+json")
     public ResponseEntity<PagedResources<Loja>> get(Pageable pageable) {
 
         Map<String, Object> maps = new HashMap<>();

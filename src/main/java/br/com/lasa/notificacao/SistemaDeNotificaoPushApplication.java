@@ -44,6 +44,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.TimeZone;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.ScheduledExecutorService;
 
 @Slf4j
@@ -58,6 +59,11 @@ public class SistemaDeNotificaoPushApplication {
 
 	}
 
+
+	@Bean
+	ForkJoinPool forkJoinPool(){
+		return new ForkJoinPool(20);
+	}
 	/*
 	@Bean
 	@Order(1)
@@ -91,10 +97,9 @@ public class SistemaDeNotificaoPushApplication {
 		return executor;
 	}
 
-
 	@Bean
 	@Order(1)
-	public ScheduledExecutorService taskScheduler() {
+	public ScheduledExecutorService scheduledExecutorService() {
 		ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(250);
 		return scheduledExecutorService;
 	}

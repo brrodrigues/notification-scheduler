@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
+import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,7 +20,7 @@ import java.util.UUID;
 
 @Service
 @Slf4j
-@Scope(value = "singleton")
+@Scope(value = "singleton", proxyMode = ScopedProxyMode.DEFAULT)
 public class NotificacaoServiceImpl implements NotificacaoService {
     @Autowired
     private NotificacaoRepository notificacaoRepository;
@@ -29,9 +30,9 @@ public class NotificacaoServiceImpl implements NotificacaoService {
 
     @Override
     public boolean enviarNotificacao(Map.Entry<String, Set<String>> notificationMap) {
-        log.debug("Sending notification...");
+        log.debug(">>>>>>>>>>>>>>>>>>>>>>>>>>>Sending notification>>>>>>>>>>>>>>>>>>>>>>>>>>>");
         envioNoticacaoServiceImpl.notificar(notificationMap);
-        log.debug("Notification done.");
+        log.debug(">>>>>>>>>>>>>>>>>>>>>>>>>>>..Notification done.>>>>>>>>>>>>>>>>>>>>>>>>>>>");
         return true;
     }
 

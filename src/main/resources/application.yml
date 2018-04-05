@@ -4,7 +4,7 @@ application:
     starttls:
       required: ${APPLICATION_MAIL_STARTTLS_REQUIRED:}
     auth:
-      required: ${APPLICATION_MAIL_AUTH_REQUIRED:}
+      required: ${APPLICATION_MAIL_AUTH_REQUIRED:false}
       user-name: ${APPLICATION_MAIL_AUTH_USERNAME:}
       pass-word: ${APPLICATION_MAIL_AUTH_PASSWORD:}
     ssl:
