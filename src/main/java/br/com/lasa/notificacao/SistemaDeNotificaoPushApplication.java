@@ -108,7 +108,7 @@ public class SistemaDeNotificaoPushApplication {
 	@Primary
 	public ObjectMapper jacksonObjectMapper() {
 		ObjectMapper mapper = new ObjectMapper();
-		// mapper.configure(JsonGenerator.Feature.ESCAPE_NON_ASCII, true);
+		// mapper.configure(JsonGenerator.Route.ESCAPE_NON_ASCII, true);
 		mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES,false);
 		//Algumas exception que podem vir a ser serializadas podem conter atributos não serializáveis
 		mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);

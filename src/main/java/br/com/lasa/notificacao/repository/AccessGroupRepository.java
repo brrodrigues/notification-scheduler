@@ -7,4 +7,5 @@ import org.springframework.data.rest.core.annotation.RepositoryRestResource;
 @RepositoryRestResource( path = "/access-groups")
 public interface AccessGroupRepository extends MongoRepository<AccessGroup, String> {
 
+
 }
