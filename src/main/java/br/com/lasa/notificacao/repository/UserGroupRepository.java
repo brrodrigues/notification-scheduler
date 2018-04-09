@@ -8,7 +8,7 @@ import org.springframework.data.rest.core.annotation.RestResource;
 
 import java.util.Collection;
 
-@RepositoryRestResource(path = "/user-groups", itemResourceRel = "groups")
+@RepositoryRestResource(path = "/user-groups", itemResourceRel = "groups", collectionResourceRel = "groups")
 public interface UserGroupRepository extends MongoRepository<UserGroup, String> {
 
     @RestResource(path = "findAllByLogin")
