@@ -11,9 +11,7 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import java.util.Date;
-import java.util.LinkedHashSet;
-import java.util.Set;
+import java.util.*;
 
 @Data
 @Document(collection = "Cadastro_Notificacoes")
@@ -36,6 +34,7 @@ public class Notification {
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private boolean scheduled;
     private Boolean enabled = true;
+    private Collection<String> emails= new ArrayList();
     private String hostname;
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private String uuid;
