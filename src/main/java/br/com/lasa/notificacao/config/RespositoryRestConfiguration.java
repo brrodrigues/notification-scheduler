@@ -1,6 +1,7 @@
 package br.com.lasa.notificacao.config;
 
 import br.com.lasa.notificacao.domain.document.Message;
+import br.com.lasa.notificacao.domain.document.UserGroup;
 import br.com.lasa.notificacao.domain.lais.BotUser;
 import br.com.lasa.notificacao.domain.lais.Conversation;
 import br.com.lasa.notificacao.domain.lais.Recipient;
@@ -13,7 +14,7 @@ public class RespositoryRestConfiguration extends RepositoryRestConfigurerAdapte
 
     @Override
     public void configureRepositoryRestConfiguration(RepositoryRestConfiguration config) {
-        config.exposeIdsFor(Recipient.class, BotUser.class, Conversation.class, Message.class);
+        config.exposeIdsFor(Recipient.class, BotUser.class, Conversation.class, Message.class, UserGroup.class);
     }
 
 

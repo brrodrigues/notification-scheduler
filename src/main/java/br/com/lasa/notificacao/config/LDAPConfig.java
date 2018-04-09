@@ -21,6 +21,7 @@ public class LDAPConfig {
         return contextSource;
     }
 
+
     @Bean(name = AppConstants.LDAP_TEMPLATE_LASA)
     public LdapTemplate ldapLASAADTemplate(
             @Autowired
