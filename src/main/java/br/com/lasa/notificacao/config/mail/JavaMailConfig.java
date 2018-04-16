@@ -37,6 +37,14 @@ public class JavaMailConfig {
     @Value("${application.mail.ssl.required}")
     private String mailSslRequired;
 
+    private String getProtocol(){
+        if (mailSslRequired.equals("true")){
+            return "mail.smtps";
+        }else {
+            return "mail.smtp";
+        }
+    }
+
     @Bean
     public JavaMailSender javaMailSender() {
         JavaMailSenderImpl mailSender = new JavaMailSenderImpl();
@@ -49,17 +57,13 @@ public class JavaMailConfig {
         //props.put("mail.smtp.host", "10.23.94.230");
         //props.put("mail.smtp.starttls.required", "true");
         //props.put("mmail.smtp.ehloail.smtp.ehlo", "false");
-        props.put("mail.smtp.auth.login.disable", "true");
-        props.put("mail.smtp.submitter", mailAuthUserName );
-        props.put("mail.debug", "true");
-        props.put("mail.smtp.host", mailHost);
-        props.put("mail.smtp.port", 587);
-        props.put("mail.smtp.auth", mailAuthRequired);
-        props.put("mail.transport.protocol", "smtp");
-        props.put("mail.smtp.starttls.enable", "true");
-        props.put("mail.smtp.starttls.required", "true");
-        props.put("mail.smtp.ssl.trust", "*");
-        props.put("mail.smtp.ssl.enable", mailSslRequired);
+        props.put(getProtocol()+ ".host", mailHost);
+        props.put(getProtocol()+ ".port", 587);
+        props.put(getProtocol()+ ".auth", mailAuthRequired);
+        props.put(getProtocol()+ ".starttls.enable", mailSslRequired);
+        props.put(getProtocol()+ ".ssl.enable", mailSslRequired);
+        props.put(getProtocol()+ ".ssl.trust", "*");
+        props.put(getProtocol()+ ".debug", "true");
         //props.put("mail.smtp.writetimeout", "1");
         /*try {
             mailSender.testConnection();
