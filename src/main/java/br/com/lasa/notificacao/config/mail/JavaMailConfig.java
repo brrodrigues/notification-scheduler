@@ -28,9 +28,6 @@ public class JavaMailConfig {
     @Value("${application.mail.auth.required}")
     private Boolean mailAuthRequired;
 
-    @Value("${application.mail.starttls.required}")
-    private Boolean mailStartTlsRequired;
-
     @Value("${application.mail.host}")
     private String mailHost;
 
