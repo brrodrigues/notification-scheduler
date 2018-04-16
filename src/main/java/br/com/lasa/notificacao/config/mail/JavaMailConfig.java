@@ -12,7 +12,7 @@ import java.util.Properties;
 public class JavaMailConfig {
     /*
     @Value("${spring.mail.host}")
-    private String host;
+    private String host;JavaMailSender
     @Value("${spring.mail.port}")
     private Integer port;
     @Value("${spring.mail.port}")
@@ -37,7 +37,7 @@ public class JavaMailConfig {
     @Value("${application.mail.ssl.required}")
     private String mailSslRequired;
 
-    @Bean(name = "javaMailSender")
+    @Bean
     public JavaMailSender javaMailSender() {
         JavaMailSenderImpl mailSender = new JavaMailSenderImpl();
         Properties props = mailSender.getJavaMailProperties();
@@ -48,14 +48,16 @@ public class JavaMailConfig {
         mailSender.setPort(587);*/
         //props.put("mail.smtp.host", "10.23.94.230");
         //props.put("mail.smtp.starttls.required", "true");
-        //props.put("mail.smtp.ehlo", "false");
-        //props.put("mail.smtp.auth.login.disable", "true");
+        //props.put("mmail.smtp.ehloail.smtp.ehlo", "false");
+        props.put("mail.smtp.auth.login.disable", "true");
+        props.put("mail.smtp.submitter", mailAuthUserName );
         props.put("mail.debug", "true");
         props.put("mail.smtp.host", mailHost);
         props.put("mail.smtp.port", 587);
         props.put("mail.smtp.auth", mailAuthRequired);
         props.put("mail.transport.protocol", "smtp");
         props.put("mail.smtp.starttls.enable", "true");
+        props.put("mail.smtp.starttls.required", "true");
         props.put("mail.smtp.ssl.trust", "*");
         props.put("mail.smtp.ssl.enable", mailSslRequired);
         //props.put("mail.smtp.writetimeout", "1");
