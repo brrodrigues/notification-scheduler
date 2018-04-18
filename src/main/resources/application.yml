@@ -74,7 +74,7 @@ spring:
     properties:
       mail:
         smtp:
-          auth: ${MAIL_AUTH_REQUIRED:true}
+          auth: ${MAIL_SMTP_AUTH:true}
           starttls:
             enable: ${MAIL_STARTTLS_ENABLE:true}
 
