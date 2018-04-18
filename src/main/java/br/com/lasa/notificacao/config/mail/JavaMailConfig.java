@@ -1,5 +1,7 @@
 package br.com.lasa.notificacao.config.mail;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -19,6 +21,8 @@ public class JavaMailConfig {
     private Integer port;
     */
 
+    private final Logger LOGGER = LoggerFactory.getLogger(JavaMailConfig.class);
+
     @Value("${application.mail.auth.user-name}")
     private String mailAuthUserName;
 
@@ -26,10 +30,13 @@ public class JavaMailConfig {
     private String mailAuthPassword;
 
     @Value("${application.mail.auth.required}")
-    private Boolean mailAuthRequired;
+    private String mailAuthRequired;
 
     @Value("${application.mail.host}")
     private String mailHost;
+
+    @Value("${application.mail.port}")
+    private String mailPort;
 
     @Value("${application.mail.ssl.required}")
     private String mailSslRequired;
@@ -44,6 +51,8 @@ public class JavaMailConfig {
 
     @Bean
     public JavaMailSender javaMailSender() {
+
+
         JavaMailSenderImpl mailSender = new JavaMailSenderImpl();
         Properties props = mailSender.getJavaMailProperties();
         mailSender.setUsername(mailAuthUserName);
@@ -55,12 +64,22 @@ public class JavaMailConfig {
         //props.put("mail.smtp.starttls.required", "true");
         //props.put("mmail.smtp.ehloail.smtp.ehlo", "false");
         props.put(getProtocol()+ ".host", mailHost);
-        props.put(getProtocol()+ ".port", 587);
-        props.put(getProtocol()+ ".auth", mailAuthRequired);
+        props.put(getProtocol()+ ".port", mailPort);
+        props.put(getProtocol()+ ".auth.required", mailAuthRequired);
         props.put(getProtocol()+ ".starttls.enable", mailSslRequired);
         props.put(getProtocol()+ ".ssl.enable", mailSslRequired);
         props.put(getProtocol()+ ".ssl.trust", "*");
         props.put(getProtocol()+ ".debug", "true");
+
+        Properties javaMailProperties = mailSender.getJavaMailProperties();
+
+        LOGGER.info("Configuracao para envio de e-mail");
+
+        for (Object value: javaMailProperties.keySet()) {
+            String key = (String) value;
+            LOGGER.info("{} :: {}",value, javaMailProperties.getProperty(key));
+        }
+
         //props.put("mail.smtp.writetimeout", "1");
         /*try {
             mailSender.testConnection();
