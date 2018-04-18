@@ -1,8 +1,9 @@
 application:
   mail:
-    host: ${APPLICATION_MAIL_HOST:}
+    host: ${APPLICATION_MAIL_HOST:localhost}
+    port: ${APPLICATION_MAIL_PORT:25}
     auth:
-      required: ${APPLICATION_MAIL_AUTH_REQUIRED:false}
+      required: ${APPLICATION_MAIL_AUTH_REQUIRED:true}
       user-name: ${APPLICATION_MAIL_AUTH_USERNAME:}
       pass-word: ${APPLICATION_MAIL_AUTH_PASSWORD:}
     ssl:
@@ -49,12 +50,7 @@ logging:
         lasa: DEBUG
 
 debug: true
-security:
-  basic:
-    enabled: false
-    authorize-mode: none
-    path: /**
-  enable-csrf: true
+
 spring:
 #  datasource:
 #    driver-class-name: com.mysql.jdbc.Driver
@@ -70,6 +66,17 @@ spring:
   jmx:
     server: mbeanServer
     enabled: true
+  mail:
+    host: ${MAIL_SMTP_HOST:smtp.gmail.com}
+    port: ${MAIL_SMTP_PORT:587}
+    username: ${MAIL_SMTP_USERNAME:}
+    password: ${MAIL_SMTP_PASSWORD:}
+    properties:
+      mail:
+        smtp:
+          auth: ${MAIL_AUTH_REQUIRED:true}
+          starttls:
+            enable: ${MAIL_STARTTLS_ENABLE:true}
 
 
 endpoints:

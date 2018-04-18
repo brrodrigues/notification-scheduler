@@ -1,16 +1,6 @@
 package br.com.lasa.notificacao.config.mail;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.javamail.JavaMailSenderImpl;
-
-import java.util.Properties;
-
-@Configuration
+//@Configuration
 public class JavaMailConfig {
     /*
     @Value("${spring.mail.host}")
@@ -21,7 +11,7 @@ public class JavaMailConfig {
     private Integer port;
     */
 
-    private final Logger LOGGER = LoggerFactory.getLogger(JavaMailConfig.class);
+    /*private final Logger LOGGER = LoggerFactory.getLogger(JavaMailConfig.class);
 
     @Value("${application.mail.auth.user-name}")
     private String mailAuthUserName;
@@ -52,14 +42,13 @@ public class JavaMailConfig {
     @Bean
     public JavaMailSender javaMailSender() {
 
-
         JavaMailSenderImpl mailSender = new JavaMailSenderImpl();
         Properties props = mailSender.getJavaMailProperties();
         mailSender.setUsername(mailAuthUserName);
         mailSender.setPassword(mailAuthPassword);
-        /*mailSender.setHost("smtp.office365.com");
+        *//*mailSender.setHost("smtp.office365.com");
         mailSender.setProtocol("smtp");
-        mailSender.setPort(587);*/
+        mailSender.setPort(587);*//*
         //props.put("mail.smtp.host", "10.23.94.230");
         //props.put("mail.smtp.starttls.required", "true");
         //props.put("mmail.smtp.ehloail.smtp.ehlo", "false");
@@ -81,12 +70,12 @@ public class JavaMailConfig {
         }
 
         //props.put("mail.smtp.writetimeout", "1");
-        /*try {
+        *//*try {
             mailSender.testConnection();
         } catch (MessagingException e) {
             e.printStackTrace();
-        }*/
+        }*//*
         return mailSender;
-    }
+    }*/
 
 }
