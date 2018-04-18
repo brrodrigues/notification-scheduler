@@ -67,10 +67,10 @@ spring:
     server: mbeanServer
     enabled: true
   mail:
-    host: ${MAIL_SMTP_HOST:smtp.gmail.com}
+    host: ${MAIL_SMTP_HOST:smtp.office365.com}
     port: ${MAIL_SMTP_PORT:587}
-    username: ${MAIL_SMTP_USERNAME:}
-    password: ${MAIL_SMTP_PASSWORD:}
+    username: ${MAIL_SMTP_USERNAME:bcrodrigues@lasa.com.br}
+    password: ${MAIL_SMTP_PASSWORD:_+Br9n7_+}
     properties:
       mail:
         smtp:
@@ -96,6 +96,10 @@ server:
     - application/hal+json;charset=UTF-8
     - application/hal+json;charset=UTF-8
     min-response-size: 1024
+security:
+  basic:
+    enabled: false
+    
 ---
 spring:
   profiles: hml, prd
