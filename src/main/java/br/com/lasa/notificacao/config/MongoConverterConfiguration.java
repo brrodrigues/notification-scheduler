@@ -1,8 +1,6 @@
 package br.com.lasa.notificacao.config;
 
-import org.springframework.context.annotation.Configuration;
-
-@Configuration
+//@Configuration
 public class MongoConverterConfiguration {
 
     /*@Bean

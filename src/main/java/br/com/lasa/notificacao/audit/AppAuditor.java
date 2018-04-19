@@ -1,14 +1,10 @@
 package br.com.lasa.notificacao.audit;
 
-import org.springframework.data.domain.AuditorAware;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
+public class AppAuditor
+//        implements AuditorAware<String>
+{
 
-import java.util.Optional;
-
-public class AppAuditor implements AuditorAware<String>{
-
-    @Override
+  /*  @Override
     public String getCurrentAuditor() {
 
         Optional<Authentication> authentication = Optional.ofNullable(SecurityContextHolder.getContext().getAuthentication());
@@ -19,5 +15,5 @@ public class AppAuditor implements AuditorAware<String>{
         return authentication.get().getName();
 
 
-    }
+    }*/
 }

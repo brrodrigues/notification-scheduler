@@ -71,24 +71,11 @@ public class CalendarioDeLojaExternalServiceImpl implements CalendarioDeLojaExte
 
         Assert.notNull(informacaoLojaList, "Nao foi localizado lojas para buscar o calendario de loja da semana");
 
-        //ConcurrentMap<InformacaoLoja, Collection<InformacaoFeriadoLoja>> map = new ConcurrentHashMap();
-
-       /* for (InformacaoLoja informacaoLoja : informacaoLojaList) {
-            Integer numeroLoja = informacaoLoja.getLoja();
-            Collection<InformacaoFeriadoLoja> feriados = getInformacaoFeriadoLoja(String.valueOf(numeroLoja));
-            map.put(informacaoLoja, feriados);
-        }*/
-
-        /*List<CalendarioDeLoja> calendarios = map.entrySet().
-                stream().
-                map(this::transformToCalendarioDeLoja).
-                collect(Collectors.toList());*/
-
         return informacaoLojaList;
     }
 
     /**
-     * Metodo que monta todas a estrutura de horario da loja, localizando, inclusive os feriados, caso exista.
+     * Metodo que monta a estrutura de horario da loja, localizando, inclusive os feriados, caso exista.
      * @param lojaId Identificador do numero da Loja
      * @return
      */

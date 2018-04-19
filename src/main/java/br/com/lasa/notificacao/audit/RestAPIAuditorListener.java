@@ -2,12 +2,6 @@ package br.com.lasa.notificacao.audit;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
-import org.springframework.security.access.event.AbstractAuthorizationEvent;
-import org.springframework.security.access.event.AuthorizationFailureEvent;
-import org.springframework.security.web.FilterInvocation;
-
-import java.util.HashMap;
-import java.util.Map;
 
 public class RestAPIAuditorListener
         //extends AbstractAuthorizationAuditListener
@@ -18,7 +12,7 @@ public class RestAPIAuditorListener
     @Autowired
     private MongoTemplate mongoTemplate;
 
-    //@Override
+   /* //@Override
     public void onApplicationEvent(AbstractAuthorizationEvent event) {
         if (event instanceof AuthorizationFailureEvent) {
             onAuthorizationFailureEvent((AuthorizationFailureEvent) event);
@@ -37,5 +31,5 @@ public class RestAPIAuditorListener
         }
 
         //publish(new AuditEvent(event.getAuthentication().getName(), AUTHORIZATION_FAILURE, data));
-    }
+    }*/
 }

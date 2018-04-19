@@ -27,5 +27,5 @@ public interface LojaService {
 
     Page<Loja> findAll(Pageable pageable);
 
-    void carregarDadosLoja();
+    void carregarDadosLoja(boolean todasAsLojas);
 }

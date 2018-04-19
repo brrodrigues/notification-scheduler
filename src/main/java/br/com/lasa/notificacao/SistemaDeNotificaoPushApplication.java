@@ -1,6 +1,5 @@
 package br.com.lasa.notificacao;
 
-import br.com.lasa.notificacao.audit.AppAuditor;
 import br.com.lasa.notificacao.service.NotificacaoService;
 import br.com.lasa.notificacao.util.AppConstants;
 import com.fasterxml.jackson.core.JsonParser;
@@ -18,8 +17,6 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.*;
 import org.springframework.core.annotation.Order;
-import org.springframework.data.domain.AuditorAware;
-import org.springframework.data.mongodb.config.EnableMongoAuditing;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
@@ -27,6 +24,7 @@ import org.springframework.http.converter.json.MappingJackson2HttpMessageConvert
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
 import java.net.Inet4Address;
 import java.net.InetAddress;
@@ -49,16 +47,21 @@ import java.util.concurrent.ScheduledExecutorService;
 
 @Slf4j
 @EnableScheduling
-@EnableMongoAuditing
-@SpringBootApplication(scanBasePackages = "br.com.lasa")
+@EnableWebMvc
+@SpringBootApplication(scanBasePackages = {"br.com.lasa", "br.com.lasa.notificacao", "br.com.lasa.notificacao.config"})
 @EnableAspectJAutoProxy
-public class SistemaDeNotificaoPushApplication {
+public class SistemaDeNotificaoPushApplication{
+
 
 	public static void main(String[] args) {
 		SpringApplication.run(SistemaDeNotificaoPushApplication.class, args);
 
 	}
 
+	/*@Bean
+	public PasswordEncoder passwordEncoder() {
+		return new StandardPasswordEncoder();
+	}*/
 
 	@Bean
 	ForkJoinPool forkJoinPool(){
@@ -203,11 +206,6 @@ public class SistemaDeNotificaoPushApplication {
 	@Bean(name = AppConstants.BRAZILIAN_LOCALE)
 	Locale getBrazilianLocale(){
 		return new Locale("pt", "BR");
-	}
-
-	@Bean
-	AuditorAware<String> auditorAware(){
-		return new AppAuditor();
 	}
 
 	@Bean

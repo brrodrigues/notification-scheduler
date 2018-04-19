@@ -1,18 +1,12 @@
 package br.com.lasa.notificacao.audit.config;
 
-import br.com.lasa.notificacao.audit.CustomAuthenticationProvider;
-import org.springframework.data.mongodb.config.EnableMongoAuditing;
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
-import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.builders.WebSecurity;
-
-@EnableMongoAuditing
+//@EnableMongoAuditing
 public class WebSecurityConfiguration
         //extends WebSecurityConfigurerAdapter
 {
 
     //@Autowired
-    CustomAuthenticationProvider authenticationProvider;
+    /*CustomAuthenticationProvider authenticationProvider;
 
     //@Override
     public void init(WebSecurity web) {
@@ -33,6 +27,6 @@ public class WebSecurityConfiguration
     //@Override
     protected void configure(HttpSecurity http) throws Exception {
         http.antMatcher("/api/**").authorizeRequests().anyRequest().authenticated();
-    }
+    }*/
 
 }

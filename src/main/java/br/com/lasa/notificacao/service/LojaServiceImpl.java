@@ -322,9 +322,8 @@ public class LojaServiceImpl implements LojaService {
     }
 
     @Override
-    public void carregarDadosLoja() {
+    public void carregarDadosLoja(boolean todasAsLojas) {
         long start = System.currentTimeMillis();
-
 
         final ForkJoinPool forkJoinPool = new ForkJoinPool(20);
 

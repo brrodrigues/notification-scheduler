@@ -99,7 +99,7 @@ server:
 security:
   basic:
     enabled: false
-    
+  ignored: /**
 ---
 spring:
   profiles: hml, prd

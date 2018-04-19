@@ -17,7 +17,7 @@ public class CarregarInformacaoLojaController {
     @GetMapping( value = "carregar-informacao-loja", produces = {"application/hal+json", })
     public ResponseEntity<String> carregar(){
 
-        lojaService.carregarDadosLoja();
+        lojaService.carregarDadosLoja(false);
 
         return ResponseEntity.ok("OK");
     }

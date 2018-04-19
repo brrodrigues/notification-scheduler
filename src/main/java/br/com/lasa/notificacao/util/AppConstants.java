@@ -14,5 +14,4 @@ public class AppConstants {
     public static final String LDAP_TEMPLATE_LASA = "LDAP_TEMPLATE_LASA";
     public static final String LDAP_TEMPLATE_B2W = "LDAP_TEMPLATE_B2W";
     public static final String LDAP_CONTEXT_LASA = "LDAP_CONTEXT_LASA";
-    public static final String LDAP_CONTEXT_B2W = "LDAP_CONTEXT_B2W";
 }
