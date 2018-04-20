@@ -9,7 +9,7 @@
 	<packaging>war</packaging>
 
 	<name>LAIS-Notificao</name>
-	<description>Sist</description>
+	<description>Sistema de notificacao LAIS</description>
 
 	<parent>
 		<groupId>org.springframework.boot</groupId>
