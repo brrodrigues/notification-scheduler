@@ -69,15 +69,15 @@ spring:
   mail:
     host: ${MAIL_SMTP_HOST:smtp.office365.com}
     port: ${MAIL_SMTP_PORT:587}
-    username: ${MAIL_SMTP_USERNAME:bcrodrigues@lasa.com.br}
-    password: ${MAIL_SMTP_PASSWORD:_+Br9n7_+}
+    username: ${MAIL_SMTP_USERNAME:}
+    password: ${MAIL_SMTP_PASSWORD:}
     properties:
       mail:
         smtp:
           auth: ${MAIL_SMTP_AUTH:true}
           starttls:
             enable: ${MAIL_STARTTLS_ENABLE:true}
-
+    test-connection: false
 
 endpoints:
   trace:

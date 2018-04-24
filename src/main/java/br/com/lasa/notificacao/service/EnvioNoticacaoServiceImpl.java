@@ -1,7 +1,7 @@
 package br.com.lasa.notificacao.service;
 
 import br.com.lasa.notificacao.domain.document.*;
-import br.com.lasa.notificacao.domain.document.enumaration.Behavior;
+import br.com.lasa.notificacao.domain.document.enumaration.NotificationType;
 import br.com.lasa.notificacao.domain.lais.Recipient;
 import br.com.lasa.notificacao.rest.ConversacaoCustomController;
 import br.com.lasa.notificacao.rest.request.EnvioNotificacaoRequest;
@@ -23,8 +23,6 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.TextStyle;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 
 @Service
 @Slf4j
@@ -70,14 +68,20 @@ public class EnvioNoticacaoServiceImpl implements EnvioNoticacaoService {
 
         Notification notification = notificacaoService.get(notificationMap.getKey());
 
-        ConcurrentMap<String, Notification> maps = new ConcurrentHashMap<>();
+        notificar(notification);
 
-        Map<String,Boolean> mapaDeLojaPorVenda = new HashMap();
+    }
+
+    @Override
+    public void notificar(Notification notification) {
+
+        //validar
+        Map<String,Boolean> mapaDeLojaParaNotificar = new HashMap();
 
         LocalDateTime horarioBrasilia = context.getBean(LocalDateTime.class);
 
         //Doing query at once by store
-        for ( String storeId: notificationMap.getValue()) {
+        for ( String storeId : notification.getStoreIds()) {
             if (storeId == null || storeId.isEmpty()) {
                 continue;
             }
@@ -89,39 +93,35 @@ public class EnvioNoticacaoServiceImpl implements EnvioNoticacaoService {
                 continue;
             }
 
-            if ( !podeNotificar(horarioBrasilia, loja) && !notification.getType().equals(Behavior.PONTUAL)) {
+            if ( !podeNotificar(horarioBrasilia, loja) && !notification.getType().equals(NotificationType.PONTUAL)) {
                 continue;
             }
 
             try {
                 boolean podeNotificar = consultaVendaLojaService.notificarLojaPorVendaForaDoPeriodo(storeId, horarioBrasilia, notification.getIntervalTime());
 
-                if (notification.getType().equals(Behavior.PONTUAL)) { //Este tipo de notificacao sera notificada sempre
+                if (notification.getType().equals(NotificationType.PONTUAL)) { //Este tipo de notificacao sera notificada sempre
                     podeNotificar = true;
                 }
 
-                mapaDeLojaPorVenda.put(storeId, podeNotificar);
+                mapaDeLojaParaNotificar.put(storeId, podeNotificar);
             }catch (Exception ex) {
-                mapaDeLojaPorVenda.put(storeId, true);//Caso ocorra algum erro (servico ao consulta a venda da loja.
+                mapaDeLojaParaNotificar.put(storeId, true);//Caso ocorra algum erro (servico ao consulta a venda da loja.
                 log.warn("Nao possivel consulta a venda da loja {} (Motivo: {})", storeId, ex.getMessage());
                 log.error("Nao possivel consulta a venda da loja. ", ex);
             }
-
         }
 
-
-
-        String[] storesToSendNotification = mapaDeLojaPorVenda.keySet().toArray(new String[mapaDeLojaPorVenda.keySet().size()]);
+        String[] storesToSendNotification = mapaDeLojaParaNotificar.keySet().toArray(new String[mapaDeLojaParaNotificar.keySet().size()]);
 
         try {
-            usuarioNotificacaoService.buscarUsuariosPorStatusAndLojas(true, storesToSendNotification ).stream().forEach(usuario -> sendNotificationTo(usuario, notification, mapaDeLojaPorVenda.get(usuario.getStoreId())));
+            usuarioNotificacaoService.buscarUsuariosPorStatusAndLojas(true, storesToSendNotification ).stream().forEach(usuario -> enviarNotificationPara(usuario, notification, mapaDeLojaParaNotificar.get(usuario.getStoreId())));
         } catch(Exception e) {
             log.error("Occur exception ", e);
             //Liberando a notification para a proxima execucao
         }finally {
             notificacaoService.setScheduleFor(notification.getId(), false);
         }
-
     }
 
     private HttpEntity<EnvioNotificacaoRequest> criarRequisicao(EnvioNotificacaoRequest requestObject){
@@ -132,7 +132,7 @@ public class EnvioNoticacaoServiceImpl implements EnvioNoticacaoService {
         return requestEntity ;
     }
 
-    private void sendNotificationTo(UsuarioNotificacao usuarioNotificacao, Notification notification, boolean enviarNotificacaoPorFaltaDeVenda) {
+    private void enviarNotificationPara(UsuarioNotificacao usuarioNotificacao, Notification notification, boolean enviarNotificacaoPorFaltaDeVenda) {
 
         if (enviarNotificacaoPorFaltaDeVenda) {
             Recipient profile = usuarioNotificacao.getProfile();

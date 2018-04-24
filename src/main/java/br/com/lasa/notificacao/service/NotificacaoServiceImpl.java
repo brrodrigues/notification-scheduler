@@ -5,8 +5,6 @@ import br.com.lasa.notificacao.repository.NotificacaoRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Scope;
-import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,13 +18,19 @@ import java.util.UUID;
 
 @Service
 @Slf4j
-@Scope(value = "singleton", proxyMode = ScopedProxyMode.DEFAULT)
 public class NotificacaoServiceImpl implements NotificacaoService {
     @Autowired
     private NotificacaoRepository notificacaoRepository;
 
     @Autowired
     private EnvioNoticacaoService envioNoticacaoServiceImpl;
+
+    @Override
+    public void enviarNotificacao(Notification notification) {
+        log.debug(">>>>>>>>>>>>>>>>>>>>>>>>>>>Sending pontual notification>>>>>>>>>>>>>>>>>>>>>>>>>>>");
+        envioNoticacaoServiceImpl.notificar(notification);
+        log.debug(">>>>>>>>>>>>>>>>>>>>>>>>>>>Pontual notification sent...>>>>>>>>>>>>>>>>>>>>>>>>>>>");
+    }
 
     @Override
     public boolean enviarNotificacao(Map.Entry<String, Set<String>> notificationMap) {

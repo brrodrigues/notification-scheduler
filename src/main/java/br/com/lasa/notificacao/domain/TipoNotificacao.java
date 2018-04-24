@@ -1,6 +1,6 @@
 package br.com.lasa.notificacao.domain;
 
-import br.com.lasa.notificacao.domain.document.enumaration.Behavior;
+import br.com.lasa.notificacao.domain.document.enumaration.NotificationType;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -22,6 +22,6 @@ public class TipoNotificacao implements Serializable {
     private ObjectId id;
     private String name;
     private String description;
-    private Behavior behavior;
+    private NotificationType notificationType;
 
 }

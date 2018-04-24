@@ -10,6 +10,8 @@ import java.util.Set;
 
 public interface NotificacaoService {
 
+    void enviarNotificacao(Notification notification);
+
     boolean enviarNotificacao(Map.Entry<String, Set<String>> notification);
 
     Map<String, Set<String>> buscarMapaDeNotificacaoNaoProgramada(LocalDateTime scheduleTime);

@@ -78,11 +78,11 @@ public class SistemaDeNotificaoPushApplication{
 			usuarioNotificacaoRepository.save(usuarioGustavoLais());
 			notificacaoRepository.deleteAll();
 			//Execucao em horario especifico
-			notificacaoRepository.save(new Notification( "Evento de 10 min", 10, Collections.singleton("1"), Behavior.INTERVAL_TIME));
+			notificacaoRepository.save(new Notification( "Evento de 10 min", 10, Collections.singleton("1"), NotificationType.INTERVAL_TIME));
 			//Execucao em periodo de intervalo
 			Instant localDate = LocalDateTime.now().plusMinutes(2).toInstant(ZoneOffset.UTC);
 			Date date = Date.from(localDate);
-			notificacaoRepository.save(new Notification(String.format("Evento de %s min", date), date, Collections.singleton("1"), Behavior.SPECIFIC_TIME_AFTER) );
+			notificacaoRepository.save(new Notification(String.format("Evento de %s min", date), date, Collections.singleton("1"), NotificationType.SPECIFIC_TIME_AFTER) );
 			log.info("Notification criado !!!!");
 		});
 	}

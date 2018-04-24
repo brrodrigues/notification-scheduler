@@ -1,12 +1,9 @@
 package br.com.lasa.notificacao.domain.document;
 
-import br.com.lasa.notificacao.domain.document.enumaration.Behavior;
+import br.com.lasa.notificacao.domain.document.enumaration.NotificationType;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -18,12 +15,13 @@ import java.util.*;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
+@ToString
 public class Notification {
 
     @Id
     private String id;
     private String eventName;
-    private Behavior type;
+    private NotificationType type;
     private String message;
     private Date scheduledTime;
     @JsonFormat(pattern = "dd/MM/yyyy HH:mm:ss", shape = JsonFormat.Shape.STRING, timezone = "America/Sao_Paulo")
@@ -40,20 +38,20 @@ public class Notification {
     private String uuid;
     private Set<String> storeIds = new LinkedHashSet<>();
 
-    public Notification(String eventName, Date specificTime, Set<String> storeIds, Behavior behavior) {
+    public Notification(String eventName, Date specificTime, Set<String> storeIds, NotificationType notificationType) {
         this.createDate = new Date();
         this.scheduledTime = specificTime;
         this.eventName = eventName;
         this.storeIds = storeIds;
-        this.type = behavior;
+        this.type = notificationType;
     }
 
-    public Notification(String eventName, Integer intervalTime, Set<String> storeIds, Behavior behavior) {
+    public Notification(String eventName, Integer intervalTime, Set<String> storeIds, NotificationType notificationType) {
         this.createDate = new Date();
         this.eventName = eventName;
         this.storeIds = storeIds;
         this.intervalTime = intervalTime;
-        this.type = behavior;
+        this.type = notificationType;
     }
 
     public void addStore(String store) {

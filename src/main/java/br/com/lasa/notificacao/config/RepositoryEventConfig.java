@@ -1,6 +1,6 @@
 package br.com.lasa.notificacao.config;
 
-import br.com.lasa.notificacao.repository.event.listener.NotificaoBeforeSaveNotificacaoRepositoryListener;
+import br.com.lasa.notificacao.event.handler.NotificationEventHandler;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -8,8 +8,8 @@ import org.springframework.context.annotation.Configuration;
 public class RepositoryEventConfig {
 
     @Bean
-    NotificaoBeforeSaveNotificacaoRepositoryListener personEventHandler() {
-        return new NotificaoBeforeSaveNotificacaoRepositoryListener();
+    NotificationEventHandler notificationEventHandler() {
+        return new NotificationEventHandler();
     }
 
 }
