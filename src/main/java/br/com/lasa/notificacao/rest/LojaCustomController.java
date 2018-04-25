@@ -101,7 +101,7 @@ public class LojaCustomController {
                 Link distritoLink = getDistritoBaseLink(lojaRegiao.getIdRegiao(), distrito.getId()).withRel("link");
                 Map<String, Object> map = new HashMap<>();
                 map.put("id", distrito.getId());
-                map.put("name", distrito.getName());
+                map.put("name", distrito.getId().concat("-").concat(distrito.getName()));
                 map.put("link", distritoLink);
                 return map;
             }).collect(Collectors.toSet());
@@ -113,7 +113,7 @@ public class LojaCustomController {
             ParentContent content = ParentContent.builder().
                     selfId(lojaRegiao.getIdRegiao()).
                     selfType("Regiões").
-                    selfName(lojaRegiao.getNomeRegiao()).
+                    selfName(lojaRegiao.getIdRegiao().concat("-").concat(lojaRegiao.getNomeRegiao())).
                     children(childrenContent).
                     lojas(lojaRegiao.getLojas()).
                     build();
@@ -149,7 +149,7 @@ public class LojaCustomController {
 
             ParentContent content = ParentContent.builder().
                     selfId(distritoCidade.getIdDistrito()).
-                    selfName(distritoCidade.getNomeDistrito()).
+                    selfName(distritoCidade.getIdDistrito().concat("-").concat(distritoCidade.getNomeDistrito())).
                     selfType("Distritos").
                     children(children).
                     lojas(distritoCidade.getLojas()).
