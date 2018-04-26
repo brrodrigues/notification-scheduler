@@ -47,21 +47,31 @@ public class CadastroUsuarioServiceImpl implements CadastroUsuarioService {
 
         Map<String, Object> metadata = request.getMetadata();
 
-        String lojaGgl = (String) metadata.get("lojaGgl");
-        String nomeGgl = (String) metadata.get("nomeGgl");
+        Object numeroLojaParameter = metadata.get("lojaGgl");
+        Object nomeGglParameter = metadata.get("nomeGgl");
+
+        Assert.notNull(numeroLojaParameter, "There is no user information on metadata.lojaGgl to create the request. Check attributes sent.");
+        Assert.notNull(nomeGglParameter, "There is no user name on metadata.nomeGgl to create the request. Check attributes sent.");
+
+
+        String nomeGGL = String.valueOf(nomeGglParameter);
+        String lojaString = String.valueOf(numeroLojaParameter);
+
+        String prefix = "L000";
+        String numeroLoja = prefix.substring(0, 4 - lojaString.length()) + lojaString;
 
         //try {
             log.debug("Chamando API de raio X da loja...");
-            CalendarioDeLoja calendarioDeLoja = calendarioDeLojaExternalService.buscarCalendarioFeriadoDaSemanaDaLoja(lojaGgl, nomeGgl);
+            CalendarioDeLoja calendarioDeLoja = calendarioDeLojaExternalService.buscarCalendarioFeriadoDaSemanaDaLoja(numeroLoja, nomeGGL);
 
-            log.debug("Montando a estrutura da loja {} para persistir...", lojaGgl);
+            log.debug("Montando a estrutura da loja {} para persistir...", numeroLojaParameter);
             Loja loja = calendarioDeLojaExternalService.toLoja(calendarioDeLoja);
 
-            log.debug("Valindando se existe {} ...", lojaGgl);
+            log.debug("Valindando se existe {} ...", numeroLojaParameter);
             if (lojaRepository.exists(loja.getId())) {
                 lojaRepository.delete(loja.getId());
             }
-            log.debug("Salvando loja {} ...", lojaGgl);
+            log.debug("Salvando loja {} ...", numeroLojaParameter);
             lojaRepository.save(loja);
             log.debug("Salvo...");
 
@@ -71,9 +81,9 @@ public class CadastroUsuarioServiceImpl implements CadastroUsuarioService {
 
         UsuarioNotificacao usuario = UsuarioNotificacao.builder().
                 metadata(metadata).
-                nome(nomeGgl).
+                nome(nomeGGL).
                 profile(requestUser).
-                storeId(lojaGgl).
+                storeId(numeroLoja).
                 loginRede(request.getLoginRede()).
                 build();
 
@@ -90,7 +100,6 @@ public class CadastroUsuarioServiceImpl implements CadastroUsuarioService {
 
         return userCreatedMessage;
     }
-
 
 
 }
