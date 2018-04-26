@@ -4,9 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.util.Map;
-import java.util.Set;
+import org.springframework.hateoas.Link;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -14,7 +12,9 @@ import java.util.Set;
 @Builder
 public class ChildrenContent {
 
-    private String childName;
-    private Set<Map<String, Object>> childData;
+    private String description;
+    private String name;
+    private String id;
+    private Link link;
 
 }

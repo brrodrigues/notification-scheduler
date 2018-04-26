@@ -97,24 +97,21 @@ public class LojaCustomController {
 
             Link linkSelf = getRegiaoBaseLink(lojaRegiao.getIdRegiao()).withSelfRel();
 
-            Set<Map<String, Object>> distritoMapList = distritoList.stream().map(distrito -> {
+            Set<ChildrenContent> distritoMapList = distritoList.stream().map(distrito -> {
                 Link distritoLink = getDistritoBaseLink(lojaRegiao.getIdRegiao(), distrito.getId()).withRel("link");
                 Map<String, Object> map = new HashMap<>();
-                map.put("id", distrito.getId());
-                map.put("name", distrito.getId().concat("-").concat(distrito.getName()));
-                map.put("link", distritoLink);
-                return map;
+
+                ChildrenContent childrenContent = ChildrenContent.builder().id(distrito.getId()).name(distrito.getName()).description(distrito.getId().concat("-").concat(distrito.getName())).link(distritoLink).build();
+
+                return childrenContent;
             }).collect(Collectors.toSet());
 
-            ChildrenContent children = ChildrenContent.builder().childName("Distritos").childData(distritoMapList).build();
-
-            Set<ChildrenContent> childrenContent = Collections.singleton(children);
 
             ParentContent content = ParentContent.builder().
                     selfId(lojaRegiao.getIdRegiao()).
                     selfType("Regiões").
                     selfName(lojaRegiao.getIdRegiao().concat("-").concat(lojaRegiao.getNomeRegiao())).
-                    children(childrenContent).
+                    children(distritoMapList).
                     lojas(lojaRegiao.getLojas()).
                     build();
 
@@ -214,23 +211,11 @@ public class LojaCustomController {
         return getRegiaoBaseLink(regiao).slash(distrito).slash("distritos").slash(cidade).slash("cidades");
     }
 
- /*   private ChildrenContent castRegiaoToChildren(String regiao, RegiaoDistrito.Distrito distrito) {
-        Link distritoLink = getDistritoBaseLink(regiao, distrito.getId()).withRel("link");
-        Map<String, Object> map = new HashMap<>();
-        map.put("id", distrito.getId());
-        map.put("name", distrito.getName());
-        map.put("link", distritoLink);
-        ChildrenContent childrenContent = ChildrenContent.builder().childName("Distritos").childData(Arrays.asList(map)).build();
-        return childrenContent;
-    }*/
-
     private ChildrenContent castCidadeToChildren(String regiao, String distrito, RegiaoDistritoCidade.Cidade cidade) {
         Link distritoLink = getCidadeBaseLink(regiao, distrito, cidade.getId()).withRel("link");
         Map<String, Object> map = new HashMap<>();
-        map.put("id", cidade.getId());
-        map.put("name", cidade.getId());
-        map.put("link", distritoLink);
-        ChildrenContent childrenContent = ChildrenContent.builder().childName("Cidades").childData(Collections.singleton(map)).build();
+        ChildrenContent childrenContent = ChildrenContent.builder().link(distritoLink).name(cidade.getId()).id(cidade.getId()).build();
+
         return childrenContent;
     }
 
