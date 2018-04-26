@@ -47,7 +47,6 @@ public class LojaCustomController {
         return new ResponseEntity(lojas, HttpStatus.OK);
     }*/
 
-    @CrossOrigin(origins = "*")
     @RequestMapping( value = "lojas", method= RequestMethod.PATCH, produces = "application/hal+json")
     public ResponseEntity<Loja> patch(@RequestBody Loja loja) {
 
@@ -56,7 +55,6 @@ public class LojaCustomController {
         return new ResponseEntity(atualizar, HttpStatus.OK);
     }
 
-    @CrossOrigin(origins = "*")
     @RequestMapping( value = "lojas/search/findAllTipoLojas", method= RequestMethod.GET, produces = "application/hal+json")
     public ResponseEntity<Resources> findAllTipoLoja (){
 
@@ -69,7 +67,6 @@ public class LojaCustomController {
         return ResponseEntity.ok(resources);
     };
 
-    @CrossOrigin(origins = "*")
     @RequestMapping (value = "lojas/{id}", method= RequestMethod.PATCH, produces = "application/hal+json")
     public ResponseEntity<Loja> patch(@PathVariable("id") String id, @RequestBody Loja loja) {
 
@@ -79,7 +76,6 @@ public class LojaCustomController {
         return new ResponseEntity(atualizar, HttpStatus.OK);
     }
 
-    @CrossOrigin(origins = "*")
     @RequestMapping (value = "lojas/{regiaoId}/regioes", method= RequestMethod.GET, produces = "application/hal+json")
     public ResponseEntity<Resource> findAllByRegiao(@PathVariable("regiaoId") final String codigoRegiao, @RequestParam(value = "tipoLoja", required = false) String tipoLoja) {
 
@@ -99,9 +95,13 @@ public class LojaCustomController {
 
             Set<ChildrenContent> distritoMapList = distritoList.stream().map(distrito -> {
                 Link distritoLink = getDistritoBaseLink(lojaRegiao.getIdRegiao(), distrito.getId()).withRel("link");
-                Map<String, Object> map = new HashMap<>();
 
-                ChildrenContent childrenContent = ChildrenContent.builder().id(distrito.getId()).name(distrito.getName()).description(distrito.getId().concat("-").concat(distrito.getName())).link(distritoLink).build();
+                ChildrenContent childrenContent = ChildrenContent.builder().
+                        id(distrito.getId()).
+                        link(distritoLink).
+                        name(distrito.getId().concat("-").concat(distrito.getName())).
+                        description(distrito.getName()).
+                        build();
 
                 return childrenContent;
             }).collect(Collectors.toSet());
@@ -123,7 +123,6 @@ public class LojaCustomController {
         return new ResponseEntity(parents, HttpStatus.OK);
     }
 
-    @CrossOrigin(origins = "*")
     @RequestMapping (value = "lojas/{regiaoId}/regioes/{distritoId}/distritos", method= RequestMethod.GET, produces = "application/hal+json")
     public ResponseEntity<Resource> findAllByRegiaoDistrito(@PathVariable("regiaoId") String regiaoId, @PathVariable("distritoId") String distritoId,  @RequestParam(value = "tipoLoja", required = false) String tipoLoja) {
 
@@ -160,7 +159,6 @@ public class LojaCustomController {
         return new ResponseEntity(parents, HttpStatus.OK);
     }
 
-    @CrossOrigin(origins = "*")
     @RequestMapping (value = "lojas/{regiaoId}/regioes/{distritoId}/distritos/{cidadeNome}/cidades", method= RequestMethod.GET, produces = "application/hal+json")
     public ResponseEntity<Resource> findAllByRegiaoDistritoECidade(@PathVariable("regiaoId") String regiaoId, @PathVariable("distritoId") String distritoId,  @PathVariable("cidadeNome") String cidadeNome, @RequestParam(value = "tipoLoja", required = false) String tipoLoja) {
 
