@@ -92,13 +92,14 @@ public class LojaCustomController {
                     String regiao = informacaoLoja.getRegiao();
                     String descricaoRegiao = informacaoLoja.getDescricaoRegiao();
                     String distrito = informacaoLoja.getDistrito();
-                    String descricaoDistrito = informacaoLoja.getDescricaoRegiao();
+                    String descricaoDistrito = informacaoLoja.getDescricaoDistrito();
                     Integer numeroLoja =  informacaoLoja.getLoja();
+                    String nomeCombinado =  informacaoLoja.getNomeCombinado();
                     String tipoLoja = informacaoLoja.getNomeTipo();
 
                     RegionContent regionContent = RegionContent.builder().type("REGIAO").label(descricaoRegiao).children(new ArrayList<>()).value(regiao).build();
                     DistrictContent districtContent = DistrictContent.builder().type("DISTRITO").label(descricaoDistrito).children(new HashSet<>()).value(distrito).build();
-                    StoreContent storeContent = StoreContent.builder().storeType(tipoLoja).label(descricaoDistrito).value(String.valueOf(numeroLoja)).build();
+                    StoreContent storeContent = StoreContent.builder().storeType(tipoLoja).label(nomeCombinado).value(String.valueOf(numeroLoja)).build();
 
                     /*regionContent = regionContents.stream().filter(filter -> filter.getValue().equals(regiao)).findFirst().orElse(regionContent);
 
