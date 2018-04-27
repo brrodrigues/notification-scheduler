@@ -9,6 +9,7 @@ import br.com.lasa.notificacao.repository.UsuarioNotificacaoRepository;
 import br.com.lasa.notificacao.rest.request.CadastroRequest;
 import br.com.lasa.notificacao.service.external.CalendarioDeLojaExternalService;
 import br.com.lasa.notificacao.service.external.response.CalendarioDeLoja;
+import br.com.lasa.notificacao.util.LojaUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -57,8 +58,7 @@ public class CadastroUsuarioServiceImpl implements CadastroUsuarioService {
         String nomeGGL = String.valueOf(nomeGglParameter);
         String lojaString = String.valueOf(numeroLojaParameter);
 
-        String prefix = "L000";
-        String numeroLoja = prefix.substring(0, 4 - lojaString.length()) + lojaString;
+        String numeroLoja = LojaUtil.formatarCodigoLoja(lojaString);
 
         //try {
             log.debug("Chamando API de raio X da loja...");

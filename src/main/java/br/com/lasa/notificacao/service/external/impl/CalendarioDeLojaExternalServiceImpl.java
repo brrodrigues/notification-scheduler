@@ -10,6 +10,7 @@ import br.com.lasa.notificacao.service.external.response.InformacaoLoja;
 import br.com.lasa.notificacao.util.AppConstants;
 import br.com.lasa.notificacao.util.DateTimeFormatterUtils;
 import br.com.lasa.notificacao.util.DateUtils;
+import br.com.lasa.notificacao.util.LojaUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -121,7 +122,7 @@ public class CalendarioDeLojaExternalServiceImpl implements CalendarioDeLojaExte
         calendarioDeLoja.setHorarios(collect);
         String nomeCombinado = informacaoLojaList.getNomeCombinado();
         calendarioDeLoja.setNomeLoja(nomeCombinado);
-        calendarioDeLoja.setLojaId(lojaId);
+        calendarioDeLoja.setLojaId(LojaUtil.formatarCodigoLoja(lojaId));
         calendarioDeLoja.setNomeResponsavel(responsavelLoja);
         calendarioDeLoja.setMetadata(metadata);
         return calendarioDeLoja;

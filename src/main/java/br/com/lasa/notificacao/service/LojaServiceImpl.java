@@ -18,12 +18,12 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
 
 import java.time.ZoneId;
 import java.util.*;
-import java.util.concurrent.ForkJoinPool;
 import java.util.stream.Collectors;
 
 @Component
@@ -42,6 +42,9 @@ public class LojaServiceImpl implements LojaService {
 
     @Autowired
     private ApplicationContext context;
+
+    @Autowired
+    private ThreadPoolTaskExecutor executor;
 
     @Autowired
     private ZoneId zoneId;
@@ -105,6 +108,12 @@ public class LojaServiceImpl implements LojaService {
         Loja save = lojaRepository.save(lojaParam);
         return save;
    }
+
+
+   @Override
+    public List<Loja> findAll() {
+       return lojaRepository.findAll();
+    }
 
     /**
      *
@@ -325,12 +334,11 @@ public class LojaServiceImpl implements LojaService {
     public void carregarDadosLoja(boolean todasAsLojas) {
         long start = System.currentTimeMillis();
 
-        final ForkJoinPool forkJoinPool = new ForkJoinPool(20);
-
-        forkJoinPool.submit(() -> this.calendarioDeLojaExternalService.buscarCalendarioDaSemanaDeTodasLoja().
-            parallelStream().
-            map(this::applyMap).
-            map(calendarioDeLojaExternalService::toLoja).forEach(this::save));
+        executor.submit(() ->
+                this.calendarioDeLojaExternalService.buscarCalendarioDaSemanaDeTodasLoja().
+                        parallelStream().
+                        map(this::applyMap).
+                        map(calendarioDeLojaExternalService::toLoja).forEach(this::save));
 
         LOGGER.info("Processo de carga de lojas executado em {} ms.", System.currentTimeMillis() - start);
     }

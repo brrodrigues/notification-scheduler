@@ -29,7 +29,6 @@ public class Notification {
     private Date createDate;
     @Indexed
     private Integer intervalTime = 0;
-    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private boolean scheduled;
     private Boolean enabled = true;
     private Collection<String> emails= new ArrayList();
