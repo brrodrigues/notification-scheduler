@@ -5,7 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 
@@ -19,7 +19,7 @@ public class RegionContent {
     private String type;
     private String label;
     private String value;
-    private List<DistrictContent> children = new ArrayList<>();
+    private List<DistrictContent> children = new LinkedList<>();
 
     @Override
     public boolean equals(Object o) {

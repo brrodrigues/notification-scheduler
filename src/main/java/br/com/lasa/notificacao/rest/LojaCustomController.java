@@ -53,7 +53,7 @@ public class LojaCustomController {
 
     @CrossOrigin(value = "*")
     @RequestMapping( value = "lojas/search/findAllTipoLojas", method= RequestMethod.GET, produces = "application/hal+json")
-    public ResponseEntity<Resources> findAllTipoLoja (){
+    public ResponseEntity<Resources> findAllTipoLoja () {
 
         List<String> tipoLojas = lojaService.listarTipoLojas();
 
@@ -80,7 +80,7 @@ public class LojaCustomController {
 
         List<Loja> lojaRegiaoDistritoList = lojaService.findAll();
 
-        List<RegionContent> regionContents = new ArrayList<>();
+        List<RegionContent> regionContents = new LinkedList<>();
 
         if (lojaRegiaoDistritoList != null && !lojaRegiaoDistritoList.isEmpty()) {
             for (Loja loja : lojaRegiaoDistritoList) {
@@ -101,7 +101,7 @@ public class LojaCustomController {
                         System.out.print("");
                     }
 
-                    RegionContent regionContent = RegionContent.builder().type("REGIAO").label(descricaoRegiao).children(new ArrayList<>()).value(regiao).build();
+                    RegionContent regionContent = RegionContent.builder().type("REGIAO").label(regiao.concat("-").concat(descricaoRegiao)).children(new ArrayList<>()).value(regiao).build();
                     DistrictContent districtContent = DistrictContent.builder().type("DISTRITO").label(descricaoDistrito).children(new HashSet<>()).value(distrito).build();
                     StoreContent storeContent = StoreContent.builder().storeType(tipoLoja).label(nomeCombinado).value(centro).build();
 
