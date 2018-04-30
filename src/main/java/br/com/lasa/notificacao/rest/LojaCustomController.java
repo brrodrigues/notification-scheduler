@@ -86,7 +86,7 @@ public class LojaCustomController {
             for (Loja loja : lojaRegiaoDistritoList) {
                 Map<String, Object> metadata = loja.getMetadata();
                 //Valida previamente se existe o atributo adicional no mapa
-                if (metadata.containsKey("adicional")){
+                if (metadata.containsKey("adicional")) {
                     InformacaoLoja informacaoLoja = (InformacaoLoja) metadata.get("adicional");
 
                     String regiao = informacaoLoja.getRegiao();
@@ -97,15 +97,20 @@ public class LojaCustomController {
                     String nomeCombinado =  informacaoLoja.getNomeCombinado();
                     String tipoLoja = informacaoLoja.getNomeTipo();
 
+                    if (distrito.equals("904")){
+                        System.out.print("");
+                    }
+
                     RegionContent regionContent = RegionContent.builder().type("REGIAO").label(descricaoRegiao).children(new ArrayList<>()).value(regiao).build();
                     DistrictContent districtContent = DistrictContent.builder().type("DISTRITO").label(descricaoDistrito).children(new HashSet<>()).value(distrito).build();
                     StoreContent storeContent = StoreContent.builder().storeType(tipoLoja).label(nomeCombinado).value(centro).build();
 
                     int regionIndex = regionContents.indexOf(regionContent) ;
 
+
                     if (regionIndex < 0) {
                         regionContents.add(regionContent);
-                        regionIndex = 0;
+                        regionIndex = regionContents.size() - 1;
                     }
                     regionContent = regionContents.get(regionIndex);
 
@@ -115,7 +120,7 @@ public class LojaCustomController {
 
                     if (districtIndex < 0 ) {
                         districtContents.add(districtContent);
-                        districtIndex = 0;
+                        districtIndex = districtContents.size() - 1;
                     }
                     districtContent = districtContents.get(districtIndex);
 
