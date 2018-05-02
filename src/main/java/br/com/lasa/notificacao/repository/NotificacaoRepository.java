@@ -2,6 +2,7 @@ package br.com.lasa.notificacao.repository;
 
 import br.com.lasa.notificacao.domain.document.Notification;
 import org.springframework.data.mongodb.repository.MongoRepository;
+import org.springframework.data.mongodb.repository.Query;
 import org.springframework.data.rest.core.annotation.RepositoryRestResource;
 import org.springframework.data.rest.core.annotation.RestResource;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -16,7 +17,8 @@ public interface NotificacaoRepository extends MongoRepository<Notification, Str
      * Listagem de notificacao por todos as notificacao
      * @return
      */
-    @RestResource(exported = true, path = "findAll")
+    @RestResource(exported = true, path = "/findAll")
+    @Query(value = "{}")
     List<Notification> findAll();
 
     /**

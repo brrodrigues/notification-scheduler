@@ -15,7 +15,8 @@ import java.util.List;
 public interface UsuarioNotificacaoRepository extends MongoRepository<UsuarioNotificacao, String> {
 
     @Override
-    @RestResource(exported = true, path = "/findAll")
+    @RestResource(path = "/findAll", rel = "findAll")
+    @Query(value = "{}")
     List<UsuarioNotificacao> findAll();
 
     @RestResource(path = "/findAllByStore" )
