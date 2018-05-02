@@ -80,10 +80,6 @@ public class EnvioNoticacaoServiceImpl implements EnvioNoticacaoService {
 
         LocalDateTime horarioBrasilia = context.getBean(LocalDateTime.class);
 
-        Integer intervalTime = notification.getIntervalTime();
-
-        Date scheduledTime = notification.getScheduledTime();
-
         //Doing query at once by store
         for ( String storeId : notification.getStoreIds()) {
             if (storeId == null || storeId.isEmpty()) {
@@ -101,20 +97,12 @@ public class EnvioNoticacaoServiceImpl implements EnvioNoticacaoService {
                 continue;
             }
 
-            if (notification.getType().equals(NotificationType.PONTUAL)
-                    && scheduledTime == null) {
-                mapaDeLojaParaNotificar.put(storeId, true);
-                continue;
-            }
-
-            if (notification.getType().equals(NotificationType.PONTUAL)
-                    && scheduledTime != null) {
-                intervalTime = 0; //Forca zero para envia a notificacao.
-            }
-
             try {
+                boolean podeNotificar = consultaVendaLojaService.notificarLojaPorVendaForaDoPeriodo(storeId, horarioBrasilia, notification.getIntervalTime());
 
-                boolean podeNotificar = consultaVendaLojaService.notificarLojaPorVendaForaDoPeriodo(storeId, horarioBrasilia, intervalTime);
+                if (notification.getType().equals(NotificationType.PONTUAL)) { //Este tipo de notificacao sera notificada sempre
+                    podeNotificar = true;
+                }
 
                 mapaDeLojaParaNotificar.put(storeId, podeNotificar);
             }catch (Exception ex) {
