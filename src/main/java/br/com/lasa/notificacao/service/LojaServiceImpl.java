@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.data.domain.Example;
+import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
@@ -67,7 +68,27 @@ public class LojaServiceImpl implements LojaService {
 
     @Override
     public Loja buscarLojaPorCodigo(String codigoLoja) {
-        return lojaRepository.findOne(codigoLoja);
+
+
+        Map<String, Object> adicional = new HashMap();
+        Map<String, Object> params = new HashMap();
+
+        params.put("centro", codigoLoja);
+        params.put("loja", codigoLoja);
+
+        adicional.put("adicional", params);
+
+        Loja loja = Loja.builder().metadata(adicional).build();
+
+        Example<Loja> example = Example.of(loja,ExampleMatcher.matchingAny());
+
+        List<Loja> all = lojaRepository.findAll(example);
+
+        if (!all.isEmpty()){
+            return all.get(0);
+        }
+
+        return null;
     }
 
     @Override
