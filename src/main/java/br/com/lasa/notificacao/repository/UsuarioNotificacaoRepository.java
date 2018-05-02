@@ -14,6 +14,10 @@ import java.util.List;
 @RepositoryRestResource(path = "/usuarios", itemResourceRel = "usuarios", collectionResourceRel = "")
 public interface UsuarioNotificacaoRepository extends MongoRepository<UsuarioNotificacao, String> {
 
+    @Override
+    @RestResource(exported = true, path = "/findAll")
+    List<UsuarioNotificacao> findAll();
+
     @RestResource(path = "/findAllByStore" )
     @Query(value = "{storeId : { $in : ?0 }}")
     List<UsuarioNotificacao> findAllByStoreIdIn(@Param("storeIds") String... storeIds);
