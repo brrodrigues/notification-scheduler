@@ -10,5 +10,5 @@ public interface EnvioNoticacaoService {
 
     void notificar(Map.Entry<String, Set<String>> notification) throws HttpStatusCodeException;
 
-    void notificar(Notification notification);
+    void notificar(Notification notification,Map<String, Object> metadata);
 }

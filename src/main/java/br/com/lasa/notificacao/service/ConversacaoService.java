@@ -10,11 +10,11 @@ public interface ConversacaoService {
 
     Conversacao save(Conversacao conversacao);
 
-    Conversacao enviarMensagem(String id, String author, String stringMessage);
+    Conversacao novaMensagem(String id, String author, String stringMessage, Integer priority);
 
-    Conversacao enviarMensagem(String id, Message message);
+    Conversacao addMessage(String id, Message message);
 
-    Conversacao iniciarConversa(Recipient profile, String value, String notificationName);
+    Conversacao iniciarConversa(Recipient profile, String value, String notificationName, Integer priority);
 
     Collection<Conversacao> getConversacoes(String id);
 

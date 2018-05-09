@@ -25,29 +25,29 @@ public class ConversacaoServiceImpl implements ConversacaoService {
     @Autowired
     private ConversacaoRepository conversacaoRepository;
 
-
     @Override
     public Conversacao save(Conversacao conversacao) {
         return conversacaoRepository.save(conversacao);
     }
 
     @Override
-    public Conversacao enviarMensagem(String id, String author, String stringMessage){
-        Message message = criarMensagem(author, stringMessage);
+    public Conversacao novaMensagem(String id, String author, String stringMessage, Integer priority){
+        Message message = criarMensagem(author, stringMessage, priority);
         return conversacaoRepository.addMessage(id,message);
     }
 
     @Override
-    public Conversacao enviarMensagem(String id, Message message) {
+    public Conversacao addMessage(String id, Message message) {
         message.setTimestamp(getHorarioBrasilia());
         return conversacaoRepository.addMessage(id,message);
     }
 
     @Override
-    public Conversacao iniciarConversa(Recipient profile, String value, String notificationName){
+    public Conversacao iniciarConversa(Recipient profile, String value, String notificationName, Integer priority){
 
         Conversacao conversacao = Conversacao.
                 builder().
+                priority(priority).
                 from(profile.getBot().getName()).
                 to(profile.getUser().getName()).
                 ref(value).
@@ -60,8 +60,8 @@ public class ConversacaoServiceImpl implements ConversacaoService {
         return conversacao;
     }
 
-    private Message criarMensagem(String fromUser, String message) {
-        Message messageBuild = Message.builder().author(fromUser).timestamp(getHorarioBrasilia()).message(message).build();
+    private Message criarMensagem(String fromUser, String message, Integer priority) {
+        Message messageBuild = Message.builder().author(fromUser).timestamp(getHorarioBrasilia()).priority(priority).message(message).build();
         return messageBuild;
     }
 

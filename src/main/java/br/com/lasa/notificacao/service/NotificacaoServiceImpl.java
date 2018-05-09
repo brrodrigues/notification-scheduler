@@ -5,6 +5,10 @@ import br.com.lasa.notificacao.repository.NotificacaoRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Example;
+import org.springframework.data.domain.ExampleMatcher;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,6 +23,7 @@ import java.util.UUID;
 @Service
 @Slf4j
 public class NotificacaoServiceImpl implements NotificacaoService {
+
     @Autowired
     private NotificacaoRepository notificacaoRepository;
 
@@ -26,9 +31,20 @@ public class NotificacaoServiceImpl implements NotificacaoService {
     private EnvioNoticacaoService envioNoticacaoServiceImpl;
 
     @Override
-    public void enviarNotificacao(Notification notification) {
+    public Page<Notification> findAllDiretoria(Pageable page) {
+
+        Notification notification = Notification.builder().priority(1).build();
+        Example<Notification> example = Example.of(notification, ExampleMatcher.matchingAny());
+        Page<Notification> pagination = notificacaoRepository.findAll(example, page);
+
+        return pagination;
+
+    }
+
+    @Override
+    public void enviarNotificacao(Notification notification, Map<String, Object> metadata) {
         log.debug(">>>>>>>>>>>>>>>>>>>>>>>>>>>Sending pontual notification>>>>>>>>>>>>>>>>>>>>>>>>>>>");
-        envioNoticacaoServiceImpl.notificar(notification);
+        envioNoticacaoServiceImpl.notificar(notification, metadata);
         log.debug(">>>>>>>>>>>>>>>>>>>>>>>>>>>Pontual notification sent...>>>>>>>>>>>>>>>>>>>>>>>>>>>");
     }
 

@@ -23,6 +23,7 @@ public class Conversacao implements Serializable {
     private String id;
     private Date timestamp;
     private String from;
+    private Integer priority;
     private String to;
     private String ref;
     private String notificationName;

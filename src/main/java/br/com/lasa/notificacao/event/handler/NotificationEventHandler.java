@@ -8,6 +8,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.rest.core.annotation.HandleAfterCreate;
 import org.springframework.data.rest.core.annotation.RepositoryEventHandler;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 
 @Slf4j
@@ -24,7 +26,12 @@ public class NotificationEventHandler
                 notification.getType().equals(NotificationType.PONTUAL) &&
                 notification.getScheduledTime() == null) {
             log.info(":::::::::::Sending pontual notification {}", notification.toString());
-            notificacaoService.enviarNotificacao(notification);
+            Map<String, Object> metadata  = new HashMap();
+            metadata.put("message", notification.getMessage());
+            metadata.put("interval", notification.getIntervalTime());
+            metadata.put("priority", notification.getPriority() );
+            metadata.put("skipRules", false);
+            notificacaoService.enviarNotificacao(notification, metadata);
         }
     }
 

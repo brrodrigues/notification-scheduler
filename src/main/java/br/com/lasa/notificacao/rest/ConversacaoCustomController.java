@@ -38,7 +38,6 @@ public class ConversacaoCustomController implements ResourceProcessor<Persistent
     @Qualifier(value = "brazilZone")
     private ZoneId zoneId;
 
-
     @Autowired
     private ConversacaoService conversacaoService;
 
@@ -82,7 +81,7 @@ public class ConversacaoCustomController implements ResourceProcessor<Persistent
 
         content.setTimestamp(new Date());
 
-        Conversacao conversacao = conversacaoService.enviarMensagem(id, resource.getContent());
+        Conversacao conversacao = conversacaoService.novaMensagem(id, resource.getContent());
 
         return ResponseEntity.ok(persistentEntityResourceAssembler.toResource(conversacao));
 
@@ -121,7 +120,7 @@ public class ConversacaoCustomController implements ResourceProcessor<Persistent
 
         content.setTimestamp(date);
 
-        Conversacao conversacao = conversacaoService.enviarMensagem(id, resource.getContent());
+        Conversacao conversacao = conversacaoService.novaMensagem(id, resource.getContent());
 
         if (conversacao == null){
             HttpHeaders responseHeaders = new HttpHeaders();

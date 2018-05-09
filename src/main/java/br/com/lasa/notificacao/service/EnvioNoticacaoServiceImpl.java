@@ -68,12 +68,18 @@ public class EnvioNoticacaoServiceImpl implements EnvioNoticacaoService {
 
         Notification notification = notificacaoService.get(notificationMap.getKey());
 
-        notificar(notification);
+        Map<String, Object> metadata  = new HashMap();
+        metadata.put("message", notification.getMessage());
+        metadata.put("interval", notification.getIntervalTime());
+        metadata.put("priority", notification.getPriority());
+        metadata.put("messageType", notification.getEventName());
+
+        notificar(notification, metadata);
 
     }
 
     @Override
-    public void notificar(Notification notification) {
+    public void notificar(Notification notification, Map<String, Object> metadata) {
 
         //validar
         Map<String,Boolean> mapaDeLojaParaNotificar = new HashMap();
@@ -115,7 +121,7 @@ public class EnvioNoticacaoServiceImpl implements EnvioNoticacaoService {
         String[] storesToSendNotification = mapaDeLojaParaNotificar.keySet().toArray(new String[mapaDeLojaParaNotificar.keySet().size()]);
 
         try {
-            usuarioNotificacaoService.buscarUsuariosPorStatusAndLojas(true, storesToSendNotification ).stream().forEach(usuario -> enviarNotificationPara(usuario, notification, mapaDeLojaParaNotificar.get(usuario.getStoreId())));
+            usuarioNotificacaoService.buscarUsuariosPorStatusAndLojas(true, storesToSendNotification ).stream().forEach(usuario -> enviarNotificacaoPara(usuario, metadata, notification, mapaDeLojaParaNotificar.get(usuario.getStoreId())));
         } catch(Exception e) {
             log.error("Occur exception ", e);
             //Liberando a notification para a proxima execucao
@@ -132,24 +138,19 @@ public class EnvioNoticacaoServiceImpl implements EnvioNoticacaoService {
         return requestEntity ;
     }
 
-    private void enviarNotificationPara(UsuarioNotificacao usuarioNotificacao, Notification notification, boolean enviarNotificacaoPorFaltaDeVenda) {
+    private void enviarNotificacaoPara(UsuarioNotificacao usuarioNotificacao, Map<String,Object> metadata, Notification notification, boolean enviarNotificacaoPorFaltaDeVenda) {
 
         if (enviarNotificacaoPorFaltaDeVenda) {
             Recipient profile = usuarioNotificacao.getProfile();
             List<Recipient> recipients = Arrays.asList(profile);
 
-            Conversacao conversacao = conversacaoService.iniciarConversa(profile, usuarioNotificacao.getStoreId(), notification.getEventName());
+            Conversacao conversacao = conversacaoService.iniciarConversa(profile, usuarioNotificacao.getStoreId(), notification.getEventName(), notification.getPriority());
 
             String conversacaoId = conversacao.getId();
 
             String URL = "api/conversations/" + conversacaoId + "/messages" ;
 
             String messageType = notification.getType().name();
-            String message = notification.getMessage();
-
-            Map<String, Object> metadata  = new HashMap();
-            metadata.put("message", message);
-            metadata.put("interval", notification.getIntervalTime());
 
             EnvioNotificacaoRequest envioNotificacaoRequest = EnvioNotificacaoRequest.
                     builder().
@@ -176,16 +177,16 @@ public class EnvioNoticacaoServiceImpl implements EnvioNoticacaoService {
                 }
             } catch (HttpStatusCodeException ex) {
                 LOGGER.error("ERR201803011533 :: Nao conseguimos enviar a notificacao para LAIS com a conversa [ID={}] (Status Code {}) - Message {}", conversacaoId, ex.getStatusCode(), ex.getMessage());
-                conversacaoService.enviarMensagem(conversacaoId, "Sistema", "Desculpe, nao consegui enviar a notificação para LAIS por falhar de comunicacao.");
+                conversacaoService.novaMensagem(conversacaoId, "Sistema", "Desculpe, a Lais Notificacao nao conseguimos enviar a notificação para LAIS por falhar de comunicacao.", -1);
             }catch (Exception ex) {
                 LOGGER.error("ERR201803011534 :: Falha grave ao enviar a notificacao para LAIS com a conversa [ID={}]. {}", conversacaoId, ex.getMessage());
-                conversacaoService.enviarMensagem(conversacaoId, "Sistema", "Desculpe, nao consegui enviar a notificação para LAIS por falhar de comunicacao.");
+                conversacaoService.novaMensagem(conversacaoId, "Sistema", "Desculpe, a Lais Notificacao nao conseguimos enviar a notificação para LAIS por falhar de comunicacao.", -1);
             }
 
         }
     }
 
-    private boolean podeNotificar(LocalDateTime horarioReferencia, Loja loja){
+    private boolean podeNotificar(LocalDateTime horarioReferencia, Loja loja) {
 
         if ( loja != null && loja.getHorarios() != null && !loja.getHorarios().isEmpty() ) {
 

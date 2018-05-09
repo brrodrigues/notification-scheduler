@@ -16,5 +16,6 @@ public class Message {
     private Date timestamp;
     private String author;
     private String message;
+    private Integer priority;
 
 }

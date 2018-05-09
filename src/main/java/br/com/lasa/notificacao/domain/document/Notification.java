@@ -1,8 +1,7 @@
 package br.com.lasa.notificacao.domain.document;
 
 import br.com.lasa.notificacao.domain.document.enumaration.NotificationType;
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.*;
 import lombok.*;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
@@ -15,6 +14,7 @@ import java.util.*;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
+@JsonIgnoreProperties({"uuid", "scheduled", "hostname",  })
 @ToString
 public class Notification {
 
@@ -31,7 +31,9 @@ public class Notification {
     private Integer intervalTime = 0;
     private boolean scheduled;
     private Boolean enabled = true;
+    private Integer priority;
     private Collection<String> emails= new ArrayList();
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private String hostname;
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private String uuid;
